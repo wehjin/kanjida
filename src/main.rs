@@ -43,13 +43,9 @@ fn run() -> Result<(), JsValue> {
 
 fn camera_entity() -> Result<Entity, JsValue> {
 	let camera = create_camera_entity()?
-		.set_component(Position(0.0, 0.0, 0.0))?
+		.set_component(Position(0.0, 1.6, 0.0))?
 		;
-	let rig = create_entity()?
-		.set_component(Position(0.0, 3.2, 0.0))?
-		.append_child(camera)?
-		;
-	Ok(rig)
+	Ok(camera)
 }
 
 fn light_entity() -> Result<Entity, JsValue> {
