@@ -53,21 +53,24 @@ impl ComponentValue for Text {
 	fn component_name(&self) -> &str { "text" }
 
 	fn component_value(&self) -> impl AsRef<str> {
-		let mut clauses = vec![format!("value: {}", self.value)];
+		let mut clauses = vec![
+			format!("value: {}", self.value),
+		];
 		if let Some(value) = &self.font {
-			clauses.push(format!("font: {}", value))
+			clauses.push("negate: false".into());
+			clauses.push(format!("font: {}", value));
 		}
 		if let Some(value) = self.wrap_count {
-			clauses.push(format!("wrapCount: {}", value))
+			clauses.push(format!("wrapCount: {}", value));
 		}
 		if let Some(value) = self.align {
-			clauses.push(format!("align: {}", value))
+			clauses.push(format!("align: {}", value));
 		}
 		if let Some(value) = self.anchor {
-			clauses.push(format!("anchor: {}", value))
+			clauses.push(format!("anchor: {}", value));
 		}
 		if let Some(value) = self.baseline {
-			clauses.push(format!("baseline: {}", value))
+			clauses.push(format!("baseline: {}", value));
 		}
 		clauses.join("; ")
 	}
