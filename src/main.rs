@@ -51,9 +51,9 @@ fn ring_entity() -> Result<Entity, JsValue> {
 	let geometry = RingGeometry::default()
 		.set_segments_theta(6)
 		;
-	let text = Text::new("K")
-		.set_font("monoid")
-		.set_wrap_count(2)
+	let text = Text::new("非")
+		.set_font("assets/kanjialive_01_08-msdf.json")
+		.set_wrap_count(1)
 		.set_align(Align::Center)
 		.set_anchor(Anchor::Center)
 		.set_baseline(Baseline::Center)
