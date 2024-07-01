@@ -5,7 +5,7 @@ use wasm_bindgen::JsValue;
 
 use more_aframe::Scene;
 
-use crate::more_aframe::RingGeometry;
+use crate::more_aframe::{Align, Anchor, Baseline, RingGeometry, Text};
 
 pub mod more_aframe;
 
@@ -51,9 +51,17 @@ fn ring_entity() -> Result<Entity, JsValue> {
 	let geometry = RingGeometry::default()
 		.set_segments_theta(6)
 		;
+	let text = Text::new("K")
+		.set_font("monoid")
+		.set_wrap_count(2)
+		.set_align(Align::Center)
+		.set_anchor(Anchor::Center)
+		.set_baseline(Baseline::Center)
+		;
 	let entity = create_entity()?
 		.set_component(geometry)?
 		.set_component(Position(0.0, 2.0, -2.0))?
+		.set_component(text)?
 		;
 	Ok(entity)
 }
