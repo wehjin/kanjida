@@ -1,9 +1,14 @@
 use aframers::browser::document;
 use aframers::component::{Color, Depth, Height, Position, Rotation, Width};
 use aframers::entity::{create_box_entity, create_camera_entity, create_entity, create_light_entity, create_plane_entity, create_sky_entity, Entity};
-use aframers::scene::create_scene;
 use wasm_bindgen::JsValue;
-use web_sys::Element;
+
+use more_aframe::Scene;
+
+use crate::more_aframe::RingGeometry;
+
+pub mod more_aframe;
+
 
 fn main() {
 	console_error_panic_hook::set_once();
@@ -36,9 +41,21 @@ fn run() -> Result<(), JsValue> {
 		.add_entity(light2)?
 		.add_entity(chest)?
 		.add_entity(origin)?
+		.add_entity(ring_entity()?)?
 		;
 	document().body().ok_or("no body")?.append_child(scene.element())?;
 	Ok(())
+}
+
+fn ring_entity() -> Result<Entity, JsValue> {
+	let geometry = RingGeometry::default()
+		.set_segments_theta(6)
+		;
+	let entity = create_entity()?
+		.set_component(geometry)?
+		.set_component(Position(0.0, 2.0, -2.0))?
+		;
+	Ok(entity)
 }
 
 fn camera_entity() -> Result<Entity, JsValue> {
@@ -74,18 +91,3 @@ fn ground_entity() -> Result<Entity, JsValue> {
 	Ok(entity)
 }
 
-pub struct Scene(Element);
-impl Scene {
-	pub fn new() -> Result<Self, JsValue> {
-		let element = create_scene()?;
-		let scene = Self(element);
-		Ok(scene)
-	}
-	pub fn add_entity(self, entity: Entity) -> Result<Self, JsValue> {
-		self.0.append_child(entity.element())?;
-		Ok(self)
-	}
-	pub fn element(&self) -> &Element {
-		&self.0
-	}
-}
