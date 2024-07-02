@@ -60,7 +60,7 @@ fn ring_entity() -> Result<Entity, JsValue> {
 		;
 	let entity = create_entity()?
 		.set_component(geometry)?
-		.set_component(Position(0.0, 2.0, -2.0))?
+		.set_component(Position(0.0, 2.0, -10.0))?
 		.set_component(text)?
 		;
 	Ok(entity)
@@ -89,7 +89,7 @@ fn light_entity_2() -> Result<Entity, JsValue> {
 }
 
 fn ground_entity() -> Result<Entity, JsValue> {
-	let size = 40.0;
+	let size = 5.0;
 	let entity = create_plane_entity()?
 		.set_component(Position(0.0, 0.0, 0.0))?
 		.set_component(Rotation(-90.0, 0.0, 0.0))?
