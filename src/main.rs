@@ -5,10 +5,10 @@ use wasm_bindgen::JsValue;
 
 use more_aframe::Scene;
 
-use crate::more_aframe::{Align, Anchor, Baseline, RingGeometry, Text};
+use crate::components::{HexCell, register_hexcell_component};
 
 pub mod more_aframe;
-
+mod components;
 
 fn main() {
 	console_error_panic_hook::set_once();
@@ -16,6 +16,8 @@ fn main() {
 }
 
 fn run() -> Result<(), JsValue> {
+	register_hexcell_component();
+
 	let sky = create_sky_entity()?.set_component(Color::Web("#5C5C5C"))?;
 	let ground = ground_entity()?;
 	let camera = camera_entity()?;
@@ -33,6 +35,9 @@ fn run() -> Result<(), JsValue> {
 		.set_component(Position(0.0, 0.5, -0.5 - 0.5))?
 		;
 
+	let hexgrid = hexgrid_entity()?
+		.set_component(Position(0.0, 2.0, -10.0))?
+		;
 	let scene = Scene::new()?
 		.add_entity(camera)?
 		.add_entity(sky)?
@@ -41,30 +46,27 @@ fn run() -> Result<(), JsValue> {
 		.add_entity(light2)?
 		.add_entity(chest)?
 		.add_entity(origin)?
-		.add_entity(ring_entity()?)?
+		.add_entity(hexgrid)?
 		;
 	document().body().ok_or("no body")?.append_child(scene.element())?;
 	Ok(())
 }
 
-fn ring_entity() -> Result<Entity, JsValue> {
-	let geometry = RingGeometry::default()
-		.set_segments_theta(6)
-		;
-	let text = Text::new("美")
-		.set_font("assets/kanjialive-msdf.json")
-		.set_wrap_count(2)
-		.set_align(Align::Center)
-		.set_anchor(Anchor::Center)
-		.set_baseline(Baseline::Center)
-		;
-	let entity = create_entity()?
-		.set_component(geometry)?
-		.set_component(Position(0.0, 2.0, -10.0))?
-		.set_component(text)?
-		;
-	Ok(entity)
+fn hexgrid_entity() -> Result<Entity, JsValue> {
+	let cells = [
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+	];
+	let mut grid = create_entity()?;
+	for (i, cell) in cells.into_iter().enumerate() {
+		let cell = cell.set_component(Position((2 * i) as f32, 0., 0.))?;
+		grid = grid.append_child(cell)?;
+	}
+	Ok(grid)
 }
+
+
 
 fn camera_entity() -> Result<Entity, JsValue> {
 	let camera = create_camera_entity()?

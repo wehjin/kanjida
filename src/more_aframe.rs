@@ -134,6 +134,10 @@ impl RingGeometry {
 		self.segments_theta = Some(value);
 		self
 	}
+	pub fn set_radius_outer(mut self, value: f32) -> Self {
+		self.radius_outer = Some(value);
+		self
+	}
 }
 
 impl ComponentValue for RingGeometry {
