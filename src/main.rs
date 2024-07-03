@@ -10,6 +10,7 @@ use crate::hexgrid::HexCoord;
 
 pub mod more_aframe;
 pub mod hexgrid;
+pub mod ka;
 
 mod components;
 
