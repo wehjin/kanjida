@@ -36,7 +36,7 @@ impl HexCoord {
 	pub const ORIGIN: Self = HexCoord::new(0, 0);
 	pub const fn new(q: i32, r: i32) -> Self { Self { q, r } }
 	pub fn s(&self) -> i32 { -self.q - self.r }
-	pub fn to_pixel_flat(&self) -> PixelCoord {
+	pub fn to_pixel(&self) -> PixelCoord {
 		let q = self.q as f32;
 		let r = self.r as f32;
 		let x = HEX_SIZE * (3. / 2. * q);
@@ -60,6 +60,14 @@ impl HexCoord {
 				results.push(hex);
 				hex = hex + travel_vector;
 			}
+		}
+		results
+	}
+	pub fn to_spiral(&self, outer_radius: usize) -> Vec<Self> {
+		let mut results = vec![*self];
+		for radius in 1..=outer_radius {
+			let ring = self.to_ring(radius);
+			results.extend(ring);
 		}
 		results
 	}
@@ -106,7 +114,7 @@ mod tests {
 		];
 		let mut results = Vec::new();
 		for test in tests {
-			let pixel = test.to_pixel_flat();
+			let pixel = test.to_pixel();
 			results.push((pixel.x, pixel.y));
 		}
 		assert_eq!(vec![(0., 0.), (1.5, -0.8660254037844386)], results);
@@ -125,6 +133,23 @@ mod tests {
 				HexCoord::new(0, -1),
 			],
 			ring.as_slice()
+		)
+	}
+	#[test]
+	fn spiral() {
+		let center = HexCoord::default();
+		let spiral = center.to_spiral(1);
+		assert_eq!(
+			&[
+				center,
+				HexCoord::new(1, -1),
+				HexCoord::new(1, 0),
+				HexCoord::new(0, 1),
+				HexCoord::new(-1, 1),
+				HexCoord::new(-1, 0),
+				HexCoord::new(0, -1),
+			],
+			spiral.as_slice()
 		)
 	}
 }

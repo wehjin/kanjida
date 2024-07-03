@@ -61,10 +61,10 @@ fn hexgrid_entity() -> Result<Entity, JsValue> {
 		create_entity()?.set_component(HexCell)?,
 		create_entity()?.set_component(HexCell)?,
 	];
-	let ring_positions = HexCoord::ORIGIN.to_ring(1);
+	let spiral_coords = HexCoord::ORIGIN.to_spiral(1);
 	let mut grid = create_entity()?;
 	for (i, cell) in cells.into_iter().enumerate() {
-		let pixel = ring_positions[i].to_pixel_flat();
+		let pixel = spiral_coords[i].to_pixel();
 		let (x, y) = pixel.flip_y();
 		let position = Position(x, y, 0.);
 		let cell = cell.set_component(position)?;
