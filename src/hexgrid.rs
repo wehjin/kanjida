@@ -71,6 +71,10 @@ impl HexCoord {
 		}
 		results
 	}
+
+	pub fn iter_spiral(&self) -> impl Iterator<Item=HexCoord> {
+		HexSpiral::new(*self)
+	}
 }
 impl Add<HexCoord> for HexCoord {
 	type Output = Self;
@@ -99,6 +103,44 @@ pub struct PixelCoord {
 impl PixelCoord {
 	pub fn flip_y(&self) -> (f32, f32) {
 		(self.x, -self.y)
+	}
+}
+
+pub struct HexSpiral {
+	center: HexCoord,
+	ring_radius: usize,
+	ring_iter: Option<Box<dyn Iterator<Item=HexCoord>>>,
+}
+
+impl Iterator for HexSpiral {
+	type Item = HexCoord;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		if self.ring_radius == 0 {
+			self.ring_radius = 1;
+			self.ring_iter = Some(Box::new(self.center.to_ring(self.ring_radius).into_iter()));
+			Some(self.center)
+		} else {
+			let mut ring_iter = self.ring_iter.take().expect("ring_iter");
+			if let Some(item) = ring_iter.next() {
+				self.ring_iter = Some(ring_iter);
+				Some(item)
+			} else {
+				self.ring_radius += 1;
+				let mut ring = self.center.to_ring(self.ring_radius);
+				ring.rotate_right(self.ring_radius - 1);
+				let mut ring_iter = Box::new(ring.into_iter());
+				let item = ring_iter.next().expect("item in ring");
+				self.ring_iter = Some(ring_iter);
+				Some(item)
+			}
+		}
+	}
+}
+
+impl HexSpiral {
+	pub fn new(center: HexCoord) -> Self {
+		HexSpiral { center, ring_radius: 0, ring_iter: None }
 	}
 }
 
@@ -150,6 +192,26 @@ mod tests {
 				HexCoord::new(0, -1),
 			],
 			spiral.as_slice()
+		)
+	}
+	#[test]
+	fn endless_spiral() {
+		let center = HexCoord::default();
+		let spiral_iter = center.iter_spiral();
+		let results = spiral_iter.take(9).collect::<Vec<_>>();
+		assert_eq!(
+			&[
+				center,
+				HexCoord::new(1, -1),
+				HexCoord::new(1, 0),
+				HexCoord::new(0, 1),
+				HexCoord::new(-1, 1),
+				HexCoord::new(-1, 0),
+				HexCoord::new(0, -1),
+				HexCoord::new(1, -2),
+				HexCoord::new(2, -2),
+			],
+			results.as_slice()
 		)
 	}
 }

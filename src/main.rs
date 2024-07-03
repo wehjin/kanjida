@@ -60,8 +60,25 @@ fn hexgrid_entity() -> Result<Entity, JsValue> {
 		create_entity()?.set_component(HexCell)?,
 		create_entity()?.set_component(HexCell)?,
 		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
+		create_entity()?.set_component(HexCell)?,
 	];
-	let spiral_coords = HexCoord::ORIGIN.to_spiral(1);
+	let spiral_coords = HexCoord::ORIGIN.iter_spiral().take(cells.len()).collect::<Vec<_>>();
 	let mut grid = create_entity()?;
 	for (i, cell) in cells.into_iter().enumerate() {
 		let pixel = spiral_coords[i].to_pixel();
