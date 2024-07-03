@@ -7,6 +7,7 @@ use more_aframe::Scene;
 
 use crate::components::{HexCell, register_hexcell_component};
 use crate::hexgrid::HexCoord;
+use crate::ka::parse_kanji;
 
 pub mod more_aframe;
 pub mod hexgrid;
@@ -40,7 +41,7 @@ fn run() -> Result<(), JsValue> {
 		;
 
 	let hexgrid = hexgrid_entity()?
-		.set_component(Position(0.0, 2.0, -10.0))?
+		.set_component(Position(0.0, 3.0, -10.0))?
 		;
 	let scene = Scene::new()?
 		.add_entity(camera)?
@@ -57,28 +58,15 @@ fn run() -> Result<(), JsValue> {
 }
 
 fn hexgrid_entity() -> Result<Entity, JsValue> {
-	let cells = [
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-		create_entity()?.set_component(HexCell)?,
-	];
+	let cells = {
+		let kanji = parse_kanji();
+		let mut cells = vec![];
+		for _ in kanji {
+			let entity = create_entity()?.set_component(HexCell)?;
+			cells.push(entity);
+		};
+		cells
+	};
 	let spiral_coords = HexCoord::ORIGIN.iter_spiral().take(cells.len()).collect::<Vec<_>>();
 	let mut grid = create_entity()?;
 	for (i, cell) in cells.into_iter().enumerate() {

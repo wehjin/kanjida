@@ -37,7 +37,7 @@ fn ring_entity(text_value: impl AsRef<str>) -> Result<Entity, JsValue> {
 		;
 	let text = Text::new(text_value)
 		.set_font("assets/kanjialive-msdf.json")
-		.set_wrap_count(2)
+		.set_wrap_count(1)
 		.set_align(Align::Center)
 		.set_anchor(Anchor::Center)
 		.set_baseline(Baseline::Center)
