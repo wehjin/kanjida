@@ -3,9 +3,10 @@ use aframers::component::{Color, Depth, Height, Position, Rotation, Width};
 use aframers::entity::{create_box_entity, create_camera_entity, create_entity, create_light_entity, create_plane_entity, create_sky_entity, Entity};
 use wasm_bindgen::JsValue;
 
+use components::hexcell_component::HexCell;
 use more_aframe::Scene;
 
-use crate::components::{HexCell, register_hexcell_component};
+use crate::components::hexcell_component;
 use crate::hexgrid::HexCoord;
 use crate::ka::parse_kanji;
 
@@ -21,8 +22,7 @@ fn main() {
 }
 
 fn run() -> Result<(), JsValue> {
-	register_hexcell_component();
-
+	hexcell_component::register();
 	let sky = create_sky_entity()?.set_component(Color::Web("#5C5C5C"))?;
 	let ground = ground_entity()?;
 	let camera = camera_entity()?;
