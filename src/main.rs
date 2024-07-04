@@ -41,7 +41,7 @@ fn run() -> Result<(), JsValue> {
 		;
 
 	let hexgrid = hexgrid_entity()?
-		.set_component(Position(0.0, 3.0, -10.0))?
+		.set_component(Position(0.0, 3.0, -12.0))?
 		;
 	let scene = Scene::new()?
 		.add_entity(camera)?
@@ -59,10 +59,10 @@ fn run() -> Result<(), JsValue> {
 
 fn hexgrid_entity() -> Result<Entity, JsValue> {
 	let cells = {
-		let kanji = parse_kanji();
 		let mut cells = vec![];
-		for _ in kanji {
-			let entity = create_entity()?.set_component(HexCell)?;
+		let kanji = parse_kanji();
+		for k in kanji {
+			let entity = create_entity()?.set_component(HexCell::new(&k.kanji))?;
 			cells.push(entity);
 		};
 		cells
