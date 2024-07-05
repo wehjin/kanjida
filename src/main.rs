@@ -4,13 +4,13 @@ use aframers::entity::{create_box_entity, create_camera_entity, create_entity, c
 use wasm_bindgen::JsValue;
 
 use components::hexcell_component::HexCell;
-use more_aframe::Scene;
+use aframe_ex::Scene;
 
 use crate::components::hexcell_component;
 use crate::hexgrid::HexCoord;
 use crate::ka::parse_kanji;
 
-pub mod more_aframe;
+pub mod aframe_ex;
 pub mod hexgrid;
 pub mod ka;
 

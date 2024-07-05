@@ -3,7 +3,7 @@ use aframers::entity::{create_entity, Entity};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::js_sys;
 
-use crate::more_aframe::{Align, Anchor, Baseline, ComponentDefinition, RingGeometry, Text};
+use crate::aframe_ex::{Align, Anchor, Baseline, ComponentDefinition, RingGeometry, Text};
 
 pub struct HexCell {
 	glyph: String,
