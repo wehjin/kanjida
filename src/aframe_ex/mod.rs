@@ -7,7 +7,9 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::{Element, js_sys};
-use web_sys::js_sys::{Object, Reflect};
+use web_sys::js_sys::{Array, Object, Reflect};
+
+pub mod components;
 
 #[wasm_bindgen(
 	inline_js = "export function to_init(c) { return function () { c(this); }; }"
@@ -16,14 +18,65 @@ extern "C" {
 	pub fn to_init(closure: &Closure<dyn Fn(Component)>) -> js_sys::Function;
 }
 
+pub struct Schema(Object);
+impl Schema {
+	pub fn new() -> Self { Self(Object::new()) }
+	pub fn push(self, name: impl AsRef<str>, field: Field) -> Self {
+		Reflect::set(&self.0, &name.as_ref().into(), &field.to_object()).expect("set field");
+		self
+	}
+	pub fn to_object(self) -> Object {
+		self.0
+	}
+}
+
+pub enum FieldKind {
+	String,
+}
+impl FieldKind {
+	pub fn as_str(&self) -> &str {
+		match self {
+			FieldKind::String => "string",
+		}
+	}
+}
+
+pub struct Field(JsValue, FieldKind);
+impl Field {
+	pub fn string(s: impl AsRef<str>) -> Self {
+		Self(JsValue::from_str(s.as_ref()), FieldKind::String)
+	}
+	pub fn to_object(self) -> Object {
+		let object = Object::new();
+		Reflect::set(&object, &"default".into(), &self.0).expect("set default");
+		Reflect::set(&object, &"type".into(), &self.1.as_str().into()).expect("set type");
+		object
+	}
+}
+
+pub struct Dependencies(Array);
+impl Dependencies {
+	pub fn new(component_name: impl AsRef<str>) -> Self {
+		let array = Array::new_with_length(1);
+		array.set(0, component_name.as_ref().into());
+		Self(array)
+	}
+	pub fn to_array(self) -> Array { self.0 }
+}
+
 pub struct ComponentDefinition(Object);
 impl ComponentDefinition {
 	pub fn new() -> Self {
 		ComponentDefinition(Object::new())
 	}
-	pub fn set_property(self, name: impl AsRef<str>, value: &JsValue) -> Self {
-		Reflect::set(&self.0, &name.as_ref().into(), &value).expect("set property");
-		self
+	pub fn register(self, name: impl AsRef<str>) {
+		register_component(name.as_ref(), &self.0);
+	}
+	pub fn set_dependencies(self, dependencies: Dependencies) -> Self {
+		self.set_property("dependencies", &dependencies.to_array())
+	}
+	pub fn set_schema(self, schema: Schema) -> Self {
+		self.set_property("schema", &schema.to_object())
 	}
 	pub fn set_init(self, value: impl Fn(Component) + 'static) -> Self {
 		let closure = Closure::wrap(Box::new(value) as Box<dyn Fn(Component)>);
@@ -31,8 +84,9 @@ impl ComponentDefinition {
 		closure.forget();
 		new_self
 	}
-	pub fn register(self, name: impl AsRef<str>) {
-		register_component(name.as_ref(), &self.0);
+	pub fn set_property(self, name: impl AsRef<str>, value: &JsValue) -> Self {
+		Reflect::set(&self.0, &name.as_ref().into(), &value).expect("set property");
+		self
 	}
 }
 #[derive(Clone, Default)]

@@ -1,9 +1,13 @@
+use aframers::component::Color;
 use aframers::component::core::{Component, ComponentValue};
 use aframers::entity::{create_entity, Entity};
+use js_sys::{Object, Reflect};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::js_sys;
 
-use crate::aframe_ex::{Align, Anchor, Baseline, ComponentDefinition, RingGeometry, Text};
+use crate::aframe_ex::{Align, Anchor, Baseline, ComponentDefinition, Field, RingGeometry, Schema, Text};
+use crate::aframe_ex::components::material::Material;
+use crate::components::collider_check_component::ColliderCheck;
 
 pub struct HexCell {
 	glyph: String,
@@ -25,26 +29,17 @@ impl ComponentValue for HexCell {
 
 
 pub fn register() {
-	fn schema() -> js_sys::Object {
-		let glyph_property = js_sys::Object::new();
-		js_sys::Reflect::set(&glyph_property, &"type".into(), &"string".into()).expect("set type");
-		js_sys::Reflect::set(&glyph_property, &"default".into(), &"美".into()).expect("set default");
-
-		let schema = js_sys::Object::new();
-		js_sys::Reflect::set(&schema, &"glyph".into(), &glyph_property).expect("set glyph");
-		schema
-	}
 	fn init(hexcell: Component) {
 		let data = hexcell.data();
-		let object: &js_sys::Object = data.as_ref().unchecked_ref();
-		let glyph = js_sys::Reflect::get(object, &"glyph".into()).expect("glyph");
+		let object: &Object = data.as_ref().unchecked_ref();
+		let glyph = Reflect::get(object, &"glyph".into()).expect("glyph");
 		let glyph = glyph.as_string().expect("string");
 		let ring = ring_entity(&glyph).expect("make ring");
 		let element = hexcell.el();
 		element.append_child(ring.element()).expect("append ring");
 	}
 	ComponentDefinition::new()
-		.set_property("schema", &schema())
+		.set_schema(Schema::new().push("glyph", Field::string("美")))
 		.set_init(init)
 		.register("hexcell")
 	;
@@ -62,9 +57,12 @@ fn ring_entity(text_value: impl AsRef<str>) -> Result<Entity, JsValue> {
 		.set_anchor(Anchor::Center)
 		.set_baseline(Baseline::Center)
 		;
+	let material = Material::new().set_color(Color::Web("silver"));
 	let entity = create_entity()?
+		.set_component(material)?
 		.set_component(geometry)?
 		.set_component(text)?
+		.set_component(ColliderCheck)?
 		;
 	Ok(entity)
 }
