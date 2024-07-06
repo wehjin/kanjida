@@ -25,6 +25,9 @@ pub fn make() -> Result<Entity, JsValue> {
 		let (x, y) = pixel.flip_y();
 		let position = Position(x, y, 0.);
 		let cell = cell.set_component(position)?;
+		if i == 0 {
+			cell.element().set_id("thecell");
+		};
 		grid = grid.append_child(cell)?;
 	}
 	Ok(grid)

@@ -1,4 +1,4 @@
-use aframers::component::Color;
+use aframers::component::{Color, Position};
 use aframers::component::core::{Component, ComponentValue};
 use aframers::entity::{create_entity, Entity};
 use js_sys::{Object, Reflect};
@@ -6,6 +6,7 @@ use wasm_bindgen::{JsCast, JsValue};
 use web_sys::js_sys;
 
 use crate::aframe_ex::{Align, Anchor, Baseline, ComponentDefinition, Field, RingGeometry, Schema, Text};
+use crate::aframe_ex::components::geometry_component::{Circle, Geometry};
 use crate::aframe_ex::components::material::Material;
 use crate::components::collider_check_component::ColliderCheck;
 
@@ -29,14 +30,24 @@ impl ComponentValue for HexCell {
 
 
 pub fn register() {
-	fn init(hexcell: Component) {
-		let data = hexcell.data();
+	fn init(this: Component) {
+		let data = this.data();
 		let object: &Object = data.as_ref().unchecked_ref();
 		let glyph = Reflect::get(object, &"glyph".into()).expect("glyph");
 		let glyph = glyph.as_string().expect("string");
 		let ring = ring_entity(&glyph).expect("make ring");
-		let element = hexcell.el();
-		element.append_child(ring.element()).expect("append ring");
+		let geometry = Geometry::<Circle>::new().set_primitive().set_segments(6);
+		let material = Material::new()
+			.set_transparent(true)
+			.set_opacity(0.)
+			.set_color(Color::Web("black"))
+			;
+		Entity(this.el())
+			.append_child(ring).expect("append ring")
+			.set_component(material).expect("set material")
+			.set_component(geometry).expect("set geometry")
+			.set_component(ColliderCheck).expect("set collider-check")
+		;
 	}
 	ComponentDefinition::new()
 		.set_schema(Schema::new().push("glyph", Field::string("美")))
@@ -59,10 +70,10 @@ fn ring_entity(text_value: impl AsRef<str>) -> Result<Entity, JsValue> {
 		;
 	let material = Material::new().set_color(Color::Web("silver"));
 	let entity = create_entity()?
+		.set_component(Position(0., 0., -0.01))?
 		.set_component(material)?
 		.set_component(geometry)?
 		.set_component(text)?
-		.set_component(ColliderCheck)?
 		;
 	Ok(entity)
 }
