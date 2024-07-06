@@ -5,18 +5,13 @@ use aframers::entity::Entity;
 use aframers::scene::create_scene;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
-use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::{Element, js_sys};
+use web_sys::Element;
 use web_sys::js_sys::{Array, Object, Reflect};
 
 pub mod components;
+pub mod events;
+pub mod js;
 
-#[wasm_bindgen(
-	inline_js = "export function to_init(c) { return function () { c(this); }; }"
-)]
-extern "C" {
-	pub fn to_init(closure: &Closure<dyn Fn(Component)>) -> js_sys::Function;
-}
 
 pub struct Schema(Object);
 impl Schema {
@@ -80,7 +75,7 @@ impl ComponentDefinition {
 	}
 	pub fn set_init(self, value: impl Fn(Component) + 'static) -> Self {
 		let closure = Closure::wrap(Box::new(value) as Box<dyn Fn(Component)>);
-		let new_self = self.set_property("init", &to_init(&closure));
+		let new_self = self.set_property("init", &js::to_init(&closure));
 		closure.forget();
 		new_self
 	}
