@@ -5,7 +5,8 @@ use js_sys::{Object, Reflect};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::js_sys;
 
-use crate::aframe_ex::{Align, Anchor, Baseline, ComponentDefinition, Field, RingGeometry, Schema, Text};
+use crate::aframe_ex::{Align, Anchor, Baseline, Field, RingGeometry, Schema, Text};
+use crate::aframe_ex::components::core::ComponentDefinition;
 use crate::aframe_ex::components::geometry_component::{Circle, Geometry};
 use crate::aframe_ex::components::material::Material;
 use crate::components::collider_check_component::ColliderCheck;

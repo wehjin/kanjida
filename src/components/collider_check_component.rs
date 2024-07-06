@@ -5,9 +5,9 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::Element;
 use web_sys::js_sys::Reflect;
 
-use crate::aframe_ex::ComponentDefinition;
+use crate::aframe_ex::components::core::ComponentDefinition;
+use crate::aframe_ex::components::cursor_component::CursorEvent;
 use crate::aframe_ex::components::material::Material;
-use crate::aframe_ex::components::raycaster_component::RaycasterEvent;
 use crate::aframe_ex::events::core::EventListener;
 
 pub const COLLIDER_CHECK: &str = "collider-check";
@@ -32,8 +32,8 @@ pub fn register() {
 
 #[wasm_bindgen]
 pub struct ColliderCheckRust {
-	_intersected: EventListener,
-	_intersected_cleared: EventListener,
+	_enter: EventListener,
+	_leave: EventListener,
 	target: Entity,
 }
 #[wasm_bindgen]
@@ -51,14 +51,14 @@ impl ColliderCheckRust {
 		} else {
 			entity.clone()
 		};
-		let intersected = EventListener::new({
+		let enter = EventListener::new({
 			let target = target.clone();
 			move |_| {
 				let material = Material::new().set_color(Color::Web("gold"));
 				target.clone().set_component(material).expect("set material");
 			}
 		});
-		let intersected_cleared = EventListener::new({
+		let leave = EventListener::new({
 			let target = target.clone();
 			move |_| {
 				let material = Material::new().set_color(Color::Web("silver"));
@@ -67,18 +67,18 @@ impl ColliderCheckRust {
 		});
 
 		entity.element().add_event_listener_with_callback(
-			RaycasterEvent::Intersected.as_str(),
-			intersected.as_function(),
-		).expect("add intersected listener");
+			CursorEvent::MouseEnter.as_str(),
+			enter.as_function(),
+		).expect("add enter listener");
 
 		entity.element().add_event_listener_with_callback(
-			RaycasterEvent::IntersectedCleared.as_str(),
-			intersected_cleared.as_function(),
-		).expect("add intersected-cleared listener");
+			CursorEvent::MouseLeave.as_str(),
+			leave.as_function(),
+		).expect("add leave listener");
 
 		Self {
-			_intersected: intersected,
-			_intersected_cleared: intersected_cleared,
+			_enter: enter,
+			_leave: leave,
 			target,
 		}
 	}
