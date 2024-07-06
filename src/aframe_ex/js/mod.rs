@@ -6,8 +6,12 @@ use web_sys::js_sys::Function;
 
 #[wasm_bindgen(
 	inline_js = "\
-	export function to_init(c) { return function () { c(this); }; };\
-	export function partial_this(f) { return function (...args) { f(this,...args); }; };\
+	export function to_init(c) { return function () { c(this); }; }\
+	export function partial_this(f) {\
+	  return function (...lastArgs) {\
+	      f(this,...lastArgs);\
+	  };\
+	}\
 	"
 )]
 extern "C" {
