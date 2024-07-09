@@ -7,6 +7,24 @@
     <link data-trunk rel="copy-dir" href="assets"/>
 </head>
 <body>
+<!--
+ When htmlElementWrapper is inserted into the dom via javascript, the html-shader renders
+ only black when the page is loaded the first time after opening the browser tab. Subsequent
+ re-loads render correctly.
+
+ When htmlElementWrapper is present here in index.html, the html-shader renders correctly
+ from the first page load.
+
+ When we figure out how to make the MQ browser render correctly from the first page load
+ using scripting, we can remove htmlElementWrapper from index.html.
+-->
+<div id="htmlElementWrapper"
+     style="width: 512px; height: 512px; position: fixed; left: 0; top: 0; z-index: -2; overflow: hidden">
+    <div id="htmlElement"
+         style="width:100%; height:100%; background: #F8F8F8; color: #333; font-size: 48px">
+        <img src="assets/sample.svg" style="width:100%; height:100%" alt="sample"/>
+    </div>
+</div>
 <div id="htmlElementMask"
      style="width: 100%; height: 100%; position: fixed; left: 0; top: 0; z-index: -1; background: #456; overflow: hidden">
 </div>

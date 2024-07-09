@@ -35,23 +35,9 @@ fn load() -> Result<(), JsValue> {
 	Ok(())
 }
 
-pub const DIV_INNER: &str = r#"
-<div id="htmlElementWrapper"
-     style="width: 512px; height: 512px; position: fixed; left: 0; top: 0; z-index: -2; overflow: hidden">
-    <div id="htmlElement"
-         style="width:100%; height:100%; background: #F8F8F8; color: #333; font-size: 48px">
-        <img src="assets/sample.svg" style="width:100%; height:100%" alt="sample"/>
-    </div>
-</div>
-"#;
-
 fn run() -> Result<(), JsValue> {
 	collider_check_component::register();
 	hexcell_component::register();
-
-	let shader_source = document().create_element("div")?;
-	shader_source.set_inner_html(DIV_INNER.trim());
-	document().body().expect("body").append_child(&shader_source)?;
 
 	let scene = Scene::new()?
 		.add_entity(light_entity::make_over()?)?
@@ -66,7 +52,7 @@ fn run() -> Result<(), JsValue> {
 		.add_entity(controller_entity::make()?)?
 		.add_entity(camera_entity::make()?)?
 		;
-	document().body().ok_or("no body")?.insert_before(scene.element(), Some(&shader_source))?;
+	document().body().expect("body").append_child(scene.element())?;
 	Ok(())
 }
 
