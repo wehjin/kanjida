@@ -218,11 +218,15 @@ impl Scene {
 		let scene = Self(element);
 		Ok(scene)
 	}
+	pub fn element(&self) -> &Element {
+		&self.0
+	}
+	pub fn set_component(self, component: impl ComponentValue) -> Result<Self, JsValue> {
+		self.0.set_attribute(component.component_name(), component.component_value().as_ref())?;
+		Ok(self)
+	}
 	pub fn add_entity(self, entity: Entity) -> Result<Self, JsValue> {
 		self.0.append_child(entity.element())?;
 		Ok(self)
-	}
-	pub fn element(&self) -> &Element {
-		&self.0
 	}
 }
