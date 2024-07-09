@@ -6,6 +6,8 @@ pub struct Material {
 	color: Option<Color>,
 	opacity: Option<f32>,
 	transparent: Option<bool>,
+	shader: Option<String>,
+	target: Option<String>,
 }
 
 impl Material {
@@ -19,6 +21,12 @@ impl Material {
 	pub fn set_transparent(self, value: bool) -> Self {
 		Self { transparent: Some(value), ..self }
 	}
+	pub fn set_shader(self, value: impl AsRef<str>) -> Self {
+		Self { shader: Some(value.as_ref().to_string()), ..self }
+	}
+	pub fn set_target(self, value: impl AsRef<str>) -> Self {
+		Self { target: Some(value.as_ref().to_string()), ..self }
+	}
 }
 
 impl ComponentValue for Material {
@@ -27,16 +35,19 @@ impl ComponentValue for Material {
 	fn component_value(&self) -> impl AsRef<str> {
 		let mut clauses = vec![];
 		if let Some(color) = &self.color {
-			let clause = format!("color: {}", color.component_value().as_ref());
-			clauses.push(clause);
+			clauses.push(format!("color: {}", color.component_value().as_ref()));
 		}
 		if let Some(value) = self.opacity {
-			let clause = format!("opacity: {}", value);
-			clauses.push(clause);
+			clauses.push(format!("opacity: {}", value));
 		}
 		if let Some(value) = self.transparent {
-			let clause = format!("transparent: {}", value.to_string());
-			clauses.push(clause);
+			clauses.push(format!("transparent: {}", value.to_string()));
+		}
+		if let Some(value) = &self.shader {
+			clauses.push(format!("shader: {}", value));
+		}
+		if let Some(value) = &self.target {
+			clauses.push(format!("target: {}", value));
 		}
 		clauses.join("; ")
 	}

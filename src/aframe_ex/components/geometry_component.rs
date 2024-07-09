@@ -8,6 +8,11 @@ impl Primitive for Circle {
 	fn as_str(&self) -> &str { "circle" }
 }
 
+pub struct Box;
+impl Primitive for Box {
+	fn as_str(&self) -> &str { "box" }
+}
+
 pub type Segments = u16;
 
 pub struct Geometry<T: Primitive> {
@@ -24,14 +29,18 @@ impl<T: Primitive> Geometry<T> {
 	}
 }
 
-impl Geometry<Circle> {
-	pub fn set_primitive(mut self) -> Self {
-		self.primitive = Some(Circle);
-		self
+impl Geometry<Box> {
+	pub fn set_primitive(self) -> Self {
+		Self { primitive: Some(Box), ..self }
 	}
-	pub fn set_segments(mut self, segments: Segments) -> Self {
-		self.segments = Some(segments);
-		self
+}
+
+impl Geometry<Circle> {
+	pub fn set_primitive(self) -> Self {
+		Self { primitive: Some(Circle), ..self }
+	}
+	pub fn set_segments(self, segments: Segments) -> Self {
+		Self { segments: Some(segments), ..self }
 	}
 }
 
