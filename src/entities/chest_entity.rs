@@ -1,4 +1,4 @@
-use aframers::component::{Color, Position};
+use aframers::component::Color;
 use aframers::entity::{create_entity, Entity};
 use wasm_bindgen::JsValue;
 
@@ -11,7 +11,6 @@ pub fn make() -> Result<Entity, JsValue> {
 		.set_component(Geometry::<Box>::new().set_primitive())?
 		.set_component(Material::new().set_shader("html").set_target("#htmlElement"))?
 		.set_component(Color::Web("goldenrod"))?
-		.set_component(Position(0.0, 0.5, -0.5 - 0.5))?
 		.set_component(ColliderCheck)?
 		;
 	Ok(chest)

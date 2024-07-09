@@ -1,5 +1,5 @@
 use aframers::browser::document;
-use aframers::component::Position;
+use aframers::component::{Position, Rotation};
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::prelude::Closure;
 use web_sys::HtmlScriptElement;
@@ -9,13 +9,15 @@ use entities::{camera_entity, chest_entity, ground_entity, hexgrid_entity, light
 
 use crate::components::{collider_check_component, hexcell_component};
 use crate::entities::controller_entity;
+use crate::systems::cell_selection_system;
 
 pub mod aframe_ex;
 pub mod hexgrid;
 pub mod ka;
 
-mod components;
 mod entities;
+mod components;
+mod systems;
 
 fn main() {
 	console_error_panic_hook::set_once();
@@ -56,6 +58,7 @@ fn load() -> Result<(), JsValue> {
 }
 
 fn run() -> Result<(), JsValue> {
+	cell_selection_system::register();
 	collider_check_component::register();
 	hexcell_component::register();
 
@@ -65,7 +68,11 @@ fn run() -> Result<(), JsValue> {
 		.add_entity(origin_entity::make()?)?
 		.add_entity(ground_entity::make()?)?
 		.add_entity(sky_entity::make()?)?
-		.add_entity(chest_entity::make()?)?
+		.add_entity(
+			chest_entity::make()?
+				.set_component(Position(0., -0.25, -1.6))?
+				.set_component(Rotation(30., 0., 0.))?
+		)?
 		.add_entity(
 			hexgrid_entity::make()?.set_component(Position(0.0, 3.0, -12.0))?
 		)?

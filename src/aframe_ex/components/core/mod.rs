@@ -4,7 +4,7 @@ use wasm_bindgen::JsValue;
 use web_sys::js_sys::{Array, Object, Reflect};
 
 use crate::aframe_ex::{js, Schema};
-use crate::aframe_ex::js::partial_this;
+use crate::aframe_ex::js::with_component_from_this;
 
 pub struct Events(Object);
 
@@ -17,7 +17,7 @@ impl Events {
 	}
 	pub fn set_handler(self, event_name: impl AsRef<str>, handler: impl Fn(Component, JsValue) + 'static) -> Self {
 		let closure = Closure::wrap(Box::new(handler) as Box<dyn Fn(Component, JsValue)>);
-		let event_function = partial_this(&closure);
+		let event_function = with_component_from_this(&closure);
 		Reflect::set(&self.0, &event_name.as_ref().into(), &event_function).expect("set handler");
 		closure.forget();
 		self

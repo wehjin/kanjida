@@ -10,7 +10,8 @@ use web_sys::js_sys::{Object, Reflect};
 pub mod components;
 pub mod events;
 pub mod js;
-
+pub mod objects;
+pub mod systems;
 
 pub struct Schema(Object);
 impl Schema {
