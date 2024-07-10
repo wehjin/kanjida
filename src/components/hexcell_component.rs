@@ -1,6 +1,7 @@
-use aframers::component::{Color, Position};
-use aframers::component::core::{Component, ComponentValue};
-use aframers::entity::{create_entity, Entity};
+use aframers::af_sys::components::AComponent;
+use aframers::components::{Color, Position};
+use aframers::components::core::ComponentValue;
+use aframers::entities::{create_entity, Entity};
 use js_sys::{Object, Reflect};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::js_sys;
@@ -31,7 +32,7 @@ impl ComponentValue for HexCell {
 
 
 pub fn register() {
-	fn init(this: Component) {
+	fn init(this: AComponent) {
 		let data = this.data();
 		let object: &Object = data.as_ref().unchecked_ref();
 		let glyph = Reflect::get(object, &"glyph".into()).expect("glyph");
@@ -43,7 +44,7 @@ pub fn register() {
 			.set_opacity(0.)
 			.set_color(Color::Web("black"))
 			;
-		Entity(this.el())
+		Entity::from(this.a_entity())
 			.append_child(ring).expect("append ring")
 			.set_component(material).expect("set material")
 			.set_component(geometry).expect("set geometry")

@@ -1,4 +1,4 @@
-use aframers::entity::{create_entity, Entity};
+use aframers::entities::{create_entity, Entity};
 use wasm_bindgen::JsValue;
 
 use crate::aframe_ex::components::laser_controls_component::{Hand, LaserControls};

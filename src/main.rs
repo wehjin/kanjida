@@ -1,5 +1,5 @@
 use aframers::browser::document;
-use aframers::component::{Position, Rotation};
+use aframers::components::{Position, Rotation};
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::prelude::Closure;
 use web_sys::HtmlScriptElement;

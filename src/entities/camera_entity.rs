@@ -1,6 +1,6 @@
-use aframers::entity::{create_camera_entity, Entity};
+use aframers::components::Position;
+use aframers::entities::{create_camera_entity, Entity};
 use wasm_bindgen::JsValue;
-use aframers::component::Position;
 
 pub fn make() -> Result<Entity, JsValue> {
 	let camera = create_camera_entity()?

@@ -1,5 +1,5 @@
-use aframers::component::Position;
-use aframers::entity::{create_entity, Entity};
+use aframers::components::Position;
+use aframers::entities::{create_entity, Entity};
 use wasm_bindgen::JsValue;
 
 use crate::components::hexcell_component::HexCell;
@@ -26,7 +26,7 @@ pub fn make() -> Result<Entity, JsValue> {
 		let position = Position(x, y, 0.);
 		let cell = cell.set_component(position)?;
 		if i == 0 {
-			cell.element().set_id("thecell");
+			cell.a_entity().set_id("thecell");
 		};
 		grid = grid.append_child(cell)?;
 	}

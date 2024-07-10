@@ -1,6 +1,6 @@
-use aframers::entity::{create_box_entity, Entity};
+use aframers::components::{Color, Depth, Height, Width};
+use aframers::entities::{create_box_entity, Entity};
 use wasm_bindgen::JsValue;
-use aframers::component::{Color, Depth, Height, Width};
 
 pub fn make() -> Result<Entity, JsValue> {
 	let origin = create_box_entity()?

@@ -1,5 +1,5 @@
-use aframers::component::Color;
-use aframers::entity::{create_entity, Entity};
+use aframers::components::Color;
+use aframers::entities::{create_entity, Entity};
 use wasm_bindgen::JsValue;
 
 use crate::aframe_ex::components::geometry_component::{Box, Geometry};

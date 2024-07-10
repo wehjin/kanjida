@@ -1,4 +1,4 @@
-use aframers::component::core::{Component, register_component};
+use aframers::af_sys::components::{AComponent, register_component};
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 use web_sys::js_sys::{Array, Object, Reflect};
@@ -15,8 +15,8 @@ impl Events {
 	pub fn to_object(self) -> Object {
 		self.0
 	}
-	pub fn set_handler(self, event_name: impl AsRef<str>, handler: impl Fn(Component, JsValue) + 'static) -> Self {
-		let closure = Closure::wrap(Box::new(handler) as Box<dyn Fn(Component, JsValue)>);
+	pub fn set_handler(self, event_name: impl AsRef<str>, handler: impl Fn(AComponent, JsValue) + 'static) -> Self {
+		let closure = Closure::wrap(Box::new(handler) as Box<dyn Fn(AComponent, JsValue)>);
 		let event_function = with_component_from_this(&closure);
 		Reflect::set(&self.0, &event_name.as_ref().into(), &event_function).expect("set handler");
 		closure.forget();
@@ -53,8 +53,8 @@ impl ComponentDefinition {
 	pub fn set_events(self, events: Events) -> Self {
 		self.set_property("events", &events.to_object())
 	}
-	pub fn set_init(self, value: impl Fn(Component) + 'static) -> Self {
-		let closure = Closure::wrap(Box::new(value) as Box<dyn Fn(Component)>);
+	pub fn set_init(self, value: impl Fn(AComponent) + 'static) -> Self {
+		let closure = Closure::wrap(Box::new(value) as Box<dyn Fn(AComponent)>);
 		let new_self = self.set_property("init", &js::to_init(&closure));
 		closure.forget();
 		new_self

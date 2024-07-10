@@ -1,4 +1,4 @@
-use aframers::component::core::ComponentValue;
+use aframers::components::core::ComponentValue;
 
 pub enum Hand {
 	Left,

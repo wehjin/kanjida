@@ -1,5 +1,5 @@
-use aframers::component::Color;
-use aframers::entity::{create_sky_entity, Entity};
+use aframers::components::Color;
+use aframers::entities::{create_sky_entity, Entity};
 use wasm_bindgen::JsValue;
 
 pub fn make() -> Result<Entity, JsValue> {

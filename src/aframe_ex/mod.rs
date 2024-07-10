@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter};
 
-use aframers::component::core::ComponentValue;
-use aframers::entity::Entity;
+use aframers::components::core::ComponentValue;
+use aframers::entities::Entity;
 use aframers::scene::create_scene;
 use wasm_bindgen::JsValue;
 use web_sys::Element;
@@ -227,7 +227,7 @@ impl Scene {
 		Ok(self)
 	}
 	pub fn add_entity(self, entity: Entity) -> Result<Self, JsValue> {
-		self.0.append_child(entity.element())?;
+		self.0.append_child(entity.a_entity())?;
 		Ok(self)
 	}
 }

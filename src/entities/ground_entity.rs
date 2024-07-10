@@ -1,6 +1,6 @@
-use aframers::entity::{create_plane_entity, Entity};
+use aframers::components::{Color, Height, Position, Rotation, Width};
+use aframers::entities::{create_plane_entity, Entity};
 use wasm_bindgen::JsValue;
-use aframers::component::{Color, Height, Position, Rotation, Width};
 
 pub fn make() -> Result<Entity, JsValue> {
 	let size = 3.0;

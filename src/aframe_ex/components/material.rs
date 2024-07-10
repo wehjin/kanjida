@@ -1,5 +1,5 @@
-use aframers::component::Color;
-use aframers::component::core::ComponentValue;
+use aframers::components::Color;
+use aframers::components::core::ComponentValue;
 
 #[derive(Default)]
 pub struct Material {

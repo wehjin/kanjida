@@ -1,7 +1,9 @@
-use aframers::component::Color;
-use aframers::component::core::{Component, ComponentValue};
-use aframers::entity::Entity;
-use wasm_bindgen::JsValue;
+use aframers::af_sys::components::AComponent;
+use aframers::af_sys::entities::AEntity;
+use aframers::components::Color;
+use aframers::components::core::ComponentValue;
+use aframers::entities::Entity;
+use wasm_bindgen::{JsCast, JsValue};
 
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::components::cursor_component::CursorEvent::{MouseEnter, MouseLeave};
@@ -18,18 +20,22 @@ pub fn register() {
 		.set_events(events)
 		.register(COLLIDER_CHECK);
 }
-fn handle_enter(this: Component, _event: JsValue) {
-	let element = this.el();
-	let target = element.first_element_child().unwrap_or_else(|| element);
+
+fn a_entity_or_first_child(a_entity: AEntity) -> AEntity {
+	a_entity.first_element_child()
+		.map(|element| element.unchecked_into::<AEntity>())
+		.unwrap_or_else(|| a_entity)
+}
+fn handle_enter(this: AComponent, _event: JsValue) {
+	let target = a_entity_or_first_child(this.a_entity());
 	let material = Material::new().set_color(Color::Web("gold"));
-	Entity(target).set_component(material).expect("set material");
+	Entity::from(target).set_component(material).expect("set material");
 }
 
-fn handle_leave(this: Component, _event: JsValue) {
-	let element = this.el();
-	let target = element.first_element_child().unwrap_or_else(|| element);
+fn handle_leave(this: AComponent, _event: JsValue) {
+	let target = a_entity_or_first_child(this.a_entity());
 	let material = Material::new().set_color(Color::Web("silver"));
-	Entity(target).set_component(material).expect("set material");
+	Entity::from(target).set_component(material).expect("set material");
 }
 
 pub struct ColliderCheck;

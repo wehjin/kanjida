@@ -1,6 +1,6 @@
-use aframers::entity::{create_light_entity, Entity};
+use aframers::components::{Color, Position};
+use aframers::entities::{create_light_entity, Entity};
 use wasm_bindgen::JsValue;
-use aframers::component::{Color, Position};
 
 pub fn make_over() -> Result<Entity, JsValue> {
 	let entity = create_light_entity()?
