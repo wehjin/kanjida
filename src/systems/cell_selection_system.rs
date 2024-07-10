@@ -2,7 +2,7 @@ use aframers::browser::log;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::Element;
 
-use crate::aframe_ex::systems::{aframe_system_def, register_system, System};
+use crate::aframe_ex::systems::{aframe_system_def, ASystem, register_system};
 
 #[wasm_bindgen]
 pub struct CellSelectionSystem {
@@ -15,13 +15,13 @@ impl CellSelectionSystem {
 	pub fn new() -> Self {
 		Self { selected: None }
 	}
-	pub fn __system_init(&self, _system: &System) {
+	pub fn __system_init(&self, _system: &ASystem) {
 		log("cell-selection-system init")
 	}
-	pub fn __system_select_cell(&mut self, _system: &System, cell: &Element) {
+	pub fn __system_select_cell(&mut self, _system: &ASystem, cell: &Element) {
 		self.selected = Some(cell.clone());
 	}
-	pub fn __system_selected(&self, _system: &System) -> Option<Element> {
+	pub fn __system_selected(&self, _system: &ASystem) -> Option<Element> {
 		self.selected.clone()
 	}
 }

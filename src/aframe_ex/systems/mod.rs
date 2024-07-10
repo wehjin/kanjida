@@ -8,18 +8,18 @@ use crate::aframe_ex::js::with_system_from_this;
 use crate::aframe_ex::objects::BuildObject;
 
 pub struct BuildSystem {
-	init: Option<Box<dyn Fn(System, JsValue) + 'static>>,
-	functions: Vec<(String, Box<dyn Fn(System, JsValue) + 'static>)>,
+	init: Option<Box<dyn Fn(ASystem, JsValue) + 'static>>,
+	functions: Vec<(String, Box<dyn Fn(ASystem, JsValue) + 'static>)>,
 }
 
 impl BuildSystem {
 	pub fn new() -> Self {
 		Self { init: None, functions: Vec::new() }
 	}
-	pub fn set_init(self, value: impl Fn(System, JsValue) + 'static) -> Self {
+	pub fn set_init(self, value: impl Fn(ASystem, JsValue) + 'static) -> Self {
 		Self { init: Some(Box::new(value)), ..self }
 	}
-	pub fn add_function(mut self, name: impl AsRef<str>, value: impl Fn(System, JsValue) + 'static) -> Self {
+	pub fn add_function(mut self, name: impl AsRef<str>, value: impl Fn(ASystem, JsValue) + 'static) -> Self {
 		self.functions.push((name.as_ref().to_string(), Box::new(value)));
 		self
 	}
@@ -35,7 +35,7 @@ impl BuildSystem {
 		builder.to_object()
 	}
 }
-fn to_function_value(f: Box<dyn Fn(System, JsValue)>) -> JsValue {
+fn to_function_value(f: Box<dyn Fn(ASystem, JsValue)>) -> JsValue {
 	let closure = Closure::wrap(f);
 	let function = with_system_from_this(&closure);
 	closure.forget();
@@ -50,11 +50,11 @@ extern "C" {
 
 #[wasm_bindgen]
 extern "C" {
-	pub type System;
+	pub type ASystem;
 	#[wasm_bindgen(method, getter)]
-	fn el(this: &System) -> Element;
+	fn el(this: &ASystem) -> Element;
 	#[wasm_bindgen(method, getter)]
-	fn data(this: &System) -> JsValue;
+	fn data(this: &ASystem) -> JsValue;
 }
 
 #[wasm_bindgen(js_namespace = AFRAME)]

@@ -4,7 +4,7 @@ use wasm_bindgen::JsValue;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::js_sys::Function;
 
-use crate::aframe_ex::systems::System;
+use crate::aframe_ex::systems::ASystem;
 
 #[wasm_bindgen(
 	inline_js = "\
@@ -21,5 +21,5 @@ extern "C" {
 	#[wasm_bindgen(js_name = withFirstFromThis)]
 	pub fn with_component_from_this(closure: &Closure<dyn Fn(Component, JsValue)>) -> Function;
 	#[wasm_bindgen(js_name = withFirstFromThis)]
-	pub fn with_system_from_this(closure: &Closure<dyn Fn(System, JsValue)>) -> Function;
+	pub fn with_system_from_this(closure: &Closure<dyn Fn(ASystem, JsValue)>) -> Function;
 }
