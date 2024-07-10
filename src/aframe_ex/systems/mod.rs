@@ -1,7 +1,7 @@
+use aframers::af_sys::scenes::AScene;
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::Element;
 use web_sys::js_sys::Object;
 
 use crate::aframe_ex::js::with_system_from_this;
@@ -52,9 +52,9 @@ extern "C" {
 extern "C" {
 	pub type ASystem;
 	#[wasm_bindgen(method, getter)]
-	fn el(this: &ASystem) -> Element;
-	#[wasm_bindgen(method, getter)]
-	fn data(this: &ASystem) -> JsValue;
+	pub fn data(this: &ASystem) -> JsValue;
+	#[wasm_bindgen(method, getter, js_name = el)]
+	pub fn a_scene(this: &ASystem) -> AScene;
 }
 
 #[wasm_bindgen(js_namespace = AFRAME)]

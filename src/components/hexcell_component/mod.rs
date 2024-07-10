@@ -5,11 +5,13 @@ use aframers::entities::{create_entity, Entity};
 use wasm_bindgen::{JsCast, JsValue};
 
 use crate::aframe_ex::{Align, Anchor, Baseline, Field, RingGeometry, Schema, Text};
-use crate::aframe_ex::components::core::{ComponentDefinition, Events};
+use crate::aframe_ex::components::core::{component_get_data_into, component_get_system_into, ComponentDefinition, Events};
 use crate::aframe_ex::components::cursor_component::CursorEvent::{MouseEnter, MouseLeave};
 use crate::aframe_ex::components::geometry_component::{Circle, Geometry};
 use crate::aframe_ex::components::material::Material;
 use crate::components::hexcell_component::data::HexcellData;
+use crate::systems::hexcell_system;
+use crate::systems::hexcell_system::HexcellSystemApi;
 
 pub mod attribute;
 pub mod data;
@@ -48,16 +50,16 @@ fn ring_entity_in_hexcell(hexcell: AComponent) -> AEntity {
 }
 
 fn handle_leave(this: AComponent, _event: JsValue) {
-	let data = this.data().unchecked_into::<HexcellData>();
-	let ring_color = Color::Web(data.ring_color());
+	let ring_color = Color::Web(api_ring_color(&this));
 	let target = ring_entity_in_hexcell(this);
 	let material = Material::new().set_color(ring_color);
 	Entity::from(target).set_component(material).expect("set material");
 }
 
 fn init(this: AComponent) {
-	let data: HexcellData = this.data().unchecked_into();
-	let ring = ring_entity(&data.glyph(), &data.ring_color()).expect("make ring");
+	let glyph = component_get_data_into::<HexcellData>(&this).glyph();
+	let ring_color = api_ring_color(&this);
+	let ring = ring_entity(&glyph, &ring_color).expect("make ring");
 	let geometry = Geometry::<Circle>::new().set_primitive().set_segments(6);
 	let material = Material::new()
 		.set_transparent(true)
@@ -71,6 +73,10 @@ fn init(this: AComponent) {
 	;
 }
 
+fn api_ring_color(a_component: &AComponent) -> String {
+	let cell_system: HexcellSystemApi = component_get_system_into(&a_component, hexcell_system::NAME);
+	cell_system.ring_color(&a_component.a_entity())
+}
 
 fn ring_entity(text_value: impl AsRef<str>, color: impl AsRef<str>) -> Result<Entity, JsValue> {
 	let geometry = RingGeometry::default()

@@ -2,16 +2,14 @@ use std::fmt::{Display, Formatter};
 
 use aframers::components::Color;
 use aframers::components::core::ComponentValue;
-use aframers::entities::Entity;
-use aframers::scene::create_scene;
 use wasm_bindgen::JsValue;
-use web_sys::Element;
 use web_sys::js_sys::{Object, Reflect};
 
 pub mod components;
 pub mod events;
 pub mod js;
 pub mod objects;
+pub mod scenes;
 pub mod systems;
 
 pub struct Schema(Object);
@@ -217,23 +215,3 @@ impl ComponentValue for RingGeometry {
 	}
 }
 
-pub struct Scene(Element);
-
-impl Scene {
-	pub fn new() -> Result<Self, JsValue> {
-		let element = create_scene()?;
-		let scene = Self(element);
-		Ok(scene)
-	}
-	pub fn element(&self) -> &Element {
-		&self.0
-	}
-	pub fn set_component(self, component: impl ComponentValue) -> Result<Self, JsValue> {
-		self.0.set_attribute(component.component_name(), component.component_value().as_ref())?;
-		Ok(self)
-	}
-	pub fn add_entity(self, entity: Entity) -> Result<Self, JsValue> {
-		self.0.append_child(entity.a_entity())?;
-		Ok(self)
-	}
-}

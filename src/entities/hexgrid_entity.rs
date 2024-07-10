@@ -1,4 +1,4 @@
-use aframers::components::{Color, Position};
+use aframers::components::Position;
 use aframers::entities::{create_entity, Entity};
 use wasm_bindgen::JsValue;
 
@@ -13,7 +13,6 @@ pub fn make() -> Result<Entity, JsValue> {
 		for k in kanji {
 			let hexcell = Hexcell::new()
 				.set_glyph(&k.kanji)
-				.set_ring_color(Color::Web("springgreen".into()))
 				;
 			let entity = create_entity()?.set_component(hexcell)?;
 			cells.push(entity);

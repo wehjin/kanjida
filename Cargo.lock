@@ -5,7 +5,7 @@ version = 3
 [[package]]
 name = "aframers"
 version = "0.1.0"
-source = "git+https://github.com/wehjin/aframers.git#041ddaed5e7720e94e208dc52b6b94852a56d7c0"
+source = "git+https://github.com/wehjin/aframers.git#e4d3ca648defeaad6ef8b469d0658ee008e91850"
 dependencies = [
  "wasm-bindgen",
  "web-sys",

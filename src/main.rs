@@ -4,12 +4,12 @@ use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::prelude::Closure;
 use web_sys::HtmlScriptElement;
 
-use aframe_ex::Scene;
+use aframe_ex::scenes::Scene;
 use entities::{camera_entity, chest_entity, ground_entity, hexgrid_entity, light_entity, origin_entity, sky_entity};
 
-use crate::components::{collider_check_component, hexcell_component};
+use crate::components::hexcell_component;
 use crate::entities::controller_entity;
-use crate::systems::cell_selection_system;
+use crate::systems::hexcell_system;
 
 pub mod aframe_ex;
 pub mod hexgrid;
@@ -58,8 +58,7 @@ fn load() -> Result<(), JsValue> {
 }
 
 fn run() -> Result<(), JsValue> {
-	cell_selection_system::register();
-	collider_check_component::register();
+	hexcell_system::register();
 	hexcell_component::register();
 
 	let scene = Scene::new()?
@@ -79,7 +78,7 @@ fn run() -> Result<(), JsValue> {
 		.add_entity(controller_entity::make()?)?
 		.add_entity(camera_entity::make()?)?
 		;
-	document().body().expect("body").append_child(scene.element())?;
+	document().body().expect("body").append_child(scene.a_scene())?;
 	Ok(())
 }
 
