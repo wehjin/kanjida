@@ -28,13 +28,13 @@ fn a_entity_or_first_child(a_entity: AEntity) -> AEntity {
 }
 fn handle_enter(this: AComponent, _event: JsValue) {
 	let target = a_entity_or_first_child(this.a_entity());
-	let material = Material::new().set_color(Color::Web("gold"));
+	let material = Material::new().set_color(Color::Web("gold".into()));
 	Entity::from(target).set_component(material).expect("set material");
 }
 
 fn handle_leave(this: AComponent, _event: JsValue) {
 	let target = a_entity_or_first_child(this.a_entity());
-	let material = Material::new().set_color(Color::Web("silver"));
+	let material = Material::new().set_color(Color::Web("silver".into()));
 	Entity::from(target).set_component(material).expect("set material");
 }
 

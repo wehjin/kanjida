@@ -7,7 +7,7 @@ pub fn make() -> Result<Entity, JsValue> {
 		.set_component(Width(0.05))?
 		.set_component(Height(0.05))?
 		.set_component(Depth(0.05))?
-		.set_component(Color::Web("red"))?
+		.set_component(Color::Web("red".into()))?
 		;
 	Ok(origin)
 }

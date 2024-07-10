@@ -7,7 +7,7 @@ use crate::aframe_ex::components::raycaster_component::Raycaster;
 pub fn make() -> Result<Entity, JsValue> {
 	let entity = create_entity()?
 		.set_component(LaserControls::new().set_hand(Hand::Right))?
-		.set_component(Raycaster::new().set_objects("[collider-check]"))?
+		.set_component(Raycaster::new().set_objects("[hexcell]"))?
 		;
 	Ok(entity)
 }

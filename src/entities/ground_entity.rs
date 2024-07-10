@@ -9,6 +9,6 @@ pub fn make() -> Result<Entity, JsValue> {
 		.set_component(Rotation(-90.0, 0.0, 0.0))?
 		.set_component(Width(size))?
 		.set_component(Height(size))?
-		.set_component(Color::Web("#7BC8A4"))?;
+		.set_component(Color::Web("#7BC8A4".into()))?;
 	Ok(entity)
 }
