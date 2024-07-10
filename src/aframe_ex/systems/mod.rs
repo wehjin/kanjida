@@ -42,6 +42,12 @@ fn to_function_value(f: Box<dyn Fn(System, JsValue)>) -> JsValue {
 	function.unchecked_into::<JsValue>()
 }
 
+#[wasm_bindgen(module = "/js/rust_systems.js")]
+extern "C" {
+	pub fn aframe_system_def(rust_system: JsValue) -> Object;
+}
+
+
 #[wasm_bindgen]
 extern "C" {
 	pub type System;
