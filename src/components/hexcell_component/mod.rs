@@ -1,7 +1,9 @@
 use aframers::af_sys::components::AComponent;
+use aframers::af_sys::entities::AEntity;
 use aframers::components::{Color, Position};
 use aframers::entities::{create_entity, Entity};
-use wasm_bindgen::JsValue;
+use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::aframe_ex::{Align, Anchor, Baseline, Field, RingGeometry, Schema, Text};
 use crate::aframe_ex::components::core::{component_get_data_into, component_get_system_into, ComponentDefinition, Events};
@@ -16,6 +18,19 @@ use crate::systems::hexcell_system::HexcellSystemApi;
 pub mod attribute;
 pub mod data;
 pub mod handlers;
+
+#[wasm_bindgen]
+extern "C" {
+	#[wasm_bindgen(extends = AComponent)]
+	pub type HexcellAComponent;
+}
+
+impl HexcellAComponent {
+	pub fn ring_entity(&self) -> AEntity {
+		let first_child = self.a_entity().first_element_child().expect("ring element");
+		first_child.unchecked_into::<AEntity>()
+	}
+}
 
 pub fn register() {
 	let events = Events::new()

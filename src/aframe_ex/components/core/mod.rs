@@ -1,10 +1,11 @@
 use aframers::af_sys::components::{AComponent, register_component};
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::closure::Closure;
+use wasm_bindgen::convert::FromWasmAbi;
 use web_sys::js_sys::{Array, Object, Reflect};
 
 use crate::aframe_ex::{js, Schema};
-use crate::aframe_ex::js::with_component_from_this;
+use crate::aframe_ex::js::bind_this_to_component;
 use crate::aframe_ex::scenes::Scene;
 use crate::aframe_ex::systems::ASystem;
 
@@ -17,11 +18,12 @@ impl Events {
 	pub fn to_object(self) -> Object {
 		self.0
 	}
-	pub fn set_handler(self, event_name: impl AsRef<str>, handler: impl Fn(AComponent, JsValue) + 'static) -> Self {
-		let closure = Closure::wrap(Box::new(handler) as Box<dyn Fn(AComponent, JsValue)>);
-		let event_function = with_component_from_this(&closure);
-		Reflect::set(&self.0, &event_name.as_ref().into(), &event_function).expect("set handler");
-		closure.forget();
+	pub fn set_handler<T>(self, event_name: impl AsRef<str>, handler: impl Fn(T, JsValue) + 'static) -> Self
+	where
+		T: AsRef<AComponent> + FromWasmAbi + 'static,
+	{
+		let bound_handler = bind_this_to_component(handler);
+		Reflect::set(&self.0, &event_name.as_ref().into(), &bound_handler).expect("set handler");
 		self
 	}
 }
