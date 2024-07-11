@@ -1,8 +1,7 @@
 use aframers::af_sys::components::AComponent;
-use aframers::af_sys::entities::AEntity;
 use aframers::components::{Color, Position};
 use aframers::entities::{create_entity, Entity};
-use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen::JsValue;
 
 use crate::aframe_ex::{Align, Anchor, Baseline, Field, RingGeometry, Schema, Text};
 use crate::aframe_ex::components::core::{component_get_data_into, component_get_system_into, ComponentDefinition, Events};
@@ -10,50 +9,29 @@ use crate::aframe_ex::components::cursor_component::CursorEvent::{MouseEnter, Mo
 use crate::aframe_ex::components::geometry_component::{Circle, Geometry};
 use crate::aframe_ex::components::material::Material;
 use crate::components::hexcell_component::data::HexcellData;
+use crate::components::hexcell_component::handlers::{handle_enter, handle_leave};
 use crate::systems::hexcell_system;
 use crate::systems::hexcell_system::HexcellSystemApi;
 
 pub mod attribute;
 pub mod data;
+pub mod handlers;
 
 pub fn register() {
-	ComponentDefinition::new()
-		.set_events(events())
-		.set_schema(schema())
-		.set_init(init)
-		.register("hexcell")
-	;
-}
-
-fn events() -> Events {
 	let events = Events::new()
 		.set_handler(MouseEnter, handle_enter)
 		.set_handler(MouseLeave, handle_leave)
 		;
-	events
-}
-
-fn schema() -> Schema {
-	Schema::new()
+	let schema = Schema::new()
 		.push("glyph", Field::string("美"))
 		.push("ring_color", Field::color(Color::Web("silver".into())))
-}
-
-fn handle_enter(this: AComponent, _event: JsValue) {
-	let target = ring_entity_in_hexcell(this);
-	let material = Material::new().set_color(Color::Web("gold".into()));
-	Entity::from(target).set_component(material).expect("set material");
-}
-
-fn ring_entity_in_hexcell(hexcell: AComponent) -> AEntity {
-	hexcell.a_entity().first_element_child().expect("ring element").unchecked_into::<AEntity>()
-}
-
-fn handle_leave(this: AComponent, _event: JsValue) {
-	let ring_color = Color::Web(api_ring_color(&this));
-	let target = ring_entity_in_hexcell(this);
-	let material = Material::new().set_color(ring_color);
-	Entity::from(target).set_component(material).expect("set material");
+		;
+	ComponentDefinition::new()
+		.set_events(events)
+		.set_schema(schema)
+		.set_init(init)
+		.register("hexcell")
+	;
 }
 
 fn init(this: AComponent) {
