@@ -1,13 +1,11 @@
 use aframers::af_sys::components::{AComponent, register_component};
-use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::convert::FromWasmAbi;
+use wasm_bindgen::JsValue;
 use web_sys::js_sys::{Array, Object, Reflect};
 
 use crate::aframe_ex::{js, Schema};
 use crate::aframe_ex::js::bind_this_to_component;
-use crate::aframe_ex::scenes::Scene;
-use crate::aframe_ex::systems::ASystem;
 
 pub struct Events(Object);
 
@@ -67,18 +65,4 @@ impl ComponentDefinition {
 		Reflect::set(&self.0, &name.as_ref().into(), &value).expect("set property");
 		self
 	}
-}
-
-pub fn component_get_system(a_component: &AComponent, system_name: impl AsRef<str>) -> ASystem {
-	let scene = Scene::from(a_component.a_entity().a_scene());
-	let a_system = scene.a_system(system_name.as_ref());
-	a_system
-}
-
-pub fn component_get_system_into<T: JsCast>(a_component: &AComponent, system_name: impl AsRef<str>) -> T {
-	component_get_system(a_component, system_name).unchecked_into()
-}
-
-pub fn component_get_data_into<T: JsCast>(a_component: &AComponent) -> T {
-	a_component.data().unchecked_into::<T>()
 }

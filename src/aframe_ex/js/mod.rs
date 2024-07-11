@@ -1,11 +1,10 @@
 use aframers::af_sys::components::AComponent;
+use aframers::af_sys::systems::ASystem;
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::convert::FromWasmAbi;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::js_sys::Function;
-
-use crate::aframe_ex::systems::ASystem;
 
 #[wasm_bindgen(
 	inline_js = "\

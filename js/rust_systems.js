@@ -1,4 +1,4 @@
-const SYSTEM_PREFIX = '__system_';
+const SYSTEM_PREFIX = '__api_';
 
 export function aframe_system_def(rust_obj) {
     const def = {

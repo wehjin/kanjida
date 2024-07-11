@@ -6,14 +6,14 @@ use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::aframe_ex::{Align, Anchor, Baseline, Field, RingGeometry, Schema, Text};
-use crate::aframe_ex::components::core::{component_get_data_into, component_get_system_into, ComponentDefinition, Events};
-use crate::aframe_ex::components::cursor_component::CursorEvent::{MouseEnter, MouseLeave};
+use crate::aframe_ex::components::core::{ComponentDefinition, Events};
+use crate::aframe_ex::components::cursor_component::CursorEvent::{Click, MouseEnter, MouseLeave};
 use crate::aframe_ex::components::geometry_component::{Circle, Geometry};
 use crate::aframe_ex::components::material::Material;
 use crate::components::hexcell_component::data::HexcellData;
-use crate::components::hexcell_component::handlers::{handle_enter, handle_leave};
+use crate::components::hexcell_component::handlers::{handle_click, handle_enter, handle_leave};
 use crate::systems::hexcell_system;
-use crate::systems::hexcell_system::HexcellSystemApi;
+use crate::systems::hexcell_system::HexcellASystem;
 
 pub mod attribute;
 pub mod data;
@@ -22,6 +22,7 @@ pub mod handlers;
 #[wasm_bindgen]
 extern "C" {
 	#[wasm_bindgen(extends = AComponent)]
+	#[derive(Clone)]
 	pub type HexcellAComponent;
 }
 
@@ -30,12 +31,27 @@ impl HexcellAComponent {
 		let first_child = self.a_entity().first_element_child().expect("ring element");
 		first_child.unchecked_into::<AEntity>()
 	}
+
+	pub fn ring_color_from_system(&self) -> String {
+		let system = self.get_system(hexcell_system::NAME).unchecked_into::<HexcellASystem>();
+		system.ring_color(&self.a_entity())
+	}
+
+	pub fn restore_ring_color(&self) {
+		let ring_color = Color::Web(self.ring_color_from_system());
+		let target = self.ring_entity();
+		let material = Material::new().set_color(ring_color);
+		Entity::from(target).set_component(material).expect("set material");
+	}
 }
+
+const NAME: &'static str = "hexcell";
 
 pub fn register() {
 	let events = Events::new()
 		.set_handler(MouseEnter, handle_enter)
 		.set_handler(MouseLeave, handle_leave)
+		.set_handler(Click, handle_click)
 		;
 	let schema = Schema::new()
 		.push("glyph", Field::string("美"))
@@ -45,12 +61,13 @@ pub fn register() {
 		.set_events(events)
 		.set_schema(schema)
 		.set_init(init)
-		.register("hexcell")
+		.register(NAME)
 	;
 }
 
 fn init(this: AComponent) {
-	let glyph = component_get_data_into::<HexcellData>(&this).glyph();
+	let data = this.data().unchecked_into::<HexcellData>();
+	let glyph = data.glyph();
 	let ring_color = api_ring_color(&this);
 	let ring = ring_entity(&glyph, &ring_color).expect("make ring");
 	let geometry = Geometry::<Circle>::new().set_primitive().set_segments(6);
@@ -67,9 +84,10 @@ fn init(this: AComponent) {
 }
 
 fn api_ring_color(a_component: &AComponent) -> String {
-	let cell_system: HexcellSystemApi = component_get_system_into(&a_component, hexcell_system::NAME);
+	let cell_system: HexcellASystem = a_component.get_system(hexcell_system::NAME).unchecked_into();
 	cell_system.ring_color(&a_component.a_entity())
 }
+
 
 fn ring_entity(text_value: impl AsRef<str>, color: impl AsRef<str>) -> Result<Entity, JsValue> {
 	let geometry = RingGeometry::default()

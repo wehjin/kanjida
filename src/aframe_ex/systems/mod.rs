@@ -1,4 +1,4 @@
-use aframers::af_sys::scenes::AScene;
+use aframers::af_sys::systems::ASystem;
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -45,20 +45,4 @@ fn to_function_value(f: Box<dyn Fn(ASystem, JsValue)>) -> JsValue {
 #[wasm_bindgen(module = "/js/rust_systems.js")]
 extern "C" {
 	pub fn aframe_system_def(rust_system: JsValue) -> Object;
-}
-
-
-#[wasm_bindgen]
-extern "C" {
-	pub type ASystem;
-	#[wasm_bindgen(method, getter)]
-	pub fn data(this: &ASystem) -> JsValue;
-	#[wasm_bindgen(method, getter, js_name = el)]
-	pub fn a_scene(this: &ASystem) -> AScene;
-}
-
-#[wasm_bindgen(js_namespace = AFRAME)]
-extern "C" {
-	#[wasm_bindgen(js_name = registerSystem)]
-	pub fn register_system(name: &str, definition: &Object);
 }
