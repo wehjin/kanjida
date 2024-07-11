@@ -5,13 +5,15 @@ use aframers::entities::{create_entity, Entity};
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::aframe_ex::{Align, Anchor, Baseline, Field, RingGeometry, Schema, Text};
-use crate::aframe_ex::components::core::{ComponentDefinition, Events};
+use crate::aframe_ex::{Align, Anchor, Baseline, RingGeometry, Text};
+use crate::aframe_ex::components::core::{ComponentDefinition, Dependencies, Events};
 use crate::aframe_ex::components::cursor_component::CursorEvent::{Click, MouseEnter, MouseLeave};
 use crate::aframe_ex::components::geometry_component::{Circle, Geometry};
 use crate::aframe_ex::components::material::Material;
+use crate::aframe_ex::schema::{Field, MultiPropertySchema};
 use crate::components::hexcell_component::data::HexcellData;
 use crate::components::hexcell_component::handlers::{handle_click, handle_enter, handle_leave};
+use crate::components::laserfocus_component;
 use crate::systems::hexcell_system;
 use crate::systems::hexcell_system::HexcellASystem;
 
@@ -48,16 +50,18 @@ impl HexcellAComponent {
 const NAME: &'static str = "hexcell";
 
 pub fn register() {
+	let dependencies = Dependencies::new(laserfocus_component::NAME);
 	let events = Events::new()
 		.set_handler(MouseEnter, handle_enter)
 		.set_handler(MouseLeave, handle_leave)
 		.set_handler(Click, handle_click)
 		;
-	let schema = Schema::new()
+	let schema = MultiPropertySchema::new()
 		.push("glyph", Field::string("美"))
 		.push("ring_color", Field::color(Color::Web("silver".into())))
 		;
 	ComponentDefinition::new()
+		.set_dependencies(dependencies)
 		.set_events(events)
 		.set_schema(schema)
 		.set_init(init)

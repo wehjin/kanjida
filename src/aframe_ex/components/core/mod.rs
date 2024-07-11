@@ -4,8 +4,9 @@ use wasm_bindgen::convert::FromWasmAbi;
 use wasm_bindgen::JsValue;
 use web_sys::js_sys::{Array, Object, Reflect};
 
-use crate::aframe_ex::{js, Schema};
+use crate::aframe_ex::{js};
 use crate::aframe_ex::js::bind_this_to_component;
+use crate::aframe_ex::schema::Schema;
 
 pub struct Events(Object);
 
@@ -49,7 +50,7 @@ impl ComponentDefinition {
 	pub fn set_dependencies(self, dependencies: Dependencies) -> Self {
 		self.set_property("dependencies", &dependencies.to_array())
 	}
-	pub fn set_schema(self, schema: Schema) -> Self {
+	pub fn set_schema(self, schema: impl Schema) -> Self {
 		self.set_property("schema", &schema.to_object())
 	}
 	pub fn set_events(self, events: Events) -> Self {

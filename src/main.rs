@@ -7,7 +7,7 @@ use web_sys::HtmlScriptElement;
 use aframe_ex::scenes::Scene;
 use entities::{camera_entity, chest_entity, ground_entity, hexgrid_entity, light_entity, origin_entity, sky_entity};
 
-use crate::components::hexcell_component;
+use crate::components::{hexcell_component, laserfocus_component};
 use crate::entities::controller_entity;
 use crate::systems::hexcell_system;
 
@@ -58,6 +58,7 @@ fn load() -> Result<(), JsValue> {
 }
 
 fn run() -> Result<(), JsValue> {
+	laserfocus_component::register();
 	hexcell_system::register();
 	hexcell_component::register();
 
@@ -73,7 +74,7 @@ fn run() -> Result<(), JsValue> {
 				.set_component(Rotation(30., 0., 0.))?
 		)?
 		.add_entity(
-			hexgrid_entity::make()?.set_component(Position(0.0, 3.0, -12.0))?
+			hexgrid_entity::hexgrid_entity()?.set_component(Position(0.0, 3.0, -12.0))?
 		)?
 		.add_entity(controller_entity::make()?)?
 		.add_entity(camera_entity::make()?)?

@@ -6,15 +6,14 @@ use crate::components::hexcell_component::attribute::Hexcell;
 use crate::hexgrid::HexCoord;
 use crate::ka::parse_kanji;
 
-pub fn make() -> Result<Entity, JsValue> {
+pub fn hexgrid_entity() -> Result<Entity, JsValue> {
 	let cells = {
 		let mut cells = vec![];
 		let kanji = parse_kanji();
 		for k in kanji {
-			let hexcell = Hexcell::new()
-				.set_glyph(&k.kanji)
+			let entity = create_entity()?
+				.set_component(Hexcell::new().set_glyph(&k.kanji))?
 				;
-			let entity = create_entity()?.set_component(hexcell)?;
 			cells.push(entity);
 		};
 		cells
