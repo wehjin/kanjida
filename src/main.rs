@@ -6,10 +6,12 @@ use web_sys::HtmlScriptElement;
 
 use aframe_ex::scenes::Scene;
 use entities::{camera_entity, chest_entity, ground_entity, hexgrid_entity, light_entity, origin_entity, sky_entity};
+use hexcell_component::register_hexcell_component;
+use laserfocus_component::register_laserfocus_component;
 
 use crate::components::{hexcell_component, laserfocus_component};
+use crate::components::hexgrid_component::register_hexgrid_component;
 use crate::entities::controller_entity;
-use crate::systems::hexcell_system;
 
 pub mod aframe_ex;
 pub mod hexgrid;
@@ -58,9 +60,9 @@ fn load() -> Result<(), JsValue> {
 }
 
 fn run() -> Result<(), JsValue> {
-	laserfocus_component::register();
-	hexcell_system::register();
-	hexcell_component::register();
+	register_laserfocus_component();
+	register_hexcell_component();
+	register_hexgrid_component();
 
 	let scene = Scene::new()?
 		.add_entity(light_entity::make_over()?)?

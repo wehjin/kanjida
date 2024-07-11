@@ -7,15 +7,13 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::aframe_ex::{Align, Anchor, Baseline, RingGeometry, Text};
 use crate::aframe_ex::components::core::{ComponentDefinition, Dependencies, Events};
-use crate::aframe_ex::components::cursor_component::CursorEvent::{Click, MouseEnter, MouseLeave};
 use crate::aframe_ex::components::geometry_component::{Circle, Geometry};
 use crate::aframe_ex::components::material::Material;
+use crate::aframe_ex::events::StateEventKind::{StateAdded, StateRemoved};
 use crate::aframe_ex::schema::{Field, MultiPropertySchema};
 use crate::components::hexcell_component::data::HexcellData;
-use crate::components::hexcell_component::handlers::{handle_click, handle_enter, handle_leave};
+use crate::components::hexcell_component::handlers::{handle_state_added, handle_state_removed};
 use crate::components::laserfocus_component;
-use crate::systems::hexcell_system;
-use crate::systems::hexcell_system::HexcellASystem;
 
 pub mod attribute;
 pub mod data;
@@ -33,28 +31,39 @@ impl HexcellAComponent {
 		let first_child = self.a_entity().first_element_child().expect("ring element");
 		first_child.unchecked_into::<AEntity>()
 	}
-
-	pub fn ring_color_from_system(&self) -> String {
-		let system = self.get_system(hexcell_system::NAME).unchecked_into::<HexcellASystem>();
-		system.ring_color(&self.a_entity())
+	pub fn set_ring_color(&self, color: impl AsRef<str>) {
+		let target = self.ring_entity();
+		let color = Color::Web(color.as_ref().to_string());
+		let material = Material::new().set_color(color);
+		Entity::from(target).set_component(material).expect("set material");
 	}
 
-	pub fn restore_ring_color(&self) {
-		let ring_color = Color::Web(self.ring_color_from_system());
-		let target = self.ring_entity();
-		let material = Material::new().set_color(ring_color);
-		Entity::from(target).set_component(material).expect("set material");
+	pub fn ring_color_from_entity_state(&self) -> impl AsRef<str> {
+		let entity = self.a_entity();
+		let focused = entity.is_state("focused");
+		let selected = entity.is_state("selected");
+		let color = match focused {
+			true if selected => "#3B7EA1",
+			true => "gold",
+			false if selected => "#003262",
+			false => "silver"
+		};
+		color.to_string()
+	}
+
+	pub fn set_ring_color_from_entity_state(&self) {
+		let color = self.ring_color_from_entity_state();
+		self.set_ring_color(color);
 	}
 }
 
 const NAME: &'static str = "hexcell";
 
-pub fn register() {
+pub fn register_hexcell_component() {
 	let dependencies = Dependencies::new(laserfocus_component::NAME);
 	let events = Events::new()
-		.set_handler(MouseEnter, handle_enter)
-		.set_handler(MouseLeave, handle_leave)
-		.set_handler(Click, handle_click)
+		.set_handler(StateAdded, handle_state_added)
+		.set_handler(StateRemoved, handle_state_removed)
 		;
 	let schema = MultiPropertySchema::new()
 		.push("glyph", Field::string("美"))
@@ -70,10 +79,11 @@ pub fn register() {
 }
 
 fn init(this: AComponent) {
+	let this = this.unchecked_into::<HexcellAComponent>();
 	let data = this.data().unchecked_into::<HexcellData>();
 	let glyph = data.glyph();
-	let ring_color = api_ring_color(&this);
-	let ring = ring_entity(&glyph, &ring_color).expect("make ring");
+	let ring_color = this.ring_color_from_entity_state();
+	let ring = ring_entity(&glyph, ring_color).expect("make ring");
 	let geometry = Geometry::<Circle>::new().set_primitive().set_segments(6);
 	let material = Material::new()
 		.set_transparent(true)
@@ -85,11 +95,6 @@ fn init(this: AComponent) {
 		.set_component(material).expect("set material")
 		.set_component(geometry).expect("set geometry")
 	;
-}
-
-fn api_ring_color(a_component: &AComponent) -> String {
-	let cell_system: HexcellASystem = a_component.get_system(hexcell_system::NAME).unchecked_into();
-	cell_system.ring_color(&a_component.a_entity())
 }
 
 

@@ -6,6 +6,12 @@ use wasm_bindgen::convert::FromWasmAbi;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::js_sys::Function;
 
+#[wasm_bindgen]
+extern "C" {
+	#[wasm_bindgen(js_namespace = console, js_name = log)]
+	pub fn log_value(value: &JsValue);
+}
+
 #[wasm_bindgen(
 	inline_js = "\
 	export function to_init(c) { return function () { c(this); }; }\

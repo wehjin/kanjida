@@ -7,7 +7,7 @@ use crate::aframe_ex::components::cursor_component::CursorEvent::{Click, MouseEn
 use crate::aframe_ex::schema::{Field, SinglePropertySchema};
 
 pub const NAME: &'static str = "laserfocus";
-pub fn register() {
+pub fn register_laserfocus_component() {
 	let events = Events::new()
 		.set_handler(MouseEnter, handle_enter)
 		.set_handler(MouseLeave, handle_leave)
