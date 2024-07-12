@@ -17,6 +17,7 @@ use crate::entities::controller_entity;
 pub mod aframe_ex;
 pub mod hexgrid;
 pub mod ka;
+pub mod three_sys;
 
 mod entities;
 mod components;

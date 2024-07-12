@@ -2,6 +2,7 @@ use std::fmt::{Display, Formatter};
 
 use aframers::components::core::ComponentValue;
 
+pub mod af_sys;
 pub mod components;
 pub mod events;
 pub mod js;
