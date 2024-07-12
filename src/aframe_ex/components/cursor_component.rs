@@ -25,3 +25,19 @@ impl AsRef<str> for CursorEvent {
 		}
 	}
 }
+
+pub enum CursorState {
+	CursorHovered,
+	CursorFusing,
+	CursorHovering,
+}
+
+impl AsRef<str> for CursorState {
+	fn as_ref(&self) -> &str {
+		match self {
+			CursorState::CursorHovered => "cursor-hovered",
+			CursorState::CursorFusing => "cursor-fusing",
+			CursorState::CursorHovering => "cursor-hovering",
+		}
+	}
+}

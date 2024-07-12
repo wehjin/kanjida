@@ -9,6 +9,12 @@ pub trait Schema {
 
 pub struct SinglePropertySchema(Object);
 
+impl<T: AsRef<str> + Sized> From<T> for SinglePropertySchema {
+	fn from(value: T) -> Self {
+		Self::from(Field::string(value))
+	}
+}
+
 impl From<Field> for SinglePropertySchema {
 	fn from(value: Field) -> Self {
 		Self(value.to_object())

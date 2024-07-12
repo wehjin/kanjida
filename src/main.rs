@@ -5,12 +5,13 @@ use wasm_bindgen::prelude::Closure;
 use web_sys::HtmlScriptElement;
 
 use aframe_ex::scenes::Scene;
+use components::hexgrid_component::registration::register_hexgrid_component;
 use entities::{camera_entity, chest_entity, ground_entity, hexgrid_entity, light_entity, origin_entity, sky_entity};
 use hexcell_component::register_hexcell_component;
 use laserfocus_component::register_laserfocus_component;
 
 use crate::components::{hexcell_component, laserfocus_component};
-use components::hexgrid_component::registration::register_hexgrid_component;
+use crate::components::yomigun_component::register_yomigun_component;
 use crate::entities::controller_entity;
 
 pub mod aframe_ex;
@@ -63,6 +64,7 @@ fn run() -> Result<(), JsValue> {
 	register_laserfocus_component();
 	register_hexcell_component();
 	register_hexgrid_component();
+	register_yomigun_component();
 
 	let scene = Scene::new()?
 		.add_entity(light_entity::make_over()?)?
@@ -71,7 +73,7 @@ fn run() -> Result<(), JsValue> {
 		.add_entity(ground_entity::make()?)?
 		.add_entity(sky_entity::make()?)?
 		.add_entity(
-			chest_entity::make()?
+			chest_entity::make_chest_entity()?
 				.set_component(Position(0., -0.25, -1.6))?
 				.set_component(Rotation(30., 0., 0.))?
 		)?
