@@ -10,7 +10,7 @@ use hexcell_component::register_hexcell_component;
 use laserfocus_component::register_laserfocus_component;
 
 use crate::components::{hexcell_component, laserfocus_component};
-use crate::components::hexgrid_component::register_hexgrid_component;
+use components::hexgrid_component::registration::register_hexgrid_component;
 use crate::entities::controller_entity;
 
 pub mod aframe_ex;

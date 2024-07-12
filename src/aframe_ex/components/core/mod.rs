@@ -1,11 +1,11 @@
 use aframers::af_sys::components::{AComponent, register_component};
+use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::closure::Closure;
-use wasm_bindgen::convert::FromWasmAbi;
-use wasm_bindgen::JsValue;
-use web_sys::js_sys::{Array, Object, Reflect};
+use wasm_bindgen::convert::{FromWasmAbi, IntoWasmAbi};
+use web_sys::js_sys::{Array, Function, Object, Reflect};
 
-use crate::aframe_ex::{js};
-use crate::aframe_ex::js::bind_this_to_component;
+use crate::aframe_ex::js;
+use crate::aframe_ex::js::{aframers_bind_init_with_extra_state, aframers_bind_remove_with_extra_state, bind_this_to_component};
 use crate::aframe_ex::schema::Schema;
 
 pub struct Events(Object);
@@ -55,6 +55,24 @@ impl ComponentDefinition {
 	}
 	pub fn set_events(self, events: Events) -> Self {
 		self.set_property("events", &events.to_object())
+	}
+	pub fn set_init_remove_with_extra_state<T>(
+		self,
+		init: impl Fn(AComponent) -> T + 'static,
+		remove: impl Fn(AComponent) + 'static,
+	) -> Self
+	where
+		T: IntoWasmAbi + 'static,
+	{
+		let bound_init = {
+			let unbound = Closure::wrap(Box::new(init) as Box<dyn Fn(AComponent) -> T>).into_js_value().unchecked_into::<Function>();
+			aframers_bind_init_with_extra_state(unbound)
+		};
+		let bound_remove = {
+			let unbound = Closure::wrap(Box::new(remove) as Box<dyn Fn(AComponent)>).into_js_value().unchecked_into::<Function>();
+			aframers_bind_remove_with_extra_state(unbound)
+		};
+		self.set_property("init", &bound_init).set_property("remove", &bound_remove)
 	}
 	pub fn set_init(self, value: impl Fn(AComponent) + 'static) -> Self {
 		let closure = Closure::wrap(Box::new(value) as Box<dyn Fn(AComponent)>);

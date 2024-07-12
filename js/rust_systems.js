@@ -1,6 +1,6 @@
 const SYSTEM_PREFIX = '__api_';
 
-export function aframe_system_def(rust_obj) {
+export function aframers_system_def(rust_obj) {
     const def = {
         rust_system: rust_obj,
     }
@@ -19,4 +19,19 @@ export function aframe_system_def(rust_obj) {
     }
     console.log(def);
     return def;
+}
+
+export function aframers_bind_init_with_extra_state(f) {
+    return function (...args) {
+        this.extra_state = f(this, ...args)
+    };
+}
+
+export function aframers_bind_remove_with_extra_state(f) {
+    return function (...args) {
+        if (typeof this.extra_state.free === "function") {
+            this.extra_state.free();
+        }
+        f(this, ...args)
+    };
 }

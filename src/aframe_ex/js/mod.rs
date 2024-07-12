@@ -4,13 +4,15 @@ use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::convert::FromWasmAbi;
 use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::js_sys::Function;
+use web_sys::js_sys::{Function, Object};
 
-#[wasm_bindgen]
+#[wasm_bindgen(module = "/js/rust_systems.js")]
 extern "C" {
-	#[wasm_bindgen(js_namespace = console, js_name = log)]
-	pub fn log_value(value: &JsValue);
+	pub fn aframers_system_def(rust_system: JsValue) -> Object;
+	pub fn aframers_bind_init_with_extra_state(f: Function) -> Function;
+	pub fn aframers_bind_remove_with_extra_state(f: Function) -> Function;
 }
+
 
 #[wasm_bindgen(
 	inline_js = "\
@@ -32,7 +34,6 @@ extern "C" {
 	#[wasm_bindgen]
 	pub fn bind_this_to_first(f: Function) -> Function;
 }
-
 pub fn bind_this_to_component<T>(f: impl Fn(T, JsValue) + 'static) -> Function
 where
 	T: AsRef<AComponent> + FromWasmAbi + 'static,
@@ -41,4 +42,11 @@ where
 	let unbound = closure.into_js_value().unchecked_into::<Function>();
 	let bound = bind_this_to_first(unbound);
 	bound
+}
+
+
+#[wasm_bindgen]
+extern "C" {
+	#[wasm_bindgen(js_namespace = console, js_name = log)]
+	pub fn log_value(value: &JsValue);
 }

@@ -1,7 +1,6 @@
 use aframers::af_sys::systems::ASystem;
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::closure::Closure;
-use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::js_sys::Object;
 
 use crate::aframe_ex::js::with_system_from_this;
@@ -40,9 +39,4 @@ fn to_function_value(f: Box<dyn Fn(ASystem, JsValue)>) -> JsValue {
 	let function = with_system_from_this(&closure);
 	closure.forget();
 	function.unchecked_into::<JsValue>()
-}
-
-#[wasm_bindgen(module = "/js/rust_systems.js")]
-extern "C" {
-	pub fn aframe_system_def(rust_system: JsValue) -> Object;
 }
