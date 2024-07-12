@@ -29,11 +29,12 @@ pub mod attribute {
 
 pub mod handlers {
 	use aframers::af_sys::components::AComponent;
+	use aframers::browser;
 	use aframers::components::{Color, Position, Scale};
 	use aframers::entities::{create_box_entity, Entity};
 	use wasm_bindgen::{JsCast, JsValue};
 
-	use crate::aframe_ex::af_sys::AEntityEx;
+	use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
 	use crate::aframe_ex::components::cursor_component::CursorState::CursorHovered;
 	use crate::aframe_ex::events::StateEvent;
 	use crate::aframe_ex::events::StateEventKind::{StateAdded, StateRemoved};
@@ -61,10 +62,15 @@ pub mod handlers {
 	}
 	pub fn yomigun_click(component: AComponent, _js_event: JsValue) {
 		let yomigun = component.a_entity().unchecked_into::<AEntityEx>();
-		let relative_position = Position(0., 0., -1.);
-		let world_position = yomigun.local_position_to_world(relative_position);
-		let sprite = create_sprite_entity(world_position);
-		Scene::from(yomigun.a_scene()).add_entity(sprite).unwrap();
+		let scene = Scene::from(yomigun.a_scene());
+		let yomigun_target_vector = scene.a_scene().unchecked_ref::<ASceneEx>().yomigun_target_position();
+		browser::log(&format!("yomigun target vector: {:?}", &yomigun_target_vector));
+		if let Some(_vector) = yomigun_target_vector {
+			let relative_position = Position(0., 0., -1.);
+			let world_position = yomigun.local_position_to_world(relative_position);
+			let sprite = create_sprite_entity(world_position);
+			scene.add_entity(sprite).unwrap();
+		}
 	}
 
 	fn create_sprite_entity(position: Position) -> Entity {

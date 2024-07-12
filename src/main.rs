@@ -79,7 +79,7 @@ fn run() -> Result<(), JsValue> {
 				.set_component(Rotation(30., 0., 0.))?
 		)?
 		.add_entity(
-			hexgrid_entity::hexgrid_entity()?.set_component(Position(0.0, 3.0, -12.0))?
+			hexgrid_entity::create_hexgrid_entity()?.set_component(Position(0.0, 1.6, -12.0))?
 		)?
 		.add_entity(controller_entity::make()?)?
 		.add_entity(camera_entity::make()?)?

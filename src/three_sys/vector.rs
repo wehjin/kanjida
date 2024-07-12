@@ -2,6 +2,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen]
 extern "C" {
+	#[derive(Debug)]
 	pub type Vector3;
 	#[wasm_bindgen(constructor, js_namespace = THREE)]
 	pub fn new(x: f32, y: f32, z: f32) -> Vector3;

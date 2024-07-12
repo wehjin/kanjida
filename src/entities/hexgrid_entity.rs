@@ -3,6 +3,6 @@ use wasm_bindgen::JsValue;
 
 use crate::components::hexgrid_component::Hexgrid;
 
-pub fn hexgrid_entity() -> Result<Entity, JsValue> {
+pub fn create_hexgrid_entity() -> Result<Entity, JsValue> {
 	create_entity()?.set_component(Hexgrid::Enabled)
 }

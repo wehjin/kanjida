@@ -29,11 +29,15 @@ impl SelectedEntity {
 			}
 		}
 	}
-	pub fn remove_entity_if_present(&mut self, value: &AEntity) {
+
+	/// Returns true if the entity was selected.
+	pub fn remove_entity_if_selected(&mut self, value: &AEntity) -> bool {
 		if let Some(existing) = &self.entity {
 			if existing.id() == value.id() {
 				self.entity = None;
+				return true;
 			}
 		}
+		return false;
 	}
 }
