@@ -60,15 +60,19 @@ pub mod handlers {
 		}
 	}
 	pub fn yomigun_click(component: AComponent, _js_event: JsValue) {
-		let entity = component.a_entity().unchecked_into::<AEntityEx>();
+		let yomigun = component.a_entity().unchecked_into::<AEntityEx>();
+		let relative_position = Position(0., 0., -1.);
+		let world_position = yomigun.local_position_to_world(relative_position);
+		let sprite = create_sprite_entity(world_position);
+		Scene::from(yomigun.a_scene()).add_entity(sprite).unwrap();
+	}
+
+	fn create_sprite_entity(position: Position) -> Entity {
 		const SPRITE_SCALE: f32 = 0.6;
-		let world_position = entity.local_position_to_world(Position(0., 0., -1.));
-		let sprite = create_box_entity().unwrap()
+		create_box_entity().unwrap()
 			.set_component(Scale(SPRITE_SCALE, SPRITE_SCALE, SPRITE_SCALE)).unwrap()
-			.set_component(world_position).unwrap()
+			.set_component(position).unwrap()
 			.set_component(Color::Web("tomato".into())).unwrap()
-			;
-		Scene::from(entity.a_scene()).add_entity(sprite).unwrap();
 	}
 }
 
