@@ -8,6 +8,51 @@ use crate::aframe_ex::js;
 use crate::aframe_ex::js::{aframers_bind_init_with_extra_state, aframers_bind_remove_with_extra_state, bind_this_to_component};
 use crate::aframe_ex::schema::Schema;
 
+pub mod properties {
+	use aframers::components::core::{ComponentValue, ToPropertyValue};
+
+	pub trait ComponentProperty: AsPropertyName + ToPropertyValue {
+		fn to_attribute_string(&self) -> String {
+			format!("{}: {}", self.as_property_name(), self.to_property_value())
+		}
+	}
+	pub trait AsPropertyName {
+		fn as_property_name(&self) -> &str;
+	}
+
+	impl<T: ComponentValue> AsPropertyName for T {
+		fn as_property_name(&self) -> &str {
+			self.component_name()
+		}
+	}
+
+	pub struct MultiPropertyAttributeValue(Vec<String>);
+	impl MultiPropertyAttributeValue {
+		pub fn new() -> Self {
+			Self(Vec::new())
+		}
+		pub fn add_property_value(self, name: impl AsRef<str>, value: &Option<impl ToPropertyValue>) -> Self {
+			if let Some(value) = value {
+				let mut vec = self.0;
+				vec.push(format!("{}: {}", name.as_ref(), value.to_property_value()));
+				Self(vec)
+			} else {
+				self
+			}
+		}
+		pub fn add_property(self, property: &Option<impl ComponentProperty>) -> Self {
+			if let Some(value) = property {
+				let mut vec = self.0;
+				vec.push(value.to_attribute_string());
+				Self(vec)
+			} else {
+				self
+			}
+		}
+		pub fn to_attribute_value(self) -> String { self.0.join("; ") }
+	}
+}
+
 pub struct Events(Object);
 
 impl Events {

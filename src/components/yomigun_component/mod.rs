@@ -35,6 +35,7 @@ pub mod handlers {
 	use wasm_bindgen::{JsCast, JsValue};
 
 	use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
+	use crate::aframe_ex::components::animation_component::{Animation, Easing};
 	use crate::aframe_ex::components::cursor_component::CursorState::CursorHovered;
 	use crate::aframe_ex::events::StateEvent;
 	use crate::aframe_ex::events::StateEventKind::{StateAdded, StateRemoved};
@@ -65,10 +66,20 @@ pub mod handlers {
 		let scene = Scene::from(yomigun.a_scene());
 		let yomigun_target_vector = scene.a_scene().unchecked_ref::<ASceneEx>().yomigun_target_position();
 		browser::log(&format!("yomigun target vector: {:?}", &yomigun_target_vector));
-		if let Some(_vector) = yomigun_target_vector {
-			let relative_position = Position(0., 0., -1.);
-			let world_position = yomigun.local_position_to_world(relative_position);
-			let sprite = create_sprite_entity(world_position);
+		if let Some(target) = yomigun_target_vector {
+			let end = Position(target.x(), target.y(), target.z() - 1.);
+			let start = {
+				let relative_position = Position(0., 0., -1.);
+				yomigun.local_position_to_world(relative_position)
+			};
+			let animation = Animation::new()
+				.set_property("position")
+				.set_from(start)
+				.set_to(end)
+				.set_dur_millis(100)
+				.set_easing(Easing::Linear)
+				;
+			let sprite = create_sprite_entity(start).set_component(animation).unwrap();
 			scene.add_entity(sprite).unwrap();
 		}
 	}
