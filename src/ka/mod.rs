@@ -63,7 +63,7 @@ mod tests {
 	fn kunyomi_ja() {
 		let kanji = parse_kanji();
 		let record = &kanji[4];
-		assert_eq!(record.to_kunyomi_ja_vec(), vec!["シ", "ジ"])
+		assert_eq!(record.to_kunyomi_ja_vec(), vec!["しめ", "しめす"])
 	}
 
 	#[test]

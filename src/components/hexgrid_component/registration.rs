@@ -8,8 +8,9 @@ use crate::aframe_ex::events::StateEventKind;
 use crate::aframe_ex::schema::{Field, SinglePropertySchema};
 use crate::components::hexcell_component::attribute::Hexcell;
 use crate::components::hexgrid_component::{handlers, Hexgrid, HEXGRID_COMPONENT_NAME, HexgridAComponent, SelectedEntity};
+use crate::GAME;
+use crate::game::quiz::Quiz;
 use crate::hexgrid::HexCoord;
-use crate::ka::parse_kanji;
 
 pub fn register_hexgrid_component() {
 	let events = Events::new()
@@ -29,17 +30,9 @@ fn init(component: AComponent) -> SelectedEntity {
 	let mut grid = Entity::from(component.a_entity())
 		.set_id("hexgrid-1").unwrap()
 		;
-	let cells = {
-		let mut cells = vec![];
-		let kanji = parse_kanji();
-		for k in kanji {
-			let entity = create_entity().unwrap()
-				.set_component(Hexcell::new().set_glyph(&k.kanji)).unwrap()
-				;
-			cells.push(entity);
-		};
-		cells
-	};
+	let cells = GAME.with_borrow(
+		|game| game.as_quizzes().into_iter().map(hexcell_entity).collect::<Vec<_>>()
+	);
 	let spiral_coords = HexCoord::ORIGIN.iter_spiral().take(cells.len()).collect::<Vec<_>>();
 	for (i, cell) in cells.into_iter().enumerate() {
 		let pixel = spiral_coords[i].to_pixel();
@@ -53,6 +46,14 @@ fn init(component: AComponent) -> SelectedEntity {
 	}
 
 	SelectedEntity::none()
+}
+
+fn hexcell_entity(quiz: &Quiz) -> Entity {
+	let glyph = quiz.glyph();
+	let entity = create_entity().unwrap()
+		.set_component(Hexcell::new().set_glyph(glyph)).unwrap()
+		;
+	entity
 }
 
 fn remove(_component: AComponent) {}

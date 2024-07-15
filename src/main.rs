@@ -1,3 +1,5 @@
+use std::cell::RefCell;
+
 use aframers::browser::document;
 use aframers::components::{Position, Rotation};
 use wasm_bindgen::{JsCast, JsValue};
@@ -13,6 +15,7 @@ use laserfocus_component::register_laserfocus_component;
 use crate::components::{hexcell_component, laserfocus_component};
 use crate::components::yomigun_component::register_yomigun_component;
 use crate::entities::controller_entity;
+use crate::game::game::Game;
 
 pub mod aframe_ex;
 pub mod hexgrid;
@@ -22,6 +25,10 @@ mod entities;
 mod game;
 mod components;
 mod systems;
+
+thread_local! {
+	pub static GAME: RefCell<Game> = RefCell::new(Game::new());
+}
 
 fn main() {
 	console_error_panic_hook::set_once();

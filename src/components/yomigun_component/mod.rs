@@ -61,7 +61,6 @@ pub mod handlers {
 			}
 		}
 	}
-
 	pub fn yomigun_click(component: AComponent, _js_event: JsValue) {
 		let yomigun = component.a_entity().unchecked_into::<AEntityEx>();
 		let scene = Scene::from(yomigun.a_scene());
