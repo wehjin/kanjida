@@ -1,11 +1,9 @@
+use std::collections::HashSet;
+
 use chrono::{DateTime, Utc};
 
 use crate::game::quiz::answer::{Answer, AnswerEvent};
 use crate::ka::KanjiRecord;
-
-pub enum QuizEvent {
-	Solve(String, DateTime<Utc>)
-}
 
 #[derive(Debug, Clone)]
 pub struct Quiz {
@@ -18,6 +16,9 @@ impl Quiz {
 	pub fn glyph(&self) -> &str {
 		&self.question
 	}
+	pub fn answers_len(&self) -> usize {
+		self.answers.len()
+	}
 	pub fn solved_answers_len(&self, now: DateTime<Utc>) -> usize {
 		self.answers.iter().filter(|&answer| answer.is_solved(now)).count()
 	}
@@ -27,13 +28,29 @@ impl Quiz {
 	pub fn fails_len(&self, now: DateTime<Utc>) -> usize {
 		self.fails.iter().filter(|&fail| is_active_fail(fail, now)).count()
 	}
+	pub fn to_goals(&self) -> HashSet<&String> {
+		self.answers.iter().map(|answer| &answer.goal).collect::<HashSet<_>>()
+	}
 }
 
 fn is_active_fail(fail: &DateTime<Utc>, now: DateTime<Utc>) -> bool {
 	(now - fail).num_minutes() <= 3
 }
 
+pub enum QuizEvent {
+	Solve(String, DateTime<Utc>)
+}
+
 impl Quiz {
+	pub fn new(record: &KanjiRecord) -> Self {
+		let question = record.kanji.to_owned();
+		let answers = record.to_onyomi_ja_vec().iter()
+			.map(Answer::new)
+			.collect::<Vec<_>>()
+			;
+		let fails = Vec::new();
+		Self { question, answers, fails }
+	}
 	pub fn after_event(&self, event: QuizEvent) -> Self {
 		match event {
 			QuizEvent::Solve(solution, now) => {
@@ -58,18 +75,6 @@ impl Quiz {
 				new
 			}
 		}
-	}
-}
-
-impl Quiz {
-	pub fn new(record: &KanjiRecord) -> Self {
-		let question = record.kanji.to_owned();
-		let answers = record.onyomi_ja_to_vec().iter()
-			.map(Answer::new)
-			.collect::<Vec<_>>()
-			;
-		let fails = Vec::new();
-		Self { question, answers, fails }
 	}
 }
 

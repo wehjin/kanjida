@@ -23,11 +23,17 @@ pub struct KanjiRecord {
 }
 
 impl KanjiRecord {
-	pub fn onyomi_ja_to_vec(&self) -> Vec<String> {
+	pub fn to_onyomi_ja_vec(&self) -> Vec<String> {
 		self.onyomi_ja
 			.split("、")
 			.map(String::from)
 			.collect::<Vec<_>>()
+	}
+	pub fn to_kunyomi_ja_vec(&self) -> Vec<String> {
+		self.kunyomi_ja
+			.split("、")
+			.map(String::from)
+			.collect()
 	}
 }
 
@@ -50,9 +56,15 @@ mod tests {
 	fn onyomi_ja() {
 		let kanji = parse_kanji();
 		let record = &kanji[4];
-		assert_eq!(record.onyomi_ja_to_vec(), vec!["シ", "ジ"])
+		assert_eq!(record.to_onyomi_ja_vec(), vec!["シ", "ジ"])
 	}
 
+	#[test]
+	fn kunyomi_ja() {
+		let kanji = parse_kanji();
+		let record = &kanji[4];
+		assert_eq!(record.to_kunyomi_ja_vec(), vec!["シ", "ジ"])
+	}
 
 	#[test]
 	fn kanji() {
