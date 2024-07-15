@@ -18,8 +18,8 @@ pub mod aframe_ex;
 pub mod hexgrid;
 pub mod ka;
 pub mod three_sys;
-
 mod entities;
+mod game;
 mod components;
 mod systems;
 

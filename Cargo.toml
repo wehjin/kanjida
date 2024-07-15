@@ -6,6 +6,9 @@ edition = "2021"
 [dependencies]
 aframers = { git = "https://github.com/wehjin/aframers.git", version = "0.1.0" }
 anyhow = "1.0.86"
+anymap = { version = "1.0.0-beta.2", default-features = false, features = ["hashbrown"] }
+bundle_sys = { git = "https://github.com/wehjin/bundle_sys.git", version = "0.1.0" }
+chrono = "0.4.38"
 console_error_panic_hook = "0.1.7"
 csv = "1.3.0"
 getrandom = { version = "0.2.15", features = ["js"] }

@@ -22,6 +22,15 @@ pub struct KanjiRecord {
 	pub rad_position: String,
 }
 
+impl KanjiRecord {
+	pub fn onyomi_ja_to_vec(&self) -> Vec<String> {
+		self.onyomi_ja
+			.split("、")
+			.map(String::from)
+			.collect::<Vec<_>>()
+	}
+}
+
 pub fn parse_kanji() -> Vec<KanjiRecord> {
 	let mut records = vec![];
 	let string = include_str!("../../kanji-data-media/language-data/ka_data.csv");
@@ -36,6 +45,14 @@ pub fn parse_kanji() -> Vec<KanjiRecord> {
 #[cfg(test)]
 mod tests {
 	use crate::ka::{KanjiRecord, parse_kanji};
+
+	#[test]
+	fn onyomi_ja() {
+		let kanji = parse_kanji();
+		let record = &kanji[4];
+		assert_eq!(record.onyomi_ja_to_vec(), vec!["シ", "ジ"])
+	}
+
 
 	#[test]
 	fn kanji() {
