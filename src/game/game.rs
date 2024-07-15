@@ -12,7 +12,7 @@ impl Game {
 	pub fn as_quiz(&self, pos: usize) -> &Quiz {
 		&self.as_quizzes()[pos]
 	}
-	pub fn to_goals(&self) -> HashSet<&String> {
+	pub fn to_inventory(&self) -> HashSet<&String> {
 		let mut set = HashSet::new();
 		for quiz in self.as_quizzes() {
 			set.extend(quiz.to_goals())
