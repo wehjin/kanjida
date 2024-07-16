@@ -2,11 +2,27 @@ use aframers::af_sys::components::AComponent;
 use aframers::components::core::ComponentValue;
 use wasm_bindgen::prelude::wasm_bindgen;
 
+use crate::aframe_ex::components::core::{ComponentDefinition, Events};
+use crate::aframe_ex::events::StateEventKind;
+use crate::aframe_ex::schema::{Field, SinglePropertySchema};
 use crate::components::hexgrid_component::other::SelectedEntity;
 
 pub mod handlers;
 pub mod other;
 pub mod registration;
+
+pub fn register_hexgrid_component() {
+	let events = Events::new()
+		.set_handler(StateEventKind::StateAdded, handlers::handle_state_added)
+		.set_handler(StateEventKind::StateRemoved, handlers::handle_state_removed)
+		;
+	let schema = SinglePropertySchema::from(Field::string(Hexgrid::Enabled.as_ref()));
+	ComponentDefinition::new()
+		.set_events(events)
+		.set_schema(schema)
+		.set_init_remove_with_extra_state(registration::init, registration::remove)
+		.register(HEXGRID_COMPONENT_NAME);
+}
 
 pub const HEXGRID_COMPONENT_NAME: &str = "hexgrid";
 
@@ -18,11 +34,11 @@ impl AsRef<str> for Hexgrid {
 	}
 }
 
+
 impl ComponentValue for Hexgrid {
 	fn component_name(&self) -> &str { HEXGRID_COMPONENT_NAME }
 	fn component_value(&self) -> impl AsRef<str> { "enabled" }
 }
-
 
 #[wasm_bindgen]
 extern "C" {

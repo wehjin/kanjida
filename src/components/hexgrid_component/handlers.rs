@@ -1,12 +1,17 @@
 use aframers::af_sys::components::AComponent;
 use aframers::af_sys::entities::AEntity;
+use aframers::components::Position;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::CustomEvent;
 
 use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
+use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::events::StateEvent;
-use crate::aframe_ex::js::log_value;
+use crate::aframe_ex::Value;
 use crate::components::hexgrid_component::HexgridAComponent;
+use crate::entities::hint_entity;
+use crate::GAME;
+use crate::three_sys::Vector3;
 
 pub fn handle_state_added(component: AComponent, event: JsValue) {
 	let component = component.unchecked_into::<HexgridAComponent>();
@@ -15,16 +20,28 @@ pub fn handle_state_added(component: AComponent, event: JsValue) {
 		match state_added.state() {
 			"selected" => {
 				let cell = custom.target().unwrap().unchecked_into::<AEntity>();
-				log_value(&cell);
+				let cell_world_position = cell.unchecked_ref::<AEntityEx>().world_position_in_new_vector();
+				update_hint_entity(&cell_world_position, cell.id().as_str());
 				update_component_with_selected_entity_notifying_old(&component, &cell);
-
 				let scene = component.a_entity().a_scene().unchecked_into::<ASceneEx>();
-				let cell_vector = cell.unchecked_ref::<AEntityEx>().world_position_in_new_vector();
-				scene.set_yomigun_target_position(Some(cell_vector));
+				scene.set_yomigun_target_position(Some(cell_world_position));
 			}
 			_ => ()
 		}
 	}
+}
+
+fn update_hint_entity(center: &Vector3, quiz_id: &str) {
+	let hint = GAME.with_borrow(|game| {
+		let quiz = game.as_quiz_by_id(quiz_id);
+		let hint = quiz.hint().to_string();
+		hint
+	});
+	hint_entity::get()
+		.set_component(Position(center.x(), center.y() + 0.6, center.z())).unwrap()
+		.set_component(Value(hint.to_uppercase())).unwrap()
+		.set_component(Visible::True).unwrap()
+	;
 }
 
 pub fn handle_state_removed(component: AComponent, event: JsValue) {

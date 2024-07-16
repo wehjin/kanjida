@@ -7,14 +7,22 @@ use crate::ka::KanjiRecord;
 
 #[derive(Debug, Clone)]
 pub struct Quiz {
+	id: String,
 	question: String,
 	answers: Vec<Answer>,
 	fails: Vec<DateTime<Utc>>,
+	hint: String,
 }
 
 impl Quiz {
+	pub fn id(&self) -> &str {
+		&self.id
+	}
 	pub fn glyph(&self) -> &str {
 		&self.question
+	}
+	pub fn hint(&self) -> &str {
+		&self.hint
 	}
 	pub fn answers_len(&self) -> usize {
 		self.answers.len()
@@ -42,14 +50,16 @@ pub enum QuizEvent {
 }
 
 impl Quiz {
-	pub fn new(record: &KanjiRecord) -> Self {
+	pub fn new((pos, record): (usize, &KanjiRecord)) -> Self {
+		let id = format!("quiz-{}", pos + 1);
 		let question = record.kanji.to_owned();
 		let answers = record.to_onyomi_ja_vec().iter()
 			.map(Answer::new)
 			.collect::<Vec<_>>()
 			;
 		let fails = Vec::new();
-		Self { question, answers, fails }
+		let hint = record.kmeaning.to_string();
+		Self { id: id, question, answers, fails, hint }
 	}
 	pub fn after_event(&self, event: QuizEvent) -> Self {
 		match event {
