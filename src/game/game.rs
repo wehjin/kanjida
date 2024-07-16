@@ -25,8 +25,15 @@ impl Game {
 	}
 }
 impl Game {
-	pub fn new() -> Self {
-		let quizzes = parse_kanji().iter().enumerate().map(Quiz::new).collect::<Vec<_>>();
+	pub fn with_limit(max: Option<usize>) -> Self {
+		let mut quizzes = parse_kanji().iter()
+			.enumerate()
+			.map(Quiz::new)
+			.collect::<Vec<_>>()
+			;
+		if let Some(limit) = max {
+			quizzes.truncate(limit);
+		}
 		let by_name = quizzes.iter()
 			.enumerate()
 			.map(|(pos, quiz)| {
@@ -35,5 +42,8 @@ impl Game {
 			.collect::<HashMap<_, _>>()
 			;
 		Self { quizzes, by_name }
+	}
+	pub fn new() -> Self {
+		Self::with_limit(None)
 	}
 }

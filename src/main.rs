@@ -27,7 +27,7 @@ mod components;
 mod systems;
 
 thread_local! {
-	pub static GAME: RefCell<Game> = RefCell::new(Game::new());
+	pub static GAME: RefCell<Game> = RefCell::new(Game::with_limit(Some(91)));
 }
 
 fn main() {
