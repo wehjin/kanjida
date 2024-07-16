@@ -4,6 +4,7 @@ use aframers::components::core::ComponentValue;
 
 pub mod af_sys;
 pub mod components;
+pub mod entities;
 pub mod events;
 pub mod js;
 pub mod objects;
@@ -83,44 +84,76 @@ impl ComponentValue for Text {
 
 #[derive(Copy, Clone)]
 pub enum Anchor { Left, Center, Right, Align }
-impl Display for Anchor {
-	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-		let display = match self {
+impl AsRef<str> for Anchor {
+	fn as_ref(&self) -> &str {
+		match self {
 			Anchor::Left => "left",
 			Anchor::Center => "center",
 			Anchor::Right => "right",
 			Anchor::Align => "align",
-		};
-		write!(f, "{}", display)
+		}
 	}
+}
+impl ComponentValue for Anchor {
+	fn component_name(&self) -> &str { "anchor" }
+	fn component_value(&self) -> impl AsRef<str> { self }
+}
+impl Display for Anchor {
+	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+		write!(f, "{}", self.as_ref())
+	}
+}
+
+pub struct Value<T: AsRef<str> + Sized>(pub T);
+impl<T: AsRef<str> + Sized> AsRef<str> for Value<T> {
+	fn as_ref(&self) -> &str {
+		self.0.as_ref()
+	}
+}
+impl<T: AsRef<str> + Sized> ComponentValue for Value<T> {
+	fn component_name(&self) -> &str { "value" }
+	fn component_value(&self) -> impl AsRef<str> { self }
 }
 
 #[derive(Copy, Clone)]
 pub enum Align { Left, Center, Right }
-
-impl Display for Align {
-	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-		let display = match self {
+impl AsRef<str> for Align {
+	fn as_ref(&self) -> &str {
+		match self {
 			Align::Left => "left",
 			Align::Center => "center",
 			Align::Right => "right",
-		};
-		write!(f, "{}", display)
+		}
+	}
+}
+impl ComponentValue for Align {
+	fn component_name(&self) -> &str { "align" }
+	fn component_value(&self) -> impl AsRef<str> { self }
+}
+impl Display for Align {
+	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+		write!(f, "{}", self.as_ref())
 	}
 }
 
-
 #[derive(Copy, Clone)]
 pub enum Baseline { Top, Center, Bottom }
-
-impl Display for Baseline {
-	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-		let display = match self {
+impl AsRef<str> for Baseline {
+	fn as_ref(&self) -> &str {
+		match self {
 			Baseline::Top => "top",
 			Baseline::Center => "center",
 			Baseline::Bottom => "bottom",
-		};
-		write!(f, "{}", display)
+		}
+	}
+}
+impl ComponentValue for Baseline {
+	fn component_name(&self) -> &str { "baseline" }
+	fn component_value(&self) -> impl AsRef<str> { self }
+}
+impl Display for Baseline {
+	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+		write!(f, "{}", self.as_ref())
 	}
 }
 
