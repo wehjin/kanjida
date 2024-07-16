@@ -12,6 +12,7 @@ chrono = "0.4.38"
 console_error_panic_hook = "0.1.7"
 csv = "1.3.0"
 getrandom = { version = "0.2.15", features = ["js"] }
+kanji-data = { git = "https://github.com/wehjin/kanji-data.git", version = "0.1.0" }
 rand = { version = "0.8.5" }
 serde = { version = "1.0.203", features = ["derive"] }
 serde-wasm-bindgen = "0.6.5"

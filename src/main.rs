@@ -19,7 +19,6 @@ use crate::game::game::Game;
 
 pub mod aframe_ex;
 pub mod hexgrid;
-pub mod ka;
 pub mod three_sys;
 mod entities;
 mod game;

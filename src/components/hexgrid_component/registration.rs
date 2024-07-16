@@ -31,7 +31,7 @@ pub fn init(component: AComponent) -> SelectedEntity {
 }
 
 fn hexcell_entity(quiz: &Quiz) -> Entity {
-	let glyph = quiz.glyph();
+	let glyph = quiz.question();
 	let entity = create_entity().unwrap()
 		.set_id(quiz.id()).unwrap()
 		.set_component(Hexcell::new().set_glyph(glyph)).unwrap()

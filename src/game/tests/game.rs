@@ -9,7 +9,7 @@ fn init() {
 fn quiz() {
 	let game = Game::new();
 	let quiz = game.as_quiz(4);
-	assert_eq!(quiz.glyph(), "示");
+	assert_eq!(quiz.question(), "示");
 }
 
 #[test]

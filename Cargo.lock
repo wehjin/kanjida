@@ -193,6 +193,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "kanji-data"
+version = "0.1.0"
+source = "git+https://github.com/wehjin/kanji-data.git#bf7c701a423d884e5192683683807fa626cf6346"
+dependencies = [
+ "anyhow",
+ "csv",
+ "serde",
+]
+
+[[package]]
 name = "kanjida"
 version = "0.1.0"
 dependencies = [
@@ -204,6 +214,7 @@ dependencies = [
  "console_error_panic_hook",
  "csv",
  "getrandom",
+ "kanji-data",
  "rand",
  "serde",
  "serde-wasm-bindgen",

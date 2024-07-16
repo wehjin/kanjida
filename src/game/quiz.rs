@@ -1,28 +1,20 @@
-use std::collections::HashSet;
-
 use chrono::{DateTime, Utc};
+use kanji_data::KanjiData;
 
-use crate::game::quiz::answer::{Answer, AnswerEvent};
-use crate::ka::KanjiRecord;
+use crate::game::quiz::answer::{Answer, AnswerEvent, YomiData};
 
 #[derive(Debug, Clone)]
 pub struct Quiz {
-	id: String,
-	question: String,
+	data: KanjiData,
 	answers: Vec<Answer>,
 	fails: Vec<DateTime<Utc>>,
-	hint: String,
 }
 
 impl Quiz {
-	pub fn id(&self) -> &str {
-		&self.id
-	}
-	pub fn glyph(&self) -> &str {
-		&self.question
-	}
-	pub fn hint(&self) -> &str {
-		&self.hint
+	pub fn id(&self) -> String { format!("quiz-{}", self.data.0 + 1) }
+	pub fn question(&self) -> &'static str { self.data.as_glyph() }
+	pub fn hint(&self) -> &'static str {
+		&self.data.as_meaning()
 	}
 	pub fn answers_len(&self) -> usize {
 		self.answers.len()
@@ -36,8 +28,8 @@ impl Quiz {
 	pub fn fails_len(&self, now: DateTime<Utc>) -> usize {
 		self.fails.iter().filter(|&fail| is_active_fail(fail, now)).count()
 	}
-	pub fn to_goals(&self) -> HashSet<&String> {
-		self.answers.iter().map(|answer| &answer.goal).collect::<HashSet<_>>()
+	pub fn as_goals(&self) -> &'static [&'static str] {
+		self.data.as_onyomi()
 	}
 }
 
@@ -46,31 +38,27 @@ fn is_active_fail(fail: &DateTime<Utc>, now: DateTime<Utc>) -> bool {
 }
 
 pub enum QuizEvent {
-	Solve(String, DateTime<Utc>)
+	TrySolution(String, DateTime<Utc>)
 }
 
 impl Quiz {
-	pub fn new((pos, record): (usize, &KanjiRecord)) -> Self {
-		let id = format!("quiz-{}", pos + 1);
-		let question = record.kanji.to_owned();
-		let answers = record.to_onyomi_ja_vec().iter()
-			.map(Answer::new)
-			.collect::<Vec<_>>()
-			;
+	pub fn new(pos: usize) -> Self {
+		let data = KanjiData(pos);
+		let mut answers = Vec::new();
+		for pos in 0..data.as_onyomi().len() {
+			let answer = Answer::new(YomiData(data, pos));
+			answers.push(answer);
+		}
 		let fails = Vec::new();
-		let hint = record.kmeaning.to_string();
-		Self { id: id, question, answers, fails, hint }
+		Self { data, answers, fails }
 	}
 	pub fn after_event(&self, event: QuizEvent) -> Self {
 		match event {
-			QuizEvent::Solve(solution, now) => {
+			QuizEvent::TrySolution(solution, now) => {
 				let mut new = self.clone();
-
-				new.answers = new.answers.into_iter()
-					.map(|answer| {
-						answer.after_event(AnswerEvent::Solve(solution.to_owned(), now))
-					})
-					.collect::<Vec<_>>();
+				new.answers = new.answers.into_iter().map(|answer| {
+					answer.after_event(AnswerEvent::TrySolution(solution.to_owned(), now))
+				}).collect::<Vec<_>>();
 
 				if new.solved_answers_len(now) == self.solved_answers_len(now) {
 					new.fails.push(now);
@@ -90,17 +78,44 @@ impl Quiz {
 
 pub mod answer {
 	use chrono::{DateTime, Utc};
+	use kanji_data::KanjiData;
 
 	pub enum AnswerEvent {
-		Solve(String, DateTime<Utc>)
+		TrySolution(String, DateTime<Utc>)
 	}
+
+	#[derive(Debug, Copy, Clone)]
+	pub struct YomiData(pub KanjiData, pub usize);
+	impl YomiData {
+		pub fn as_yomi(&self) -> &'static str { self.0.as_onyomi()[self.1] }
+	}
+
 	#[derive(Debug, Clone)]
 	pub struct Answer {
+		pub data: YomiData,
 		pub age: usize,
-		pub goal: String,
 		pub recent_solution: Option<DateTime<Utc>>,
 	}
 	impl Answer {
+		pub fn new(data: YomiData) -> Self {
+			Self { data, age: 0, recent_solution: None }
+		}
+
+		pub fn after_event(&self, event: AnswerEvent) -> Self {
+			match event {
+				AnswerEvent::TrySolution(solution, now) => {
+					let mut new = self.clone();
+					if &solution == self.as_solution() {
+						new.age += 1;
+						new.recent_solution = Some(now);
+					}
+					new
+				}
+			}
+		}
+	}
+	impl Answer {
+		pub fn as_solution(&self) -> &'static str { self.data.as_yomi() }
 		pub fn is_solved(&self, now: DateTime<Utc>) -> bool {
 			if let Some(solution_time) = &self.recent_solution {
 				let expired = (now - solution_time).num_days() > 30;
@@ -108,23 +123,6 @@ pub mod answer {
 				solved
 			} else {
 				false
-			}
-		}
-	}
-	impl Answer {
-		pub fn new(goal: impl AsRef<str>) -> Self {
-			Self { age: 0, goal: goal.as_ref().to_string(), recent_solution: None }
-		}
-		pub fn after_event(&self, event: AnswerEvent) -> Self {
-			match event {
-				AnswerEvent::Solve(solution, now) => {
-					let mut new = self.clone();
-					if solution == self.goal {
-						new.age += 1;
-						new.recent_solution = Some(now);
-					}
-					new
-				}
 			}
 		}
 	}
