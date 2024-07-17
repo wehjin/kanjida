@@ -12,9 +12,12 @@ use entities::{camera_entity, chest_entity, ground_entity, hexgrid_entity, light
 use hexcell_component::register_hexcell_component;
 use laserfocus_component::register_laserfocus_component;
 
+use crate::aframe_ex::components::visible_component::Visible;
 use crate::components::{hexcell_component, laserfocus_component};
+use crate::components::hex_color_component::HexColor;
 use crate::components::yomigun_component::register_yomigun_component;
 use crate::entities::{controller_entity, hint_entity};
+use crate::entities::ring_entity::try_ring_entity;
 use crate::game::game::Game;
 
 pub mod aframe_ex;
@@ -26,8 +29,18 @@ mod components;
 mod systems;
 
 thread_local! {
-	pub static GAME: RefCell<Game> = RefCell::new(Game::with_limit(Some(91)));
+	pub static GAME: RefCell<Game> = RefCell::new(Game::with_limit(Some(309)));
 }
+
+pub const TEXT_Z_OFFSET: f32 = 0.01;
+pub const PLAIN_RING_Z_OFFSET: f32 = 0.02;
+pub const SELECT_RING_Z_OFFSET: f32 = 0.03;
+pub const SELECT_RING_ID: &'static str = "select-ring";
+pub const SELECT_RING_SELECTOR: &'static str = "#select-ring";
+pub const FOCUS_RING_Z_OFFSET: f32 = 0.04;
+pub const FOCUS_RING_ID: &'static str = "focus-ring";
+pub const FOCUS_RING_SELECTOR: &'static str = "#focus-ring";
+pub const HINT_Z_OFFSET: f32 = 0.05;
 
 fn main() {
 	console_error_panic_hook::set_once();
@@ -73,6 +86,15 @@ fn run() -> Result<(), JsValue> {
 	register_hexgrid_component();
 	register_yomigun_component();
 
+	let focus_ring = try_ring_entity(HexColor::Focused.as_ref())
+		.unwrap().set_id(FOCUS_RING_ID)?
+		.set_component(Visible::False)?
+		;
+	let select_ring = try_ring_entity(HexColor::Selected.as_ref())
+		.unwrap().set_id(SELECT_RING_ID)?
+		.set_component(Visible::False)?
+		;
+
 	let scene = Scene::new()?
 		.add_entity(light_entity::make_over()?)?
 		.add_entity(light_entity::make_under()?)?
@@ -80,6 +102,8 @@ fn run() -> Result<(), JsValue> {
 		.add_entity(ground_entity::make()?)?
 		.add_entity(sky_entity::make()?)?
 		.add_entity(hint_entity::make())?
+		.add_entity(focus_ring)?
+		.add_entity(select_ring)?
 		.add_entity(
 			chest_entity::make_chest_entity()?
 				.set_component(Position(0., -0.25, -1.6))?

@@ -6,5 +6,6 @@ pub mod hexgrid_entity;
 pub mod light_entity;
 pub mod origin_entity;
 pub mod hint_entity;
+pub mod ring_entity;
 pub mod sky_entity;
 

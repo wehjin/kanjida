@@ -4,13 +4,13 @@ use aframers::components::Position;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::CustomEvent;
 
+use crate::{GAME, HINT_Z_OFFSET};
 use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::events::StateEvent;
 use crate::aframe_ex::Value;
 use crate::components::hexgrid_component::HexgridAComponent;
 use crate::entities::hint_entity;
-use crate::GAME;
 use crate::three_sys::Vector3;
 
 pub fn handle_state_added(component: AComponent, event: JsValue) {
@@ -38,7 +38,7 @@ fn update_hint_entity(center: &Vector3, quiz_id: &str) {
 		hint
 	});
 	hint_entity::get()
-		.set_component(Position(center.x(), center.y() + 0.6, center.z())).unwrap()
+		.set_component(Position(center.x(), center.y() + 0.6, center.z() + HINT_Z_OFFSET)).unwrap()
 		.set_component(Value(hint.to_uppercase())).unwrap()
 		.set_component(Visible::True).unwrap()
 	;

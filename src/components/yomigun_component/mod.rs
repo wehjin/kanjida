@@ -67,7 +67,7 @@ pub mod handlers {
 		let yomigun_target_vector = scene.a_scene().unchecked_ref::<ASceneEx>().yomigun_target_position();
 		browser::log(&format!("yomigun target vector: {:?}", &yomigun_target_vector));
 		if let Some(target) = yomigun_target_vector {
-			let end = Position(target.x(), target.y(), target.z() - 1.);
+			let end = Position(target.x(), target.y(), target.z());
 			let start = {
 				let relative_position = Position(0., 0., -1.);
 				yomigun.local_position_to_world(relative_position)

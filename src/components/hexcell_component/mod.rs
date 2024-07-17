@@ -1,16 +1,23 @@
 use aframers::af_sys::components::AComponent;
 use aframers::af_sys::entities::AEntity;
+use aframers::browser;
 use aframers::components::{Color, Position};
-use aframers::entities::{create_entity, Entity};
-use wasm_bindgen::{JsCast, JsValue};
+use aframers::components::core::ComponentValue;
+use aframers::entities::Entity;
+use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::aframe_ex::{Align, Anchor, Baseline, RingGeometry, Text};
+use crate::{FOCUS_RING_SELECTOR, FOCUS_RING_Z_OFFSET, SELECT_RING_SELECTOR, SELECT_RING_Z_OFFSET, TEXT_Z_OFFSET};
+use crate::aframe_ex::{Align, Anchor, Baseline, Text};
+use crate::aframe_ex::af_sys::AEntityEx;
 use crate::aframe_ex::components::core::{ComponentDefinition, Dependencies, Events};
 use crate::aframe_ex::components::geometry_component::{Circle, Geometry};
 use crate::aframe_ex::components::material::Material;
+use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::events::StateEventKind::{StateAdded, StateRemoved};
+use crate::aframe_ex::js::log_value;
 use crate::aframe_ex::schema::{Field, MultiPropertySchema};
+use crate::components::hex_color_component::HexColor;
 use crate::components::hexcell_component::data::HexcellData;
 use crate::components::hexcell_component::handlers::{handle_state_added, handle_state_removed};
 use crate::components::laserfocus_component;
@@ -27,33 +34,104 @@ extern "C" {
 }
 
 impl HexcellAComponent {
-	pub fn ring_entity(&self) -> AEntity {
-		let first_child = self.a_entity().first_element_child().expect("ring element");
-		first_child.unchecked_into::<AEntity>()
+	pub fn select_ring_entity(&self) -> AEntity {
+		let element = self.a_entity().a_scene().query_selector(SELECT_RING_SELECTOR).unwrap().unwrap();
+		element.unchecked_into()
 	}
-	pub fn set_ring_color(&self, color: impl AsRef<str>) {
-		let target = self.ring_entity();
-		let color = Color::Web(color.as_ref().to_string());
-		let material = Material::new().set_color(color);
-		Entity::from(target).set_component(material).expect("set material");
+	pub fn focus_ring_entity(&self) -> AEntity {
+		let element = self.a_entity().a_scene().query_selector(FOCUS_RING_SELECTOR).unwrap().unwrap();
+		element.unchecked_into()
 	}
 
-	pub fn ring_color_from_entity_state(&self) -> impl AsRef<str> {
+	pub fn ring_color_from_entity_state(&self) -> HexColor {
 		let entity = self.a_entity();
 		let focused = entity.is_state("focused");
 		let selected = entity.is_state("selected");
-		let color = match focused {
-			true if selected => "#3B7EA1",
-			true => "gold",
-			false if selected => "#003262",
-			false => "silver"
+		let color = if focused {
+			if selected {
+				HexColor::FocusedAndSelected
+			} else {
+				HexColor::Focused
+			}
+		} else {
+			if selected {
+				HexColor::Selected
+			} else {
+				HexColor::NeitherFocusedNorSelected
+			}
 		};
-		color.to_string()
+		color
 	}
 
 	pub fn set_ring_color_from_entity_state(&self) {
-		let color = self.ring_color_from_entity_state();
-		self.set_ring_color(color);
+		log_value(&self.a_entity().id().into());
+		let focus_ring = self.focus_ring_entity();
+		browser::log(&format!("fr id: {}", focus_ring.id()));
+		let cell_is_focus_ring_target = match focus_ring.get_attribute("target") {
+			Some(target) if target == self.a_entity().id() => true,
+			_ => false
+		};
+		let select_ring = self.select_ring_entity();
+		browser::log(&format!("sr id: {}", select_ring.id()));
+		let cell_is_select_ring_target = match select_ring.get_attribute("target") {
+			Some(target) if target == self.a_entity().id() => true,
+			_ => false
+		};
+		let world = self.a_entity().unchecked_into::<AEntityEx>().world_position_in_new_vector();
+		let state = self.ring_color_from_entity_state();
+		browser::log(&format!("HexState: {:?}", state));
+		match state {
+			HexColor::Focused => {
+				focus_ring.set_attribute("target", &self.a_entity().id()).unwrap();
+				Entity::from(focus_ring)
+					.set_component(Material::new().set_color(state.to_color())).unwrap()
+					.set_component(Position(world.x(), world.y(), world.z() + FOCUS_RING_Z_OFFSET)).unwrap()
+					.set_component(Visible::True).unwrap()
+				;
+			}
+			HexColor::FocusedAndSelected => {
+				focus_ring.set_attribute("target", &self.a_entity().id()).unwrap();
+				let position = Position(world.x(), world.y(), world.z() + FOCUS_RING_Z_OFFSET);
+				browser::log(&format!("fr position: {}", position.component_value().as_ref()));
+				Entity::from(focus_ring)
+					.set_component(Material::new().set_color(state.to_color())).unwrap()
+					.set_component(position).unwrap()
+					.set_component(Visible::True).unwrap()
+				;
+				select_ring.set_attribute("target", &self.a_entity().id()).unwrap();
+				let position = Position(world.x(), world.y(), world.z() + SELECT_RING_Z_OFFSET);
+				browser::log(&format!("sr position: {}", position.component_value().as_ref()));
+				Entity::from(select_ring)
+					.set_component(Material::new().set_color(state.to_color())).unwrap()
+					.set_component(position).unwrap()
+					.set_component(Visible::True).unwrap()
+				;
+			}
+			HexColor::Selected => {
+				select_ring.set_attribute("target", &self.a_entity().id()).unwrap();
+				browser::log("set the attribute");
+				let position = Position(world.x(), world.y(), world.z() + SELECT_RING_Z_OFFSET);
+				browser::log(&format!("sr position: {}", position.component_value().as_ref()));
+				Entity::from(select_ring)
+					.set_component(Material::new().set_color(state.to_color())).unwrap()
+					.set_component(position).unwrap()
+					.set_component(Visible::True).unwrap()
+				;
+				browser::log("updated the select ring");
+			}
+			HexColor::NeitherFocusedNorSelected => {
+				if cell_is_focus_ring_target {
+					Entity::from(focus_ring.unchecked_into::<AEntity>())
+						.set_component(Visible::False).unwrap()
+					;
+				}
+				if cell_is_select_ring_target {
+					Entity::from(select_ring.unchecked_into::<AEntity>())
+						.set_component(Visible::False).unwrap()
+					;
+				}
+			}
+		}
 	}
 }
 
@@ -81,41 +159,32 @@ pub fn register_hexcell_component() {
 fn init(this: AComponent) {
 	let this = this.unchecked_into::<HexcellAComponent>();
 	let data = this.data().unchecked_into::<HexcellData>();
-	let glyph = data.glyph();
-	let ring_color = this.ring_color_from_entity_state();
-	let ring = ring_entity(&glyph, ring_color).expect("make ring");
-	let geometry = Geometry::<Circle>::new().set_primitive().set_segments(6);
-	let material = Material::new()
-		.set_transparent(true)
-		.set_opacity(0.)
-		.set_color(Color::Web("black".into()))
-		;
 	Entity::from(this.a_entity())
-		.append_child(ring).expect("append ring")
-		.set_component(material).expect("set material")
-		.set_component(geometry).expect("set geometry")
+		.set_component(rear_material()).unwrap()
+		.set_component(rear_geometry()).unwrap()
+		.set_component(text_component(&data.glyph())).unwrap()
 	;
 }
 
+fn rear_geometry() -> Geometry<Circle> {
+	let geometry = Geometry::<Circle>::new().set_primitive().set_segments(6);
+	geometry
+}
 
-fn ring_entity(text_value: impl AsRef<str>, color: impl AsRef<str>) -> Result<Entity, JsValue> {
-	let geometry = RingGeometry::default()
-		.set_segments_theta(6)
-		.set_radius_outer(1.0)
-		;
-	let text = Text::new(text_value)
-		.set_font("assets/kanjialive-msdf.json")
-		.set_wrap_count(1)
+fn rear_material() -> Material {
+	let material = Material::new().set_color(Color::Web("DarkSlateGray".into()));
+	material
+}
+
+fn text_component(text_value: impl AsRef<str> + Sized) -> Text {
+	let text = Text::new()
 		.set_align(Align::Center)
 		.set_anchor(Anchor::Center)
 		.set_baseline(Baseline::Center)
+		.set_font("assets/kanjialive-msdf.json")
+		.set_value(text_value)
+		.set_wrap_count(1)
+		.set_z_offset(TEXT_Z_OFFSET)
 		;
-	let material = Material::new().set_color(Color::Web(color.as_ref().into()));
-	let entity = create_entity()?
-		.set_component(Position(0., 0., -0.01))?
-		.set_component(material)?
-		.set_component(geometry)?
-		.set_component(text)?
-		;
-	Ok(entity)
+	text
 }

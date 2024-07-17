@@ -14,23 +14,16 @@ pub mod systems;
 
 #[derive(Clone, Default)]
 pub struct Text {
-	value: String,
-	wrap_count: Option<u32>,
 	align: Option<Align>,
-	font: Option<String>,
 	anchor: Option<Anchor>,
 	baseline: Option<Baseline>,
+	font: Option<String>,
+	value: Option<String>,
+	wrap_count: Option<u32>,
+	z_offset: Option<f32>,
 }
 
 impl Text {
-	pub fn set_font(mut self, value: impl AsRef<str>) -> Self {
-		self.font = Some(value.as_ref().to_string());
-		self
-	}
-	pub fn set_wrap_count(mut self, value: u32) -> Self {
-		self.wrap_count = Some(value);
-		self
-	}
 	pub fn set_align(mut self, value: Align) -> Self {
 		self.align = Some(value);
 		self
@@ -43,14 +36,29 @@ impl Text {
 		self.baseline = Some(value);
 		self
 	}
-	pub fn new(value: impl AsRef<str>) -> Self {
+	pub fn set_font(mut self, value: impl AsRef<str>) -> Self {
+		self.font = Some(value.as_ref().to_string());
+		self
+	}
+	pub fn set_value(self, value: impl AsRef<str>) -> Self {
+		Self { value: Some(value.as_ref().into()), ..self }
+	}
+	pub fn set_wrap_count(mut self, value: u32) -> Self {
+		self.wrap_count = Some(value);
+		self
+	}
+	pub fn set_z_offset(self, value: f32) -> Self {
+		Self { z_offset: Some(value), ..self }
+	}
+	pub fn new() -> Self {
 		Self {
-			value: value.as_ref().to_string(),
-			wrap_count: None,
 			align: None,
-			font: None,
 			anchor: None,
 			baseline: None,
+			font: None,
+			value: None,
+			wrap_count: None,
+			z_offset: None,
 		}
 	}
 }
@@ -59,15 +67,9 @@ impl ComponentValue for Text {
 	fn component_name(&self) -> &str { "text" }
 
 	fn component_value(&self) -> impl AsRef<str> {
-		let mut clauses = vec![
-			format!("value: {}", self.value),
-		];
-		if let Some(value) = &self.font {
-			clauses.push("negate: false".into());
-			clauses.push(format!("font: {}", value));
-		}
-		if let Some(value) = self.wrap_count {
-			clauses.push(format!("wrapCount: {}", value));
+		let mut clauses = vec![];
+		if let Some(value) = self.baseline {
+			clauses.push(format!("baseline: {}", value));
 		}
 		if let Some(value) = self.align {
 			clauses.push(format!("align: {}", value));
@@ -75,8 +77,18 @@ impl ComponentValue for Text {
 		if let Some(value) = self.anchor {
 			clauses.push(format!("anchor: {}", value));
 		}
-		if let Some(value) = self.baseline {
-			clauses.push(format!("baseline: {}", value));
+		if let Some(value) = &self.font {
+			clauses.push("negate: false".into());
+			clauses.push(format!("font: {}", value));
+		}
+		if let Some(value) = &self.value {
+			clauses.push(format!("value: {}", value));
+		}
+		if let Some(value) = self.wrap_count {
+			clauses.push(format!("wrapCount: {}", value));
+		}
+		if let Some(value) = self.z_offset {
+			clauses.push(format!("zOffset: {}", value));
 		}
 		clauses.join("; ")
 	}
