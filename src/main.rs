@@ -4,7 +4,7 @@ use aframers::browser::document;
 use aframers::components::{Position, Rotation};
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::prelude::Closure;
-use web_sys::HtmlScriptElement;
+use web_sys::{Element, HtmlScriptElement};
 
 use aframe_ex::scenes::Scene;
 use components::hexgrid_component::register_hexgrid_component;
@@ -96,8 +96,11 @@ fn run() -> Result<(), JsValue> {
 		;
 
 	let scene = Scene::new()?
+		.update_element(|scene| {
+			scene.set_attribute("renderer", "colorManagement: true").unwrap()
+		})
+		.add_assets(try_make_assets()?)
 		.add_entity(light_entity::make_over()?)?
-		.add_entity(light_entity::make_under()?)?
 		.add_entity(origin_entity::make()?)?
 		.add_entity(ground_entity::make()?)?
 		.add_entity(sky_entity::make()?)?
@@ -109,9 +112,7 @@ fn run() -> Result<(), JsValue> {
 				.set_component(Position(0., -0.25, -1.6))?
 				.set_component(Rotation(30., 0., 0.))?
 		)?
-		.add_entity(
-			hexgrid_entity::create_hexgrid_entity()?.set_component(Position(0.0, 1.6, -12.0))?
-		)?
+		.add_entity(hexgrid_entity::try_make()?.set_component(Position(0.0, 1.6, -12.0))?)?
 		.add_entity(controller_entity::make()?)?
 		.add_entity(camera_entity::make()?)?
 		;
@@ -119,4 +120,13 @@ fn run() -> Result<(), JsValue> {
 	Ok(())
 }
 
-
+fn try_make_assets() -> Result<Element, JsValue> {
+	let img = document().create_element("img")?;
+	img.set_id("spiral");
+	img.set_attribute("src", "assets/spiral.png")?;
+	img.set_attribute("width", "2272")?;
+	img.set_attribute("height", "2272")?;
+	let assets = document().create_element("a-assets")?;
+	assets.append_child(&img)?;
+	Ok(assets)
+}

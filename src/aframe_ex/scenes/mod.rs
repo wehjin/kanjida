@@ -3,6 +3,7 @@ use aframers::components::core::ComponentValue;
 use aframers::entities::Entity;
 use aframers::scene::create_scene;
 use wasm_bindgen::{JsCast, JsValue};
+use web_sys::Element;
 
 pub struct Scene(AScene);
 
@@ -25,9 +26,13 @@ impl Scene {
 		self.0.append_child(entity.a_entity())?;
 		Ok(self)
 	}
-	pub fn add_entity_with_borrow(self, f: impl Fn(&Self) -> Entity) -> Self {
-		let entity = f(&self);
-		self.add_entity(entity).unwrap()
+	pub fn add_assets(self, assets: Element) -> Self {
+		self.0.append_child(&assets).unwrap();
+		self
+	}
+	pub fn update_element(self, f: impl Fn(&AScene)) -> Self {
+		f(self.a_scene());
+		self
 	}
 }
 

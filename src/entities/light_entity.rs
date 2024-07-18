@@ -5,14 +5,6 @@ use wasm_bindgen::JsValue;
 pub fn make_over() -> Result<Entity, JsValue> {
 	let entity = create_light_entity()?
 		.set_component(Color::Web("#fff".into()))?
-		.set_component(Position(0.0, 5.0, -0.5))?;
-	Ok(entity)
-}
-
-pub fn make_under() -> Result<Entity, JsValue> {
-	let entity = create_light_entity()?
-		.set_component(Color::Web("#aaa".into()))?
-		.set_component(Position(0., -0.25, 0.5))?
-		;
+		.set_component(Position(-1.0, 2.0, 4.))?;
 	Ok(entity)
 }
