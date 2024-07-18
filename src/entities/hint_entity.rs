@@ -8,7 +8,7 @@ use crate::aframe_ex::{Align, Baseline, };
 use crate::aframe_ex::components::font_component::StockFont;
 use crate::aframe_ex::components::visible_component::Visible;
 
-pub const ENTITY_ID: &'static str = "meaningEntity";
+pub const ENTITY_ID: &'static str = "hintEntity";
 
 pub fn make() -> Entity {
 	try_make().unwrap()
@@ -25,7 +25,7 @@ fn try_make() -> Result<Entity, JsValue> {
 		.set_id(ENTITY_ID)?
 		.set_component(Align::Center)?
 		.set_component(Baseline::Center)?
-		.set_component(Color::Web("gold".into()))?
+		.set_component(Color::Web("Yellow".into()))?
 		.set_component(StockFont::Monoid)?
 		.set_component(Position(0.0, 1.6, -11.0))?
 		.set_component(Scale(scale, scale, scale))?

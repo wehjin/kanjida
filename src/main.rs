@@ -29,11 +29,11 @@ mod components;
 mod systems;
 
 thread_local! {
-	pub static GAME: RefCell<Game> = RefCell::new(Game::with_limit(Some(309)));
+	pub static GAME: RefCell<Game> = RefCell::new(Game::with_limit(None));
 }
 
 pub const TEXT_Z_OFFSET: f32 = 0.01;
-pub const PLAIN_RING_Z_OFFSET: f32 = 0.02;
+pub const PLAIN_RING_Z_OFFSET: f32 = -0.02;
 pub const SELECT_RING_Z_OFFSET: f32 = 0.03;
 pub const SELECT_RING_ID: &'static str = "select-ring";
 pub const SELECT_RING_SELECTOR: &'static str = "#select-ring";

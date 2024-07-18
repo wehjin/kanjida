@@ -1,14 +1,15 @@
 use aframers::af_sys::components::AComponent;
 use aframers::af_sys::entities::AEntity;
 use aframers::browser;
+use aframers::browser::document;
 use aframers::components::{Color, Position};
 use aframers::components::core::ComponentValue;
 use aframers::entities::Entity;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::wasm_bindgen;
+use web_sys::js_sys::Reflect;
 
-use crate::{FOCUS_RING_SELECTOR, FOCUS_RING_Z_OFFSET, SELECT_RING_SELECTOR, SELECT_RING_Z_OFFSET, TEXT_Z_OFFSET};
-use crate::aframe_ex::{Align, Anchor, Baseline, Text};
+use crate::{FOCUS_RING_SELECTOR, FOCUS_RING_Z_OFFSET, SELECT_RING_SELECTOR, SELECT_RING_Z_OFFSET, three_sys};
 use crate::aframe_ex::af_sys::AEntityEx;
 use crate::aframe_ex::components::core::{ComponentDefinition, Dependencies, Events};
 use crate::aframe_ex::components::geometry_component::{Circle, Geometry};
@@ -18,9 +19,10 @@ use crate::aframe_ex::events::StateEventKind::{StateAdded, StateRemoved};
 use crate::aframe_ex::js::log_value;
 use crate::aframe_ex::schema::{Field, MultiPropertySchema};
 use crate::components::hex_color_component::HexColor;
-use crate::components::hexcell_component::data::HexcellData;
 use crate::components::hexcell_component::handlers::{handle_state_added, handle_state_removed};
 use crate::components::laserfocus_component;
+use crate::three_sys::material::MeshBasicMaterial;
+use crate::three_sys::mesh::Mesh;
 
 pub mod attribute;
 pub mod data;
@@ -158,12 +160,27 @@ pub fn register_hexcell_component() {
 
 fn init(this: AComponent) {
 	let this = this.unchecked_into::<HexcellAComponent>();
-	let data = this.data().unchecked_into::<HexcellData>();
 	Entity::from(this.a_entity())
-		.set_component(rear_material()).unwrap()
 		.set_component(rear_geometry()).unwrap()
-		.set_component(text_component(&data.glyph())).unwrap()
 	;
+	let material = {
+		let doc = document();
+		let material = match Reflect::get(&doc, &"hexcellMaterial".into()) {
+			Ok(material) if !material.is_undefined() => material,
+			_ => {
+				log_value(&"Make new material".into());
+				let material = MeshBasicMaterial::new();
+				log_value(&material);
+				let color = three_sys::Color::new_str("Fuchsia");
+				material.set_color(&color);
+				Reflect::set(&doc, &"hexcellMaterial".into(), &material).unwrap();
+				material.unchecked_into()
+			}
+		};
+		material.unchecked_into::<three_sys::Material>()
+	};
+	let mesh = this.a_entity().unchecked_into::<AEntityEx>().get_object3d_kind("mesh").unchecked_into::<Mesh>();
+	mesh.set_material(&material);
 }
 
 fn rear_geometry() -> Geometry<Circle> {
@@ -171,20 +188,15 @@ fn rear_geometry() -> Geometry<Circle> {
 	geometry
 }
 
-fn rear_material() -> Material {
-	let material = Material::new().set_color(Color::Web("DarkSlateGray".into()));
-	material
-}
-
-fn text_component(text_value: impl AsRef<str> + Sized) -> Text {
-	let text = Text::new()
-		.set_align(Align::Center)
-		.set_anchor(Anchor::Center)
-		.set_baseline(Baseline::Center)
-		.set_font("assets/kanjialive-msdf.json")
-		.set_value(text_value)
-		.set_wrap_count(1)
-		.set_z_offset(TEXT_Z_OFFSET)
-		;
-	text
-}
+// fn text_component(text_value: impl AsRef<str> + Sized) -> Text {
+// 	let text = Text::new()
+// 		.set_align(Align::Center)
+// 		.set_anchor(Anchor::Center)
+// 		.set_baseline(Baseline::Center)
+// 		.set_font("assets/kanjialive-msdf.json")
+// 		.set_value(text_value)
+// 		.set_wrap_count(1)
+// 		.set_z_offset(TEXT_Z_OFFSET)
+// 		;
+// 	text
+// }

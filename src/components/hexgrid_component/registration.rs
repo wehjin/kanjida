@@ -3,9 +3,9 @@ use aframers::components::Position;
 use aframers::entities::{create_entity, Entity};
 use wasm_bindgen::JsCast;
 
+use crate::{GAME, PLAIN_RING_Z_OFFSET};
 use crate::components::hexcell_component::attribute::Hexcell;
 use crate::components::hexgrid_component::{HexgridAComponent, SelectedEntity};
-use crate::GAME;
 use crate::game::quiz::Quiz;
 use crate::hexgrid::HexCoord;
 
@@ -22,7 +22,7 @@ pub fn init(component: AComponent) -> SelectedEntity {
 	for (i, cell) in cells.into_iter().enumerate() {
 		let pixel = spiral_coords[i].to_pixel();
 		let (x, y) = pixel.flip_y();
-		let position = Position(x, y, 0.);
+		let position = Position(x, y, PLAIN_RING_Z_OFFSET);
 		let cell = cell.set_component(position).unwrap();
 		grid = grid.append_child(cell).unwrap();
 	}
