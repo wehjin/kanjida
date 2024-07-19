@@ -1,6 +1,7 @@
 use std::fmt::{Display, Formatter};
 
 use aframers::components::core::ComponentValue;
+use aframers::components::Width;
 
 pub mod af_sys;
 pub mod components;
@@ -19,7 +20,8 @@ pub struct Text {
 	baseline: Option<Baseline>,
 	font: Option<String>,
 	value: Option<String>,
-	wrap_count: Option<u32>,
+	width: Option<Width>,
+	wrap_count: Option<f32>,
 	z_offset: Option<f32>,
 }
 
@@ -43,7 +45,11 @@ impl Text {
 	pub fn set_value(self, value: impl AsRef<str>) -> Self {
 		Self { value: Some(value.as_ref().into()), ..self }
 	}
-	pub fn set_wrap_count(mut self, value: u32) -> Self {
+	pub fn set_width(mut self, value: Width) -> Self {
+		self.width = Some(value);
+		self
+	}
+	pub fn set_wrap_count(mut self, value: f32) -> Self {
 		self.wrap_count = Some(value);
 		self
 	}
@@ -57,6 +63,7 @@ impl Text {
 			baseline: None,
 			font: None,
 			value: None,
+			width: None,
 			wrap_count: None,
 			z_offset: None,
 		}
@@ -68,14 +75,14 @@ impl ComponentValue for Text {
 
 	fn component_value(&self) -> impl AsRef<str> {
 		let mut clauses = vec![];
-		if let Some(value) = self.baseline {
-			clauses.push(format!("baseline: {}", value));
-		}
 		if let Some(value) = self.align {
 			clauses.push(format!("align: {}", value));
 		}
 		if let Some(value) = self.anchor {
 			clauses.push(format!("anchor: {}", value));
+		}
+		if let Some(value) = self.baseline {
+			clauses.push(format!("baseline: {}", value));
 		}
 		if let Some(value) = &self.font {
 			clauses.push("negate: false".into());
@@ -83,6 +90,9 @@ impl ComponentValue for Text {
 		}
 		if let Some(value) = &self.value {
 			clauses.push(format!("value: {}", value));
+		}
+		if let Some(value) = self.width {
+			clauses.push(format!("width: {}", value.component_value().as_ref()));
 		}
 		if let Some(value) = self.wrap_count {
 			clauses.push(format!("wrapCount: {}", value));

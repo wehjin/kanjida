@@ -47,18 +47,18 @@ pub fn register_ykey_component() {
 fn handle_enter(comp: YomikeyAComponent, _event: JsValue) {
 	let state = comp.take_rust_state().enter();
 	log(&format!("is_focused: {}", state.is_focused()));
-	render(&state, comp.a_entity().unchecked_ref::<AEntityEx>());
+	update_entity(&state, comp.a_entity().unchecked_ref::<AEntityEx>());
 	comp.set_rust_state(state);
 }
 
 fn handle_leave(comp: YomikeyAComponent, _event: JsValue) {
 	let state = comp.take_rust_state().leave();
 	log(&format!("is_focused: {}", state.is_focused()));
-	render(&state, comp.a_entity().unchecked_ref::<AEntityEx>());
+	update_entity(&state, comp.a_entity().unchecked_ref::<AEntityEx>());
 	comp.set_rust_state(state);
 }
 
-fn render(state: &YkeyState, entity: &AEntityEx) {
+fn update_entity(state: &YkeyState, entity: &AEntityEx) {
 	let color = match state.is_focused() {
 		true => "Chartreuse",
 		false => "ForestGreen"
@@ -68,7 +68,7 @@ fn render(state: &YkeyState, entity: &AEntityEx) {
 
 fn handle_init(comp: YomikeyAComponent) {
 	let state = YkeyState::init([]);
-	render(&state, comp.a_entity().unchecked_ref::<AEntityEx>());
+	update_entity(&state, comp.a_entity().unchecked_ref::<AEntityEx>());
 	comp.set_rust_state(state);
 }
 fn handle_remove(comp: YomikeyAComponent) {

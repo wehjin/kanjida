@@ -5,7 +5,7 @@ version = 3
 [[package]]
 name = "aframers"
 version = "0.1.0"
-source = "git+https://github.com/wehjin/aframers.git#5b0a735a62145ccf665634edab5cd61a1f92cd88"
+source = "git+https://github.com/wehjin/aframers.git#ec6c4020485fbf66cf370ce065c89be8ceea685a"
 dependencies = [
  "wasm-bindgen",
  "web-sys",
@@ -71,9 +71,9 @@ source = "git+https://github.com/wehjin/bundle_sys.git#45b908c5c61d82dd40ae189ce
 
 [[package]]
 name = "cc"
-version = "1.1.5"
+version = "1.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "324c74f2155653c90b04f25b2a47a8a631360cb908f92a772695f430c7e31052"
+checksum = "2aba8f4e9906c7ce3c73463f62a7f0c65183ada1a2d47e397cc8810827f9694f"
 
 [[package]]
 name = "cfg-if"
