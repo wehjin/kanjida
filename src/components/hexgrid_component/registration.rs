@@ -1,13 +1,13 @@
 use aframers::af_sys::components::AComponent;
 use aframers::components::Position;
 use aframers::entities::{create_entity, Entity};
+use hexgrid::coordinates::AxialCoord;
 use wasm_bindgen::JsCast;
 
 use crate::{GAME, PLAIN_RING_Z_OFFSET};
 use crate::components::hexcell_component::attribute::Hexcell;
 use crate::components::hexgrid_component::{HexgridAComponent, SelectedEntity};
 use crate::game::quiz::Quiz;
-use crate::hexgrid::HexCoord;
 
 pub fn init(component: AComponent) -> SelectedEntity {
 	let component: HexgridAComponent = component.unchecked_into();
@@ -18,7 +18,7 @@ pub fn init(component: AComponent) -> SelectedEntity {
 		.map(hexcell_entity)
 		.collect::<Vec<_>>()
 	);
-	let spiral_coords = HexCoord::ORIGIN.iter_spiral().take(cells.len()).collect::<Vec<_>>();
+	let spiral_coords = AxialCoord::ORIGIN.iter_spiral().take(cells.len()).collect::<Vec<_>>();
 	for (i, cell) in cells.into_iter().enumerate() {
 		let pixel = spiral_coords[i].to_pixel();
 		let (x, y) = pixel.flip_y();

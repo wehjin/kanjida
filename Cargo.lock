@@ -155,6 +155,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "hexgrid"
+version = "0.1.0"
+source = "git+https://github.com/wehjin/hexgrid.git#99e419a0d95702cbbb233fa69b5e0bb3858600b3"
+
+[[package]]
 name = "iana-time-zone"
 version = "0.1.60"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -195,7 +200,7 @@ dependencies = [
 [[package]]
 name = "kanji-data"
 version = "0.1.0"
-source = "git+https://github.com/wehjin/kanji-data.git#bf7c701a423d884e5192683683807fa626cf6346"
+source = "git+https://github.com/wehjin/kanji-data.git#3d416b9dc9b6dd25e91ed9b8ac297c489395f29a"
 dependencies = [
  "anyhow",
  "csv",
@@ -214,6 +219,7 @@ dependencies = [
  "console_error_panic_hook",
  "csv",
  "getrandom",
+ "hexgrid",
  "kanji-data",
  "rand",
  "serde",

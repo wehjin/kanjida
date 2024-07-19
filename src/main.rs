@@ -21,7 +21,6 @@ use crate::entities::ring_entity::try_ring_entity;
 use crate::game::game::Game;
 
 pub mod aframe_ex;
-pub mod hexgrid;
 pub mod three_sys;
 mod entities;
 mod game;
