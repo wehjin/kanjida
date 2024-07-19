@@ -83,6 +83,7 @@ impl Dependencies {
 	pub fn to_array(self) -> Array { self.0 }
 }
 
+#[must_use]
 pub struct ComponentDefinition(Object);
 
 impl ComponentDefinition {

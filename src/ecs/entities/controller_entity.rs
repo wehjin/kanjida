@@ -4,7 +4,7 @@ use wasm_bindgen::JsValue;
 use crate::aframe_ex::components::laser_controls_component::{Hand, LaserControls};
 use crate::aframe_ex::components::raycaster_component::Raycaster;
 
-const TARGETS: &'static str = "[hexcell],[yomigun]";
+const TARGETS: &'static str = "[hexcell],[yomigun],[yomikey]";
 
 pub fn make() -> Result<Entity, JsValue> {
 	let entity = create_entity()?

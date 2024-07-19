@@ -2,6 +2,8 @@ use aframers::components::{Color, Position, Scale};
 use aframers::entities::{create_plane_entity, Entity};
 use wasm_bindgen::JsValue;
 
+use crate::ecs::components::yomikey_component::Yomikey;
+
 pub fn create_answers_panel() -> Result<Entity, JsValue> {
 	let panel = create_plane_entity()?
 		.set_id("answers")?
@@ -24,18 +26,18 @@ fn append_key(panel: Entity, key_pos: KeyPos) -> Result<Entity, JsValue> {
 		let y = 0.5 - (EDGE_PADDING + (key_pos.1 as f32 * SPACING) + KEY_SIZE / 2.);
 		Position(x, y, 0.01)
 	};
-	let key = create_key(key_pos.to_id())?
+	let key = create_yomikey_entity(key_pos.to_id("yomikey"))?
 		.set_component(Scale(KEY_SIZE, KEY_SIZE, 1.))?
 		.set_component(position)?
 		;
 	panel.append_child(key)
 }
 
-fn create_key(id: impl AsRef<str>) -> Result<Entity, JsValue> {
+fn create_yomikey_entity(id: impl AsRef<str>) -> Result<Entity, JsValue> {
 	let id = id.as_ref();
 	let entity = create_plane_entity()?
 		.set_id(id)?
-		.set_component(Color::Web("ForestGreen".into()))?
+		.set_component(Yomikey)?
 		;
 	Ok(entity)
 }
@@ -53,7 +55,7 @@ impl KeyPos {
 		}
 		out
 	}
-	pub fn to_id(&self) -> String {
-		format!("an-key-{}-{}", self.0, self.1)
+	pub fn to_id(&self, prefix: impl AsRef<str>) -> String {
+		format!("{}-{}-{}", prefix.as_ref(), self.0, self.1)
 	}
 }
