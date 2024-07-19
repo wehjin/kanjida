@@ -21,6 +21,12 @@ use crate::views::settings::{FOCUS_RING_ID, SELECT_RING_ID};
 
 pub fn run() -> Result<(), JsValue> {
 	register_components();
+	let scene = create_scene()?;
+	document().body().expect("body").append_child(scene.a_scene())?;
+	Ok(())
+}
+
+fn create_scene() -> Result<Scene, JsValue> {
 	let scene = Scene::new()?
 		.add_assets(create_assets()?)
 		.add_entity(light_entity::make_over()?)?
@@ -40,8 +46,7 @@ pub fn run() -> Result<(), JsValue> {
 		.add_entity(controller_entity::make()?)?
 		.add_entity(camera_entity::make()?)?
 		;
-	document().body().expect("body").append_child(scene.a_scene())?;
-	Ok(())
+	Ok(scene)
 }
 
 fn register_components() {
