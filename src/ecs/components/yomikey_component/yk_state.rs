@@ -1,25 +1,3 @@
-use crate::ecs::components::yomikey_component::settings::YkeySetting;
-
-#[cfg(test)]
-mod tests {
-	use crate::ecs::components::yomikey_component::{YkeySetting, YkeyState};
-
-	#[test]
-	fn state_works() {
-		let settings = [YkeySetting::Glyph("M".into()), YkeySetting::Uv(1, 2)];
-		let state = YkeyState::init(settings);
-		assert_eq!(state.glyph(), "M");
-		assert_eq!(state.uv(), (1, 2));
-		assert_eq!(state.is_focused(), false);
-		assert_eq!(state.clicks(), 0);
-		let state = state.enter().click();
-		assert_eq!(state.is_focused(), true);
-		assert_eq!(state.clicks(), 1);
-		let state = state.leave();
-		assert_eq!(state.is_focused(), false);
-	}
-}
-
 #[derive(Debug, Clone, Default)]
 pub struct YkeyState {
 	age: usize,
@@ -29,8 +7,9 @@ pub struct YkeyState {
 	leaves: usize,
 	clicks: usize,
 }
+
 pub mod queries {
-	use crate::ecs::components::yomikey_component::YkeyState;
+	use crate::ecs::components::yomikey_component::yk_state::YkeyState;
 
 	impl YkeyState {
 		pub fn glyph(&self) -> &str { &self.glyph }
@@ -41,8 +20,8 @@ pub mod queries {
 }
 
 pub mod actions {
-	use crate::ecs::components::yomikey_component::settings::YkeySetting;
-	use crate::ecs::components::yomikey_component::YkeyState;
+	use crate::ecs::components::yomikey_component::yk_settings::YkeySetting;
+	use crate::ecs::components::yomikey_component::yk_state::YkeyState;
 
 	impl YkeyState {
 		pub fn init(settings: impl AsRef<[YkeySetting]>) -> Self {
@@ -79,12 +58,5 @@ pub mod actions {
 		let glyph = glyph.unwrap_or_else(|| "X".into());
 		let uv = uv.unwrap_or((0, 0));
 		(glyph, uv)
-	}
-}
-pub mod settings {
-	#[derive(Debug, Clone)]
-	pub enum YkeySetting {
-		Glyph(String),
-		Uv(usize, usize),
 	}
 }
