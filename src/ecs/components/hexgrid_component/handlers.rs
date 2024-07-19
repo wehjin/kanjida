@@ -4,14 +4,15 @@ use aframers::components::Position;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::CustomEvent;
 
-use crate::{GAME, HINT_Z_OFFSET};
 use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::events::StateEvent;
 use crate::aframe_ex::Value;
-use crate::components::hexgrid_component::HexgridAComponent;
-use crate::entities::hint_entity;
+use crate::ecs::components::hexgrid_component::HexgridAComponent;
+use crate::ecs::entities::hint_entity;
+use crate::GAME;
 use crate::three_sys::Vector3;
+use crate::views::settings::HINT_Z_OFFSET;
 
 pub fn handle_state_added(component: AComponent, event: JsValue) {
 	let component = component.unchecked_into::<HexgridAComponent>();

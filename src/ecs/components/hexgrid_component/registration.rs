@@ -4,10 +4,11 @@ use aframers::entities::{create_entity, Entity};
 use hexgrid::coordinates::AxialCoord;
 use wasm_bindgen::JsCast;
 
-use crate::{GAME, PLAIN_RING_Z_OFFSET};
-use crate::components::hexcell_component::attribute::Hexcell;
-use crate::components::hexgrid_component::{HexgridAComponent, SelectedEntity};
+use crate::GAME;
+use crate::ecs::components::hexcell_component::attribute::Hexcell;
+use crate::ecs::components::hexgrid_component::{HexgridAComponent, SelectedEntity};
 use crate::game::quiz::Quiz;
+use crate::views::settings::PLAIN_RING_Z_OFFSET;
 
 pub fn init(component: AComponent) -> SelectedEntity {
 	let component: HexgridAComponent = component.unchecked_into();

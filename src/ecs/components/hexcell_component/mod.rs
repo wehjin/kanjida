@@ -9,7 +9,7 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::js_sys::Reflect;
 
-use crate::{FOCUS_RING_SELECTOR, FOCUS_RING_Z_OFFSET, SELECT_RING_SELECTOR, SELECT_RING_Z_OFFSET, three_sys};
+use crate::three_sys;
 use crate::aframe_ex::af_sys::AEntityEx;
 use crate::aframe_ex::components::core::{ComponentDefinition, Dependencies, Events};
 use crate::aframe_ex::components::geometry_component::{Circle, Geometry};
@@ -18,11 +18,12 @@ use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::events::StateEventKind::{StateAdded, StateRemoved};
 use crate::aframe_ex::js::log_value;
 use crate::aframe_ex::schema::{Field, MultiPropertySchema};
-use crate::components::hex_color_component::HexColor;
-use crate::components::hexcell_component::handlers::{handle_state_added, handle_state_removed};
-use crate::components::laserfocus_component;
+use crate::ecs::components::hex_color_component::HexColor;
+use crate::ecs::components::hexcell_component::handlers::{handle_state_added, handle_state_removed};
+use crate::ecs::components::laserfocus_component;
 use crate::three_sys::material::MeshBasicMaterial;
 use crate::three_sys::mesh::Mesh;
+use crate::views::settings::{FOCUS_RING_SELECTOR, FOCUS_RING_Z_OFFSET, SELECT_RING_SELECTOR, SELECT_RING_Z_OFFSET};
 
 pub mod attribute;
 pub mod data;

@@ -4,7 +4,7 @@ use wasm_bindgen::JsValue;
 
 use crate::aframe_ex::components::geometry_component::{Box, Geometry};
 use crate::aframe_ex::components::material::Material;
-use crate::components::yomigun_component::attribute::Yomigun;
+use crate::ecs::components::yomigun_component::attribute::Yomigun;
 
 pub fn make_chest_entity() -> Result<Entity, JsValue> {
 	let chest = create_entity()?

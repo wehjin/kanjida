@@ -2,15 +2,15 @@ use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::components::cursor_component::CursorEvent::Click;
 use crate::aframe_ex::events::StateEventKind::{StateAdded, StateRemoved};
 use crate::aframe_ex::schema::SinglePropertySchema;
-use crate::components::yomigun_component::attribute::Yomigun;
-use crate::components::yomigun_component::handlers::{yomigun_click, yomigun_state_added, yomigun_state_removed};
+use crate::ecs::components::yomigun_component::attribute::Yomigun;
+use crate::ecs::components::yomigun_component::handlers::{yomigun_click, yomigun_state_added, yomigun_state_removed};
 
 pub const YOMIGUN: &'static str = "yomigun";
 
 pub mod attribute {
 	use aframers::components::core::ComponentValue;
 
-	use crate::components::yomigun_component::YOMIGUN;
+	use crate::ecs::components::yomigun_component::YOMIGUN;
 
 	pub enum Yomigun { Enabled }
 
