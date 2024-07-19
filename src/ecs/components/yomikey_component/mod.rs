@@ -35,10 +35,7 @@ pub fn register_ykey_component() {
 		;
 	ComponentDefinition::new()
 		.set_events(events)
-		.set_init_remove_with_extra_state(
-			handle_init,
-			handle_remove,
-		)
+		.set_init_remove_ref(handle_init, handle_remove)
 		.register(YOMIKEY_COMPONENT)
 	;
 }
@@ -66,12 +63,12 @@ fn update_entity(state: &YkeyState, entity: &AEntityEx) {
 	entity.set_attribute("color", color).unwrap();
 }
 
-fn handle_init(comp: YomikeyAComponent) {
+fn handle_init(comp: &YomikeyAComponent) {
 	let state = YkeyState::init([]);
 	update_entity(&state, comp.a_entity().unchecked_ref::<AEntityEx>());
 	comp.set_rust_state(state);
 }
-fn handle_remove(comp: YomikeyAComponent) {
+fn handle_remove(comp: &YomikeyAComponent) {
 	comp.take_rust_state();
 }
 
