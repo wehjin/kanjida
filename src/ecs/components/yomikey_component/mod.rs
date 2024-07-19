@@ -7,7 +7,6 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use crate::aframe_ex::af_sys::AEntityEx;
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::components::cursor_component::CursorEvent::{MouseEnter, MouseLeave};
-use crate::ecs::components::yomikey_component::yk_settings::YkeySetting;
 use crate::ecs::components::yomikey_component::yk_state::YkeyState;
 
 const YOMIKEY_COMPONENT: &'static str = "yomikey";

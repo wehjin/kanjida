@@ -2,8 +2,8 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 #[cfg(test)]
 mod tests {
+	use crate::ecs::components::yomikey_component::yk_settings::YkeySetting;
 	use crate::ecs::components::yomikey_component::yk_state::YkeyState;
-	use crate::ecs::components::yomikey_component::YkeySetting;
 
 	#[test]
 	fn state_works() {

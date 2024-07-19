@@ -10,22 +10,45 @@ pub fn create_answers_panel() -> Result<Entity, JsValue> {
 		.set_id("answers")?
 		.set_component(Color::Web("MintCream".into()))?
 		;
-
-	let glyphs = vec!["A", "B", "C", "D"];
+	const FONT: &str = "assets/onyofirsts-msdf.json";
+	const GLYPHS: [&str; 61] = [
+		"ア", "イ", "ウ", "エ", "オ", "カ", "ガ", "キ",
+		"ギ", "ク", "グ", "ケ", "ゲ", "コ", "ゴ", "サ",
+		"ザ", "シ", "ジ", "ス", "ズ", "セ", "ゼ", "ソ",
+		"ゾ", "タ", "ダ", "チ", "ツ", "テ", "デ", "ト",
+		"ド", "ナ", "ニ", "ネ", "ノ", "ハ", "バ", "ヒ",
+		"ビ", "フ", "ブ", "ヘ", "ベ", "ホ", "ボ", "マ",
+		"ミ", "ム", "メ", "モ", "ヤ", "ユ", "ヨ", "ラ",
+		"リ", "ル", "レ", "ロ", "ワ"
+	];
+	let glyphs = &GLYPHS;
 	for (i, key_pos) in KeyPos::all().into_iter().enumerate() {
-		panel = append_key(panel, key_pos, glyphs.get(i).cloned())?;
+		panel = append_key(panel, key_pos, glyphs.get(i).cloned(), FONT)?;
 	}
 	Ok(panel)
 }
 
+fn text(glyph: &str, font: &str) -> Text {
+	let text = Text::new()
+		.set_align(Align::Center)
+		.set_anchor(Anchor::Center)
+		.set_baseline(Baseline::Center)
+		.set_font(font)
+		.set_width(Width(1.))
+		.set_value(glyph)
+		.set_wrap_count(1.8)
+		;
+	text
+}
 const KEYS_PER_SIDE: usize = 8;
 const EDGE_PADDING: f32 = 0.05;
 const TWEEN_PADDING: f32 = 0.4 * EDGE_PADDING;
 const NUMER: f32 = 1. - 2. * EDGE_PADDING - (KEYS_PER_SIDE as f32 - 1.) * TWEEN_PADDING;
 const KEY_SIZE: f32 = NUMER / (KEYS_PER_SIDE as f32);
+
 const SPACING: f32 = KEY_SIZE + TWEEN_PADDING;
 
-fn append_key(panel: Entity, key_pos: KeyPos, glyph: Option<&str>) -> Result<Entity, JsValue> {
+fn append_key(panel: Entity, key_pos: KeyPos, glyph: Option<&str>, font: &str) -> Result<Entity, JsValue> {
 	let position = {
 		let x = -0.5 + EDGE_PADDING + (key_pos.0 as f32 * SPACING) + KEY_SIZE / 2.;
 		let y = 0.5 - (EDGE_PADDING + (key_pos.1 as f32 * SPACING) + KEY_SIZE / 2.);
@@ -37,15 +60,7 @@ fn append_key(panel: Entity, key_pos: KeyPos, glyph: Option<&str>) -> Result<Ent
 		;
 	let decorated = match glyph {
 		Some(glyph) => {
-			let text = Text::new()
-				.set_align(Align::Center)
-				.set_anchor(Anchor::Center)
-				.set_baseline(Baseline::Center)
-				.set_width(Width(1.))
-				.set_value(glyph)
-				.set_wrap_count(1.8)
-				.set_z_offset(0.005)
-				;
+			let text = text(glyph, font);
 			plain.set_component(text)?
 		}
 		None => plain,

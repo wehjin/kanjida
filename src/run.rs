@@ -51,8 +51,8 @@ fn create_scene() -> Result<Scene, JsValue> {
 			.set_component(Rotation(30., 0., 0.))?
 		)?
 		.add_entity(create_answers_panel()?
-			.set_component(Rotation(-60., -40., 0.)).unwrap()
-			.set_component(Position(1.4, 0.35, -1.4)).unwrap()
+			.set_component(Rotation(-40., -40., 0.)).unwrap()
+			.set_component(Position(1.4, 0.50, -1.4)).unwrap()
 			.set_component(Scale(1.3, 1.3, 1.3)).unwrap()
 		)?
 		.add_entity(create_hexgrid()?
