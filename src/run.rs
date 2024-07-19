@@ -1,5 +1,5 @@
 use aframers::browser::document;
-use aframers::components::{Position, Rotation};
+use aframers::components::{Position, Rotation, Scale};
 use aframers::entities::Entity;
 use wasm_bindgen::JsValue;
 use web_sys::Element;
@@ -16,6 +16,7 @@ use crate::ecs::components::hexgrid_component::register_hexgrid_component;
 use crate::ecs::components::laserfocus_component::register_laserfocus_component;
 use crate::ecs::components::yomigun_component::register_yomigun_component;
 use crate::ecs::entities::{camera_entity, chest_entity, controller_entity, ground_entity, hexgrid_entity, hint_entity, light_entity, origin_entity, sky_entity};
+use crate::ecs::entities::answers_entity::create_answers_panel;
 use crate::ecs::entities::ring_entity::try_ring_entity;
 use crate::views::settings::{FOCUS_RING_ID, SELECT_RING_ID};
 
@@ -39,6 +40,11 @@ fn create_scene() -> Result<Scene, JsValue> {
 		.add_entity(create_chest_entity()?
 			.set_component(Position(0., -0.25, -1.6))?
 			.set_component(Rotation(30., 0., 0.))?
+		)?
+		.add_entity(create_answers_panel()?
+			.set_component(Rotation(-60., -40., 0.)).unwrap()
+			.set_component(Position(1.4, 0.35, -1.4)).unwrap()
+			.set_component(Scale(1.3, 1.3, 1.3)).unwrap()
 		)?
 		.add_entity(create_hexgrid()?
 			.set_component(Position(0.0, 1.6, -12.0))?

@@ -169,9 +169,7 @@ fn init(this: AComponent) {
 		let material = match Reflect::get(&doc, &"hexcellMaterial".into()) {
 			Ok(material) if !material.is_undefined() => material,
 			_ => {
-				log_value(&"Make new material".into());
 				let material = MeshBasicMaterial::new();
-				log_value(&material);
 				let color = three_sys::Color::new_str("Fuchsia");
 				material.set_color(&color);
 				Reflect::set(&doc, &"hexcellMaterial".into(), &material).unwrap();
