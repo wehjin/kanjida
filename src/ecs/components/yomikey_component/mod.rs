@@ -28,7 +28,7 @@ extern "C" {
 	pub fn set_rust_state(this: &YomikeyAComponent, value: YkeyState);
 }
 
-pub fn register_ykey_component() {
+pub fn register_yomikey_component() {
 	let events = Events::new()
 		.set_handler(MouseEnter, handle_enter)
 		.set_handler(MouseLeave, handle_leave)
