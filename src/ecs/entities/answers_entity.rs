@@ -10,7 +10,7 @@ pub fn create_answers_panel() -> Result<Entity, JsValue> {
 		.set_id("answers")?
 		.set_component(Color::Web("MintCream".into()))?
 		;
-	const FONT: &str = "assets/onyofirsts-msdf.json";
+	const FONT: &str = "assets/onyonanum-msdf.json";
 	const GLYPHS: [&str; 61] = [
 		"ア", "イ", "ウ", "エ", "オ", "カ", "ガ", "キ",
 		"ギ", "ク", "グ", "ケ", "ゲ", "コ", "ゴ", "サ",
@@ -36,7 +36,7 @@ fn text(glyph: &str, font: &str) -> Text {
 		.set_font(font)
 		.set_width(Width(1.))
 		.set_value(glyph)
-		.set_wrap_count(1.8)
+		.set_wrap_count(1.3)
 		;
 	text
 }
