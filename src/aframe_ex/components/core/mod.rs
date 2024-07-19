@@ -102,20 +102,21 @@ impl ComponentDefinition {
 	pub fn set_events(self, events: Events) -> Self {
 		self.set_property("events", &events.to_object())
 	}
-	pub fn set_init_remove_with_extra_state<T>(
+	pub fn set_init_remove_with_extra_state<T, U>(
 		self,
-		init: impl Fn(AComponent) -> T + 'static,
-		remove: impl Fn(AComponent) + 'static,
+		init: impl Fn(T) -> U + 'static,
+		remove: impl Fn(T) + 'static,
 	) -> Self
 	where
-		T: IntoWasmAbi + 'static,
+		T: AsRef<AComponent> + FromWasmAbi + 'static,
+		U: IntoWasmAbi + 'static,
 	{
 		let bound_init = {
-			let unbound = Closure::wrap(Box::new(init) as Box<dyn Fn(AComponent) -> T>).into_js_value().unchecked_into::<Function>();
+			let unbound = Closure::wrap(Box::new(init) as Box<dyn Fn(T) -> U>).into_js_value().unchecked_into::<Function>();
 			aframers_bind_init_with_extra_state(unbound)
 		};
 		let bound_remove = {
-			let unbound = Closure::wrap(Box::new(remove) as Box<dyn Fn(AComponent)>).into_js_value().unchecked_into::<Function>();
+			let unbound = Closure::wrap(Box::new(remove) as Box<dyn Fn(T)>).into_js_value().unchecked_into::<Function>();
 			aframers_bind_remove_with_extra_state(unbound)
 		};
 		self.set_property("init", &bound_init).set_property("remove", &bound_remove)

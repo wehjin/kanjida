@@ -66,14 +66,12 @@ fn render(state: &YkeyState, entity: &AEntityEx) {
 	entity.set_attribute("color", color).unwrap();
 }
 
-fn handle_init(comp: AComponent) {
-	let comp = comp.unchecked_ref::<YomikeyAComponent>();
+fn handle_init(comp: YomikeyAComponent) {
 	let state = YkeyState::init([]);
 	render(&state, comp.a_entity().unchecked_ref::<AEntityEx>());
 	comp.set_rust_state(state);
 }
-fn handle_remove(comp: AComponent) {
-	let comp = comp.unchecked_ref::<YomikeyAComponent>();
+fn handle_remove(comp: YomikeyAComponent) {
 	comp.take_rust_state();
 }
 
