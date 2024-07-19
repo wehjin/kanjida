@@ -4,22 +4,18 @@ use aframers::components::{Color, Position, Scale};
 use aframers::entities::Entity;
 use wasm_bindgen::{JsCast, JsValue};
 
-use crate::aframe_ex::{Align, Baseline, };
+use crate::aframe_ex::{Align, Baseline};
 use crate::aframe_ex::components::font_component::StockFont;
 use crate::aframe_ex::components::visible_component::Visible;
 
 pub const ENTITY_ID: &'static str = "hintEntity";
-
-pub fn make() -> Entity {
-	try_make().unwrap()
-}
 
 pub fn get() -> Entity {
 	let element = document().get_element_by_id(ENTITY_ID).unwrap().unchecked_into::<AEntity>();
 	Entity::from(element)
 }
 
-fn try_make() -> Result<Entity, JsValue> {
+pub fn create_hint_cursor() -> Result<Entity, JsValue> {
 	let scale = 2.5;
 	let entity = Entity::from(a_entity_create("a-text")?)
 		.set_id(ENTITY_ID)?

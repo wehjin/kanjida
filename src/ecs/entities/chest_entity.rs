@@ -6,7 +6,7 @@ use crate::aframe_ex::components::geometry_component::{Box, Geometry};
 use crate::aframe_ex::components::material::Material;
 use crate::ecs::components::yomigun_component::attribute::Yomigun;
 
-pub fn make_chest_entity() -> Result<Entity, JsValue> {
+pub fn create_chest_entity() -> Result<Entity, JsValue> {
 	let chest = create_entity()?
 		.set_id("yomigun")?
 		.set_component(Geometry::<Box>::new().set_primitive())?

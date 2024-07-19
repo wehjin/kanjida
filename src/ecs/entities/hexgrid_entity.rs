@@ -6,7 +6,7 @@ use wasm_bindgen::JsValue;
 use crate::aframe_ex::components::source_component::Source;
 use crate::ecs::components::hexgrid_component::Hexgrid;
 
-pub fn try_make() -> Result<Entity, JsValue> {
+pub fn create_hexgrid() -> Result<Entity, JsValue> {
 	let entity = circle_entity()?
 		.set_component(Hexgrid::Enabled)?
 		.set_component(Source::new("#spiral"))?
