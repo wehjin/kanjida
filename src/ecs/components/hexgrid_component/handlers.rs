@@ -11,6 +11,7 @@ use crate::aframe_ex::Value;
 use crate::ecs::components::hexgrid_component::HexgridAComponent;
 use crate::ecs::entities::hint_entity;
 use crate::GAME;
+use crate::views::quiz_point_from_element_id;
 use crate::three_sys::Vector3;
 use crate::views::settings::HINT_Z_OFFSET;
 
@@ -34,9 +35,8 @@ pub fn handle_state_added(component: AComponent, event: JsValue) {
 
 fn update_hint_entity(center: &Vector3, quiz_id: &str) {
 	let hint = GAME.with_borrow(|game| {
-		let quiz = game.as_quiz_by_id(quiz_id);
-		let hint = quiz.hint().to_string();
-		hint
+		let quiz_point = quiz_point_from_element_id(quiz_id);
+		game.quiz_hint(quiz_point).to_string()
 	});
 	hint_entity::get()
 		.set_component(Position(center.x(), center.y() + 0.8, center.z() + HINT_Z_OFFSET)).unwrap()

@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use crate::game::game::Game;
+use game::game_state::GameState;
 
 pub mod aframe_ex;
 pub mod three_sys;
@@ -11,7 +11,7 @@ mod run;
 mod views;
 
 thread_local! {
-	pub static GAME: RefCell<Game> = RefCell::new(Game::with_limit(None));
+	pub static GAME: RefCell<GameState> = RefCell::new(GameState::init());
 }
 
 fn main() {
