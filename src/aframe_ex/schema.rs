@@ -61,7 +61,6 @@ impl FieldKind {
 }
 
 pub struct Field(JsValue, FieldKind);
-
 impl Field {
 	pub fn color(value: Color) -> Self {
 		Self(value.component_value().as_ref().into(), FieldKind::Color)

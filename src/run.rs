@@ -4,19 +4,20 @@ use aframers::entities::Entity;
 use wasm_bindgen::JsValue;
 use web_sys::Element;
 
-use yomigun_entity::create_yomigun;
 use hexgrid_entity::create_hexgrid;
 use hint_entity::create_hint_cursor;
+use yomigun_entity::create_yomigun;
 
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::scenes::Scene;
+use crate::ecs::components::game_component::{Game, register_game_component};
 use crate::ecs::components::hex_color_component::HexColor;
 use crate::ecs::components::hexcell_component::register_hexcell_component;
 use crate::ecs::components::hexgrid_component::register_hexgrid_component;
 use crate::ecs::components::laserfocus_component::register_laserfocus_component;
 use crate::ecs::components::yomigun_component::register_yomigun_component;
 use crate::ecs::components::yomikey_component::register_yomikey_component;
-use crate::ecs::entities::{camera_entity, yomigun_entity, controller_entity, ground_entity, hexgrid_entity, hint_entity, light_entity, origin_entity, sky_entity};
+use crate::ecs::entities::{camera_entity, controller_entity, ground_entity, hexgrid_entity, hint_entity, light_entity, origin_entity, sky_entity, yomigun_entity};
 use crate::ecs::entities::answers_entity::create_answers_panel;
 use crate::ecs::entities::ring_entity::try_ring_entity;
 use crate::views::settings::{FOCUS_RING_ID, SELECT_RING_ID};
@@ -34,6 +35,7 @@ fn register_components() {
 	register_hexgrid_component();
 	register_yomikey_component();
 	register_yomigun_component();
+	register_game_component();
 }
 
 fn create_scene() -> Result<Scene, JsValue> {
@@ -60,6 +62,7 @@ fn create_scene() -> Result<Scene, JsValue> {
 		)?
 		.add_entity(controller_entity::make()?)?
 		.add_entity(camera_entity::make()?)?
+		.set_component(Game)?
 		;
 	Ok(scene)
 }

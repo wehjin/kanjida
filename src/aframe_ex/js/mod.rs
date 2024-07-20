@@ -4,6 +4,7 @@ use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::convert::FromWasmAbi;
 use wasm_bindgen::prelude::wasm_bindgen;
+use web_sys::Event;
 use web_sys::js_sys::{Function, Object};
 
 #[wasm_bindgen(module = "/js/rust_systems.js")]
@@ -35,11 +36,12 @@ extern "C" {
 	#[wasm_bindgen]
 	pub fn bind_this_to_first(f: Function) -> Function;
 }
-pub fn bind_this_to_component<T>(f: impl Fn(T, JsValue) + 'static) -> Function
+pub fn bind_this_to_component<T,U>(f: impl Fn(T, U) + 'static) -> Function
 where
 	T: AsRef<AComponent> + FromWasmAbi + 'static,
+	U: AsRef<Event> + FromWasmAbi + 'static,
 {
-	let closure = Closure::wrap(Box::new(f) as Box<dyn Fn(T, JsValue)>);
+	let closure = Closure::wrap(Box::new(f) as Box<dyn Fn(T, U)>);
 	let unbound = closure.into_js_value().unchecked_into::<Function>();
 	let bound = bind_this_to_first(unbound);
 	bound

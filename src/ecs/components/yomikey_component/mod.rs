@@ -1,12 +1,14 @@
-use aframers::af_sys::entities::AEntity;
-use aframers::browser::{document, log};
+use aframers::af_sys::scenes::AScene;
+use aframers::browser::log;
 use aframers::components::core::ComponentValue;
-use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen::JsCast;
+use web_sys::Event;
 
 use crate::aframe_ex::af_sys::AEntityEx;
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::components::cursor_component::CursorEvent::{Click, MouseEnter, MouseLeave};
 use crate::aframe_ex::schema::{Field, SinglePropertySchema};
+use crate::ecs::components::game_component::GameEvent;
 use crate::ecs::components::yomikey_component::bindgen::YomikeyAComponent;
 use crate::ecs::components::yomikey_component::yk_settings::YkeySetting;
 use crate::ecs::components::yomikey_component::yk_state::YkeyState;
@@ -42,35 +44,33 @@ enum YomikeyEffect {
 	SelectYomi(usize)
 }
 
-fn handle_click(comp: YomikeyAComponent, _event: JsValue) {
+fn handle_click(comp: YomikeyAComponent, _event: Event) {
 	let state = comp.take_rust_state().click();
 	log(&format!("CLICK: {:?}", &state));
 	let effects = vec![YomikeyEffect::SelectYomi(state.glyph())];
-	do_effects(effects);
+	do_effects(effects, comp.a_entity().a_scene());
 	comp.set_rust_state(state);
 }
 
-fn do_effects(effects: Vec<YomikeyEffect>) {
+fn do_effects(effects: Vec<YomikeyEffect>, a_scene: AScene) {
 	for effect in effects {
 		log(&format!("EFFECT: {:?}", effect));
 		match effect {
-			YomikeyEffect::SelectYomi(yomi_code) => {
-				let yomigun = document().query_selector("#yomigun").unwrap().unwrap();
-				yomigun.unchecked_ref::<AEntity>()
-					.update_component_property("yomigun", "yomiCode", &yomi_code.into());
+			YomikeyEffect::SelectYomi(yomi_point) => {
+				a_scene.emit_event_with_details(GameEvent::SelectYomi.as_ref(), &yomi_point.into());
 			}
 		}
 	}
 }
 
-fn handle_enter(comp: YomikeyAComponent, _event: JsValue) {
+fn handle_enter(comp: YomikeyAComponent, _event: Event) {
 	let state = comp.take_rust_state().enter();
 	log(&format!("ENTER: {:?}", &state));
 	update_entity(&state, comp.a_entity().unchecked_ref::<AEntityEx>());
 	comp.set_rust_state(state);
 }
 
-fn handle_leave(comp: YomikeyAComponent, _event: JsValue) {
+fn handle_leave(comp: YomikeyAComponent, _event: Event) {
 	let state = comp.take_rust_state().leave();
 	update_entity(&state, comp.a_entity().unchecked_ref::<AEntityEx>());
 	comp.set_rust_state(state);

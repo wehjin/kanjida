@@ -1,8 +1,8 @@
 use aframers::af_sys::components::AComponent;
 use aframers::af_sys::entities::AEntity;
 use aframers::components::Position;
-use wasm_bindgen::{JsCast, JsValue};
-use web_sys::CustomEvent;
+use wasm_bindgen::JsCast;
+use web_sys::{CustomEvent, Event};
 
 use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
 use crate::aframe_ex::components::visible_component::Visible;
@@ -11,11 +11,11 @@ use crate::aframe_ex::Value;
 use crate::ecs::components::hexgrid_component::HexgridAComponent;
 use crate::ecs::entities::hint_entity;
 use crate::GAME;
-use crate::views::quiz_point_from_element_id;
 use crate::three_sys::Vector3;
+use crate::views::quiz_point_from_element_id;
 use crate::views::settings::HINT_Z_OFFSET;
 
-pub fn handle_state_added(component: AComponent, event: JsValue) {
+pub fn handle_state_added(component: AComponent, event: Event) {
 	let component = component.unchecked_into::<HexgridAComponent>();
 	let custom = event.unchecked_into::<CustomEvent>();
 	if let Some(state_added) = StateEvent::try_added(&custom) {
@@ -45,7 +45,7 @@ fn update_hint_entity(center: &Vector3, quiz_id: &str) {
 	;
 }
 
-pub fn handle_state_removed(component: AComponent, event: JsValue) {
+pub fn handle_state_removed(component: AComponent, event: Event) {
 	let component = component.unchecked_into::<HexgridAComponent>();
 	let custom = event.unchecked_into::<CustomEvent>();
 	if let Some(state_removed) = StateEvent::try_removed(&custom) {

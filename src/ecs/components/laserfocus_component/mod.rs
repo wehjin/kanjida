@@ -1,6 +1,6 @@
 use aframers::af_sys::components::AComponent;
 use aframers::components::core::ComponentValue;
-use wasm_bindgen::JsValue;
+use web_sys::Event;
 
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::components::cursor_component::CursorEvent::{Click, MouseEnter, MouseLeave};
@@ -22,15 +22,15 @@ pub fn register_laserfocus_component() {
 		.register(NAME);
 }
 
-fn handle_click(a_component: AComponent, _event: JsValue) {
+fn handle_click(a_component: AComponent, _event: Event) {
 	a_component.a_entity().add_state("selected");
 }
 
-fn handle_enter(a_component: AComponent, _event: JsValue) {
+fn handle_enter(a_component: AComponent, _event: Event) {
 	a_component.a_entity().add_state("focused");
 }
 
-fn handle_leave(a_component: AComponent, _event: JsValue) {
+fn handle_leave(a_component: AComponent, _event: Event) {
 	a_component.a_entity().remove_state("focused");
 }
 

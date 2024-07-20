@@ -1,3 +1,5 @@
+pub mod game_component;
+
 pub mod hexcell_component;
 pub mod hex_color_component;
 pub mod hexgrid_component;

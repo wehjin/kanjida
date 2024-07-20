@@ -92,7 +92,8 @@ pub mod handlers {
 	use aframers::browser;
 	use aframers::components::{Color, Position, Scale};
 	use aframers::entities::{create_box_entity, Entity};
-	use wasm_bindgen::{JsCast, JsValue};
+	use wasm_bindgen::JsCast;
+	use web_sys::Event;
 
 	use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
 	use crate::aframe_ex::components::animation_component::{Animation, Easing};
@@ -101,7 +102,7 @@ pub mod handlers {
 	use crate::aframe_ex::events::StateEventKind::{StateAdded, StateRemoved};
 	use crate::aframe_ex::scenes::Scene;
 
-	pub fn yomigun_state_added(component: AComponent, js_event: JsValue) {
+	pub fn yomigun_state_added(component: AComponent, js_event: Event) {
 		if let Some(event) = StateEvent::try_from_js(&js_event, StateAdded) {
 			if event.state() == CursorHovered.as_ref() {
 				Entity::from(component.a_entity())
@@ -111,7 +112,7 @@ pub mod handlers {
 			}
 		}
 	}
-	pub fn yomigun_state_removed(component: AComponent, js_event: JsValue) {
+	pub fn yomigun_state_removed(component: AComponent, js_event: Event) {
 		if let Some(event) = StateEvent::try_from_js(&js_event, StateRemoved) {
 			if event.state() == CursorHovered.as_ref() {
 				Entity::from(component.a_entity())
@@ -121,7 +122,7 @@ pub mod handlers {
 			}
 		}
 	}
-	pub fn yomigun_click(component: AComponent, _js_event: JsValue) {
+	pub fn yomigun_click(component: AComponent, _js_event: Event) {
 		let yomigun = component.a_entity().unchecked_into::<AEntityEx>();
 		let scene = Scene::from(yomigun.a_scene());
 		let yomigun_target_vector = scene.a_scene().unchecked_ref::<ASceneEx>().yomigun_target_position();

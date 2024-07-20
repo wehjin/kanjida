@@ -2,6 +2,7 @@ use aframers::af_sys::components::{AComponent, register_component};
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::convert::{FromWasmAbi, IntoWasmAbi, RefFromWasmAbi};
+use web_sys::Event;
 use web_sys::js_sys::{Array, Function, Object, Reflect};
 
 use crate::aframe_ex::js;
@@ -62,9 +63,10 @@ impl Events {
 	pub fn to_object(self) -> Object {
 		self.0
 	}
-	pub fn set_handler<T>(self, event_name: impl AsRef<str>, handler: impl Fn(T, JsValue) + 'static) -> Self
+	pub fn set_handler<T, U>(self, event_name: impl AsRef<str>, handler: impl Fn(T, U) + 'static) -> Self
 	where
 		T: AsRef<AComponent> + FromWasmAbi + 'static,
+		U: AsRef<Event> + FromWasmAbi + 'static,
 	{
 		let bound_handler = bind_this_to_component(handler);
 		Reflect::set(&self.0, &event_name.as_ref().into(), &bound_handler).expect("set handler");
