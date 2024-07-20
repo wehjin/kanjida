@@ -6,7 +6,10 @@ use wasm_bindgen::JsCast;
 use web_sys::CustomEvent;
 
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
+use crate::aframe_ex::js::log_value;
 use crate::GAME;
+use crate::game::{QuizPoint, YomiPoint};
+use crate::views::element_id_from_quiz_point;
 
 /// Enumerates game events.
 #[derive(Debug, Clone)]
@@ -42,21 +45,23 @@ pub fn register_game_component() {
 		.register("game");
 }
 fn handle_select_quiz(_comp: AComponent, event: CustomEvent) {
+	log_value(&event);
 	let quiz_point = event.detail().as_f64().map(|it| it as usize).unwrap_or(0);
 	let game_state = GAME.take().select_quiz(quiz_point);
 	log(&format!("SELECT_QUIZ: {:?}", &game_state));
 	GAME.set(game_state);
+
+	let selected_quiz = GAME.with_borrow(|game_state| game_state.selected_quiz);
+	render_hexgrid(selected_quiz);
 }
 fn handle_select_yomi(_comp: AComponent, event: CustomEvent) {
-	let yomi_point = event.detail().as_f64().map(|it| it as usize).unwrap_or(0);
+	let yomi_point = event.detail().as_f64().map(|detail| detail as usize).unwrap_or(0);
 	let game_state = GAME.take().select_yomi(yomi_point);
 	log(&format!("SELECT_YOMI: {:?}", &game_state));
 	GAME.set(game_state);
 
 	let selected_yomi = GAME.with_borrow(|game_state| game_state.selected_yomi);
-	let yomigun = document().query_selector("#yomigun").unwrap().unwrap();
-	yomigun.unchecked_ref::<AEntity>()
-		.update_component_property("yomigun", "yomiCode", &selected_yomi.into());
+	render_yomigun(selected_yomi);
 }
 
 fn handle_submit_answer(_comp: AComponent, _event: CustomEvent) {
@@ -64,6 +69,18 @@ fn handle_submit_answer(_comp: AComponent, _event: CustomEvent) {
 	let game_state = game.submit_answer();
 	log(&format!("SUBMIT_ANSWER: {:?}", &game_state));
 	GAME.set(game_state);
+}
+fn render_hexgrid(selected_quiz: Option<QuizPoint>) {
+	if let Some(quiz_point) = selected_quiz {
+		let cell_selector = format!("#{}", element_id_from_quiz_point(quiz_point));
+		let cell_element = document().query_selector(&cell_selector).unwrap().unwrap();
+		cell_element.unchecked_ref::<AEntity>().add_state("selected");
+	}
+}
+fn render_yomigun(selected_yomi: YomiPoint) {
+	let yomigun = document().query_selector("#yomigun").unwrap().unwrap();
+	yomigun.unchecked_ref::<AEntity>()
+		.update_component_property("yomigun", "yomiCode", &selected_yomi.into());
 }
 
 pub struct Game;

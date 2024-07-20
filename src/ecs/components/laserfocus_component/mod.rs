@@ -1,10 +1,15 @@
 use aframers::af_sys::components::AComponent;
+use aframers::af_sys::entities::AEntity;
+use aframers::browser::log;
 use aframers::components::core::ComponentValue;
 use web_sys::Event;
 
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::components::cursor_component::CursorEvent::{Click, MouseEnter, MouseLeave};
 use crate::aframe_ex::schema::{Field, SinglePropertySchema};
+use crate::ecs::components::game_component::GameEvent;
+use crate::game::QuizPoint;
+use crate::views::quiz_point_from_element_id;
 
 pub const NAME: &'static str = "laserfocus";
 pub fn register_laserfocus_component() {
@@ -23,7 +28,14 @@ pub fn register_laserfocus_component() {
 }
 
 fn handle_click(a_component: AComponent, _event: Event) {
-	a_component.a_entity().add_state("selected");
+	let entity = a_component.a_entity();
+	let quiz_point = quiz_point_from_element_id(entity.id().as_str());
+	log(&format!("LASERFOCUS_CLICK: Emit SelectQuiz({})", quiz_point));
+	do_effect_emit_select_yomi(quiz_point, entity);
+}
+
+fn do_effect_emit_select_yomi(quiz_point: QuizPoint, entity: AEntity) {
+	entity.emit_event_with_details(GameEvent::SelectQuiz.as_ref(), &quiz_point.into());
 }
 
 fn handle_enter(a_component: AComponent, _event: Event) {
