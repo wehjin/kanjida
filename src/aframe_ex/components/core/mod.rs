@@ -5,7 +5,7 @@ use wasm_bindgen::convert::{FromWasmAbi, IntoWasmAbi, RefFromWasmAbi};
 use web_sys::js_sys::{Array, Function, Object, Reflect};
 
 use crate::aframe_ex::js;
-use crate::aframe_ex::js::{aframers_bind_init_with_extra_state, aframers_bind_remove_with_extra_state, bind_this_to_component};
+use crate::aframe_ex::js::{aframers_bind_init_with_extra_state, aframers_bind_other_with_extra_state, aframers_bind_remove_with_extra_state, bind_this_to_component};
 use crate::aframe_ex::schema::Schema;
 
 pub mod properties {
@@ -102,19 +102,31 @@ impl ComponentDefinition {
 	pub fn set_events(self, events: Events) -> Self {
 		self.set_property("events", &events.to_object())
 	}
+	pub fn set_init_update_remove<T, U>(
+		self,
+		init: impl Fn(&T) -> U + 'static,
+		update: impl Fn(&T) + 'static,
+		remove: impl Fn(&T) + 'static,
+	) -> Self
+	where
+		T: AsRef<AComponent> + RefFromWasmAbi + 'static,
+		U: IntoWasmAbi + 'static,
+	{
+		let bound_init = aframers_bind_init_with_extra_state(function_from_component_fn_with_return(init));
+		let bound_update = aframers_bind_other_with_extra_state(function_from_component_fn(update));
+		let bound_remove = aframers_bind_remove_with_extra_state(function_from_component_fn(remove));
+		self.set_property("init", &bound_init)
+			.set_property("update", &bound_update)
+			.set_property("remove", &bound_remove)
+	}
+
 	pub fn set_init_remove_ref<T, U>(self, init: impl Fn(&T) -> U + 'static, remove: impl Fn(&T) + 'static) -> Self
 	where
 		T: AsRef<AComponent> + RefFromWasmAbi + 'static,
 		U: IntoWasmAbi + 'static,
 	{
-		let bound_init = {
-			let unbound = Closure::wrap(Box::new(init) as Box<dyn Fn(&T) -> U>).into_js_value().unchecked_into::<Function>();
-			aframers_bind_init_with_extra_state(unbound)
-		};
-		let bound_remove = {
-			let unbound = Closure::wrap(Box::new(remove) as Box<dyn Fn(&T)>).into_js_value().unchecked_into::<Function>();
-			aframers_bind_remove_with_extra_state(unbound)
-		};
+		let bound_init = aframers_bind_init_with_extra_state(function_from_component_fn_with_return(init));
+		let bound_remove = aframers_bind_remove_with_extra_state(function_from_component_fn(remove));
 		self.set_property("init", &bound_init).set_property("remove", &bound_remove)
 	}
 
@@ -147,4 +159,19 @@ impl ComponentDefinition {
 		Reflect::set(&self.0, &name.as_ref().into(), &value).expect("set property");
 		self
 	}
+}
+
+fn function_from_component_fn_with_return<T, U>(f: impl Fn(&T) -> U + Sized + 'static) -> Function
+where
+	T: AsRef<AComponent> + RefFromWasmAbi + 'static,
+	U: IntoWasmAbi + 'static,
+{
+	Closure::wrap(Box::new(f) as Box<dyn Fn(&T) -> U>).into_js_value().unchecked_into::<Function>()
+}
+
+fn function_from_component_fn<T>(f: impl Fn(&T) + Sized + 'static) -> Function
+where
+	T: AsRef<AComponent> + RefFromWasmAbi + 'static,
+{
+	Closure::wrap(Box::new(f) as Box<dyn Fn(&T)>).into_js_value().unchecked_into::<Function>()
 }

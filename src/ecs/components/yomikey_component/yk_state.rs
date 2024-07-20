@@ -7,10 +7,9 @@ mod tests {
 
 	#[test]
 	fn state_works() {
-		let settings = [YkeySetting::Glyph("M".into()), YkeySetting::Uv(1, 2)];
+		let settings = [YkeySetting::Glyph(3)];
 		let state = YkeyState::init(settings);
-		assert_eq!(state.glyph(), "M");
-		assert_eq!(state.uv(), (1, 2));
+		assert_eq!(state.glyph(), 3);
 		assert_eq!(state.is_focused(), false);
 		assert_eq!(state.clicks(), 0);
 		let state = state.enter().click();
@@ -25,8 +24,7 @@ mod tests {
 #[derive(Debug, Clone, Default)]
 pub struct YkeyState {
 	age: usize,
-	uv: (usize, usize),
-	glyph: String,
+	glyph: usize,
 	enters: usize,
 	leaves: usize,
 	clicks: usize,
@@ -36,21 +34,20 @@ pub mod queries {
 	use crate::ecs::components::yomikey_component::yk_state::YkeyState;
 
 	impl YkeyState {
-		pub fn glyph(&self) -> &str { &self.glyph }
-		pub fn uv(&self) -> (usize, usize) { self.uv }
+		pub fn glyph(&self) -> usize { self.glyph }
 		pub fn is_focused(&self) -> bool { self.enters > self.leaves }
 		pub fn clicks(&self) -> usize { self.clicks }
 	}
 }
 
 pub mod actions {
-	use crate::ecs::components::yomikey_component::yk_settings::YkeySetting;
+	use crate::ecs::components::yomikey_component::yk_settings::{unwrap_or_default, YkeySetting};
 	use crate::ecs::components::yomikey_component::yk_state::YkeyState;
 
 	impl YkeyState {
 		pub fn init(settings: impl AsRef<[YkeySetting]>) -> Self {
-			let (glyph, uv) = unwrap_settings(settings);
-			Self { uv, glyph, ..Self::default() }
+			let glyph = unwrap_or_default(settings);
+			Self { glyph, ..Self::default() }
 		}
 		pub fn enter(self) -> Self {
 			if self.enters <= self.leaves {
@@ -69,18 +66,5 @@ pub mod actions {
 		pub fn click(self) -> Self {
 			Self { age: self.age + 1, clicks: self.clicks + 1, ..self }
 		}
-	}
-	fn unwrap_settings(settings: impl AsRef<[YkeySetting]>) -> (String, (usize, usize)) {
-		let mut glyph: Option<String> = None;
-		let mut uv: Option<(usize, usize)> = None;
-		for setting in settings.as_ref() {
-			match setting {
-				YkeySetting::Glyph(value) => glyph = Some(value.to_string()),
-				YkeySetting::Uv(u, v) => uv = Some((*u, *v)),
-			}
-		}
-		let glyph = glyph.unwrap_or_else(|| "X".into());
-		let uv = uv.unwrap_or((0, 0));
-		(glyph, uv)
 	}
 }

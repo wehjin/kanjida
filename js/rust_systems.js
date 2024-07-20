@@ -27,9 +27,17 @@ export function aframers_bind_init_with_extra_state(f) {
     };
 }
 
+export function aframers_bind_other_with_extra_state(f) {
+    return function (...args) {
+        f(this, ...args)
+    };
+}
+
 export function aframers_bind_remove_with_extra_state(f) {
     return function (...args) {
+        // noinspection JSUnresolvedReference
         if (typeof this.extra_state.free === "function") {
+            // noinspection JSUnresolvedReference
             this.extra_state.free();
         }
         f(this, ...args)

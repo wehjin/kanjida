@@ -4,7 +4,7 @@ use aframers::entities::Entity;
 use wasm_bindgen::JsValue;
 use web_sys::Element;
 
-use chest_entity::create_chest_entity;
+use yomigun_entity::create_yomigun;
 use hexgrid_entity::create_hexgrid;
 use hint_entity::create_hint_cursor;
 
@@ -16,7 +16,7 @@ use crate::ecs::components::hexgrid_component::register_hexgrid_component;
 use crate::ecs::components::laserfocus_component::register_laserfocus_component;
 use crate::ecs::components::yomigun_component::register_yomigun_component;
 use crate::ecs::components::yomikey_component::register_yomikey_component;
-use crate::ecs::entities::{camera_entity, chest_entity, controller_entity, ground_entity, hexgrid_entity, hint_entity, light_entity, origin_entity, sky_entity};
+use crate::ecs::entities::{camera_entity, yomigun_entity, controller_entity, ground_entity, hexgrid_entity, hint_entity, light_entity, origin_entity, sky_entity};
 use crate::ecs::entities::answers_entity::create_answers_panel;
 use crate::ecs::entities::ring_entity::try_ring_entity;
 use crate::views::settings::{FOCUS_RING_ID, SELECT_RING_ID};
@@ -46,9 +46,9 @@ fn create_scene() -> Result<Scene, JsValue> {
 		.add_entity(create_hint_cursor()?)?
 		.add_entity(create_focus_ring()?)?
 		.add_entity(create_select_ring()?)?
-		.add_entity(create_chest_entity()?
-			.set_component(Position(0., -0.25, -1.6))?
-			.set_component(Rotation(30., 0., 0.))?
+		.add_entity(create_yomigun()?
+			.set_component(Position(0., 0.3, -1.6))?
+			.set_component(Rotation(-50., 0., 0.))?
 		)?
 		.add_entity(create_answers_panel()?
 			.set_component(Rotation(-2., -45., 0.)).unwrap()

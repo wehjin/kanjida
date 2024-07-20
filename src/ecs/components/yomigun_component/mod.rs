@@ -1,30 +1,90 @@
+use aframers::components::core::ComponentValue;
+
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::components::cursor_component::CursorEvent::Click;
 use crate::aframe_ex::events::StateEventKind::{StateAdded, StateRemoved};
-use crate::aframe_ex::schema::SinglePropertySchema;
-use crate::ecs::components::yomigun_component::attribute::Yomigun;
+use crate::aframe_ex::schema::MultiPropertySchema;
 use crate::ecs::components::yomigun_component::handlers::{yomigun_click, yomigun_state_added, yomigun_state_removed};
+use crate::ecs::components::yomigun_component::lifecycle::{init, remove, update};
+use crate::ecs::components::yomigun_component::settings::YomigunSetting;
 
 pub const YOMIGUN: &'static str = "yomigun";
+
 
 pub mod attribute {
 	use aframers::components::core::ComponentValue;
 
+	use crate::ecs::components::yomigun_component::settings::YomigunSetting;
 	use crate::ecs::components::yomigun_component::YOMIGUN;
 
-	pub enum Yomigun { Enabled }
+	#[derive(Debug, Clone)]
+	pub struct Yomigun(Vec<YomigunSetting>);
 
-	impl AsRef<str> for Yomigun {
-		fn as_ref(&self) -> &str {
-			match self {
-				Yomigun::Enabled => "enabled",
-			}
+	impl From<usize> for Yomigun {
+		fn from(value: usize) -> Self {
+			let setting = YomigunSetting::YomiCode(value);
+			Self(vec![setting])
 		}
 	}
+
 	impl ComponentValue for Yomigun {
 		fn component_name(&self) -> &str { YOMIGUN }
-		fn component_value(&self) -> impl AsRef<str> { self }
+		fn component_value(&self) -> impl AsRef<str> {
+			let settings = self.0.iter()
+				.map(|setting| {
+					setting.as_attribute_str().as_ref().to_string()
+				})
+				.collect::<Vec<_>>()
+				.join("; ")
+				;
+			settings
+		}
 	}
+}
+
+pub fn register_yomigun_component() {
+	let events = Events::new()
+		.set_handler(StateAdded, yomigun_state_added)
+		.set_handler(StateRemoved, yomigun_state_removed)
+		.set_handler(Click, yomigun_click)
+		;
+	let schema = {
+		let yomi_code = YomigunSetting::YomiCode(0);
+		MultiPropertySchema::new().push(yomi_code.component_name(), yomi_code.to_field())
+	};
+	ComponentDefinition::new()
+		.set_events(events)
+		.set_schema(schema)
+		.set_init_update_remove(init, update, remove)
+		.register("yomigun")
+	;
+}
+
+mod lifecycle {
+	use aframers::af_sys::entities::AEntity;
+	use aframers::entities::Entity;
+
+	use crate::ecs::components::yomi_text_component::yomi_text;
+	use crate::ecs::components::yomigun_component::bindgen::YomigunAComponent;
+	use crate::views::yomi_data::YomiChar;
+
+	pub fn init(this: &YomigunAComponent) {
+		let yomi_code = this.yomigun_data().yomi_code();
+		Entity::from(this.a_entity())
+			.set_component(yomi_text(YomiChar(yomi_code))).unwrap()
+		;
+	}
+	pub fn update(this: &YomigunAComponent) {
+		let yomi_code = this.yomigun_data().yomi_code();
+		update_entity(YomiChar(yomi_code), this.a_entity());
+	}
+
+	fn update_entity(yomi_char: YomiChar, entity: AEntity) {
+		let text_value = yomi_char.as_glyph();
+		entity.update_component_property("text", "value", &text_value.into());
+	}
+
+	pub fn remove(_this: &YomigunAComponent) {}
 }
 
 pub mod handlers {
@@ -92,17 +152,5 @@ pub mod handlers {
 			.set_component(Color::Web("tomato".into())).unwrap()
 	}
 }
-
-pub fn register_yomigun_component() {
-	let events = Events::new()
-		.set_handler(StateAdded, yomigun_state_added)
-		.set_handler(StateRemoved, yomigun_state_removed)
-		.set_handler(Click, yomigun_click)
-		;
-	let schema = SinglePropertySchema::from(Yomigun::Enabled);
-	ComponentDefinition::new()
-		.set_events(events)
-		.set_schema(schema)
-		.register("yomigun")
-	;
-}
+pub mod settings;
+pub mod bindgen;

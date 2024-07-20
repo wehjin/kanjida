@@ -1,45 +1,22 @@
-use aframers::components::{Color, Position, Scale, Width};
+use aframers::components::{Color, Position, Scale};
 use aframers::entities::{create_plane_entity, Entity};
 use wasm_bindgen::JsValue;
 
-use crate::aframe_ex::{Align, Anchor, Baseline, Text};
+use crate::ecs::components::yomi_text_component::yomi_text;
 use crate::ecs::components::yomikey_component::Yomikey;
+use crate::views::yomi_data::YomiChar;
 
 pub fn create_answers_panel() -> Result<Entity, JsValue> {
 	let mut panel = create_plane_entity()?
 		.set_id("answers")?
 		.set_component(Color::Web("MintCream".into()))?
 		;
-	const FONT: &str = "assets/onyonanum-msdf.json";
-	const GLYPHS: [&str; 61] = [
-		"ア", "イ", "ウ", "エ", "オ", "カ", "ガ", "キ",
-		"ギ", "ク", "グ", "ケ", "ゲ", "コ", "ゴ", "サ",
-		"ザ", "シ", "ジ", "ス", "ズ", "セ", "ゼ", "ソ",
-		"ゾ", "タ", "ダ", "チ", "ツ", "テ", "デ", "ト",
-		"ド", "ナ", "ニ", "ネ", "ノ", "ハ", "バ", "ヒ",
-		"ビ", "フ", "ブ", "ヘ", "ベ", "ホ", "ボ", "マ",
-		"ミ", "ム", "メ", "モ", "ヤ", "ユ", "ヨ", "ラ",
-		"リ", "ル", "レ", "ロ", "ワ"
-	];
-	let glyphs = &GLYPHS;
 	for (i, key_pos) in KeyPos::all().into_iter().enumerate() {
-		panel = append_key(panel, key_pos, glyphs.get(i).cloned(), FONT)?;
+		panel = append_key(panel, key_pos, i)?;
 	}
 	Ok(panel)
 }
 
-fn text(glyph: &str, font: &str) -> Text {
-	let text = Text::new()
-		.set_align(Align::Center)
-		.set_anchor(Anchor::Center)
-		.set_baseline(Baseline::Center)
-		.set_font(font)
-		.set_width(Width(1.))
-		.set_value(glyph)
-		.set_wrap_count(1.3)
-		;
-	text
-}
 const KEYS_PER_SIDE: usize = 8;
 const EDGE_PADDING: f32 = 0.05;
 const TWEEN_PADDING: f32 = 0.4 * EDGE_PADDING;
@@ -48,7 +25,7 @@ const KEY_SIZE: f32 = NUMER / (KEYS_PER_SIDE as f32);
 
 const SPACING: f32 = KEY_SIZE + TWEEN_PADDING;
 
-fn append_key(panel: Entity, key_pos: KeyPos, glyph: Option<&str>, font: &str) -> Result<Entity, JsValue> {
+fn append_key(panel: Entity, key_pos: KeyPos, yomi_code: usize) -> Result<Entity, JsValue> {
 	let position = {
 		let x = -0.5 + EDGE_PADDING + (key_pos.0 as f32 * SPACING) + KEY_SIZE / 2.;
 		let y = 0.5 - (EDGE_PADDING + (key_pos.1 as f32 * SPACING) + KEY_SIZE / 2.);
@@ -56,14 +33,12 @@ fn append_key(panel: Entity, key_pos: KeyPos, glyph: Option<&str>, font: &str) -
 	};
 	let plain = create_plane_entity()?
 		.set_id(key_pos.to_id("yomikey"))?
-		.set_component(Yomikey)?
+		.set_component(Yomikey(yomi_code))?
 		;
-	let decorated = match glyph {
-		Some(glyph) => {
-			let text = text(glyph, font);
-			plain.set_component(text)?
-		}
-		None => plain,
+	let yomi_char = YomiChar(yomi_code);
+	let decorated = match yomi_char.is_glyph() {
+		true => plain.set_component(yomi_text(yomi_char))?,
+		false => plain,
 	};
 	let positioned = decorated
 		.set_component(Scale(KEY_SIZE, KEY_SIZE, 1.))?

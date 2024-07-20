@@ -7,24 +7,26 @@ pub trait Schema {
 	fn to_object(self) -> Object;
 }
 
+#[must_use]
 pub struct SinglePropertySchema(Object);
-
-impl<T: AsRef<str> + Sized> From<T> for SinglePropertySchema {
+impl<T> From<T> for SinglePropertySchema
+where
+	T: AsRef<str> + Sized,
+{
 	fn from(value: T) -> Self {
 		Self::from(Field::string(value))
 	}
 }
-
 impl From<Field> for SinglePropertySchema {
 	fn from(value: Field) -> Self {
 		Self(value.to_object())
 	}
 }
-
 impl Schema for SinglePropertySchema {
 	fn to_object(self) -> Object { self.0 }
 }
 
+#[must_use]
 pub struct MultiPropertySchema(Object);
 
 impl MultiPropertySchema {
@@ -36,7 +38,6 @@ impl MultiPropertySchema {
 		self
 	}
 }
-
 impl Schema for MultiPropertySchema {
 	fn to_object(self) -> Object {
 		self.0
@@ -44,15 +45,17 @@ impl Schema for MultiPropertySchema {
 }
 
 pub enum FieldKind {
-	String,
 	Color,
+	String,
+	USize,
 }
 
 impl FieldKind {
 	pub fn as_str(&self) -> &str {
 		match self {
-			FieldKind::String => "string",
 			FieldKind::Color => "color",
+			FieldKind::String => "string",
+			FieldKind::USize => "int",
 		}
 	}
 }
@@ -60,11 +63,14 @@ impl FieldKind {
 pub struct Field(JsValue, FieldKind);
 
 impl Field {
+	pub fn color(value: Color) -> Self {
+		Self(value.component_value().as_ref().into(), FieldKind::Color)
+	}
 	pub fn string(s: impl AsRef<str>) -> Self {
 		Self(JsValue::from_str(s.as_ref()), FieldKind::String)
 	}
-	pub fn color(value: Color) -> Self {
-		Self(value.component_value().as_ref().into(), FieldKind::Color)
+	pub fn usize(value: usize) -> Self {
+		Self(JsValue::from(value), FieldKind::USize)
 	}
 	pub fn to_object(self) -> Object {
 		let object = Object::new();

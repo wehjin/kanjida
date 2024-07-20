@@ -10,6 +10,7 @@ use web_sys::js_sys::{Function, Object};
 extern "C" {
 	pub fn aframers_system_def(rust_system: JsValue) -> Object;
 	pub fn aframers_bind_init_with_extra_state(f: Function) -> Function;
+	pub fn aframers_bind_other_with_extra_state(f: Function) -> Function;
 	pub fn aframers_bind_remove_with_extra_state(f: Function) -> Function;
 }
 

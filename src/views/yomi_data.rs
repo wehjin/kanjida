@@ -10,14 +10,13 @@ const GLYPHS: [&'static str; 61] = [
 	"リ", "ル", "レ", "ロ", "ワ"
 ];
 
-#[derive(Debug, Copy, Clone)]
-pub struct YomiChar(usize);
-
-impl From<usize> for YomiChar {
-	fn from(value: usize) -> Self { Self(value) }
-}
+#[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
+pub struct YomiChar(pub usize);
 
 impl YomiChar {
+	pub fn to_code(&self) -> usize {
+		self.0
+	}
 	pub fn is_glyph(&self) -> bool {
 		self.0 < GLYPHS.len()
 	}
