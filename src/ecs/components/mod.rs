@@ -4,3 +4,4 @@ pub mod hexgrid_component;
 pub mod laserfocus_component;
 pub mod yomigun_component;
 pub mod yomikey_component;
+pub mod yomi_text_component;
