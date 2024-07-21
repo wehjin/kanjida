@@ -5,12 +5,18 @@ use crate::aframe_ex::components::core::properties::{AsPropertyName, ComponentPr
 pub const ANIMATION: &'static str = "animation";
 
 pub enum Easing {
-	Linear
+	EaseInQuad,
+	EaseOutQuad,
+	EaseInOutQuad,
+	Linear,
 }
 impl AsRef<str> for Easing {
 	fn as_ref(&self) -> &str {
 		match self {
 			Easing::Linear => "linear",
+			Easing::EaseInQuad => "easeInQuad",
+			Easing::EaseOutQuad => "easeOutQuad",
+			Easing::EaseInOutQuad => "easeInOutQuad",
 		}
 	}
 }

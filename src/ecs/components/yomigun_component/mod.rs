@@ -89,18 +89,16 @@ mod lifecycle {
 
 pub mod handlers {
 	use aframers::af_sys::components::AComponent;
-	use aframers::browser;
-	use aframers::components::{Color, Position, Scale};
-	use aframers::entities::{create_box_entity, Entity};
-	use wasm_bindgen::JsCast;
+	use aframers::af_sys::scenes::AScene;
+	use aframers::browser::log;
+	use aframers::components::{Color, Scale};
+	use aframers::entities::Entity;
 	use web_sys::Event;
 
-	use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
-	use crate::aframe_ex::components::animation_component::{Animation, Easing};
 	use crate::aframe_ex::components::cursor_component::CursorState::CursorHovered;
 	use crate::aframe_ex::events::StateEvent;
 	use crate::aframe_ex::events::StateEventKind::{StateAdded, StateRemoved};
-	use crate::aframe_ex::scenes::Scene;
+	use crate::ecs::components::game_component::GameEvent;
 
 	pub fn yomigun_state_added(component: AComponent, js_event: Event) {
 		if let Some(event) = StateEvent::try_from_js(&js_event, StateAdded) {
@@ -123,34 +121,12 @@ pub mod handlers {
 		}
 	}
 	pub fn yomigun_click(component: AComponent, _js_event: Event) {
-		let yomigun = component.a_entity().unchecked_into::<AEntityEx>();
-		let scene = Scene::from(yomigun.a_scene());
-		let yomigun_target_vector = scene.a_scene().unchecked_ref::<ASceneEx>().yomigun_target_position();
-		browser::log(&format!("yomigun target vector: {:?}", &yomigun_target_vector));
-		if let Some(target) = yomigun_target_vector {
-			let end = Position(target.x(), target.y(), target.z());
-			let start = {
-				let relative_position = Position(0., 0., -1.);
-				yomigun.local_position_to_world(relative_position)
-			};
-			let animation = Animation::new()
-				.set_property("position")
-				.set_from(start)
-				.set_to(end)
-				.set_dur_millis(100)
-				.set_easing(Easing::Linear)
-				;
-			let sprite = create_sprite_entity(start).set_component(animation).unwrap();
-			scene.add_entity(sprite).unwrap();
-		}
+		log("YOMIGUN_CLICK: Emit SelectAnswer");
+		do_emit_select_answer(component.a_entity().a_scene());
 	}
 
-	fn create_sprite_entity(position: Position) -> Entity {
-		const SPRITE_SCALE: f32 = 0.6;
-		create_box_entity().unwrap()
-			.set_component(Scale(SPRITE_SCALE, SPRITE_SCALE, SPRITE_SCALE)).unwrap()
-			.set_component(position).unwrap()
-			.set_component(Color::Web("tomato".into())).unwrap()
+	fn do_emit_select_answer(a_scene: AScene) {
+		a_scene.emit_event(GameEvent::SubmitAnswer.as_ref());
 	}
 }
 pub mod settings;

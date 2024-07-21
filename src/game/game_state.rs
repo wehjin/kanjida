@@ -20,7 +20,7 @@ impl Debug for QuizStates {
 #[derive(Debug, Clone, Default)]
 pub struct GameState {
 	/// Available quizzes.
-	pub quiz_states: QuizStates,
+	pub all_quizzes: QuizStates,
 	/// The selected quiz.
 	pub selected_quiz: Option<QuizPoint>,
 	/// The selected yomi point. This is used when submitting an answer.
@@ -28,18 +28,18 @@ pub struct GameState {
 	/// An unused answer point.
 	pub unused_answer_point: AnswerPoint,
 	/// Submitted answers.
-	pub submitted_answer_states: HashMap<AnswerPoint, AnswerState>,
+	pub submitted_answers: HashMap<AnswerPoint, AnswerState>,
 	/// The age of the game. This advances with each event.
 	pub age: usize,
 }
 
 impl GameState {
 	pub fn quiz_hint(&self, quiz_point: QuizPoint) -> &'static str {
-		let quiz = &self.quiz_states.0[quiz_point];
+		let quiz = &self.all_quizzes.0[quiz_point];
 		quiz.as_hint()
 	}
 	pub fn as_quiz_states(&self) -> &Vec<QuizState> {
-		&self.quiz_states.0
+		&self.all_quizzes.0
 	}
 }
 
@@ -52,12 +52,12 @@ impl GameState {
 			.collect()
 			;
 		let quiz_states = QuizStates(quizzes);
-		GameState { quiz_states, ..GameState::default() }
+		GameState { all_quizzes: quiz_states, ..GameState::default() }
 	}
 
 	/// Select a quiz.
 	pub fn select_quiz(self, quiz_point: QuizPoint) -> Self {
-		match quiz_point < self.quiz_states.0.len() {
+		match quiz_point < self.all_quizzes.0.len() {
 			true => {
 				let selected_quiz = Some(quiz_point);
 				let age = self.age + 1;
@@ -75,36 +75,36 @@ impl GameState {
 	}
 
 	/// Submit an answer.
-	pub fn submit_answer(self) -> Self {
+	pub fn submit_answer(self) -> (Self, Option<AnswerPoint>) {
 		match self.selected_quiz {
-			None => self,
+			None => (self, None),
 			Some(quiz_point) => {
 				let yomi_point = self.selected_yomi;
 				let answer = AnswerState { quiz_point, yomi_point };
 				let answer_point = self.unused_answer_point;
-				let mut submitted_answers = self.submitted_answer_states.clone();
+				let mut submitted_answers = self.submitted_answers.clone();
 				submitted_answers.insert(answer_point, answer);
 				let unused_answer_point = self.unused_answer_point + 1;
 				let age = self.age + 1;
-				GameState { unused_answer_point: unused_answer_point, submitted_answer_states: submitted_answers, age, ..self }
+				(GameState { unused_answer_point, submitted_answers, age, ..self }, Some(answer_point))
 			}
 		}
 	}
 
 	/// Grade a submitted answer.
 	pub fn grade_answer(mut self, answer_point: AnswerPoint, now: DateTime<Utc>) -> Self {
-		let answer = self.submitted_answer_states.get(&answer_point);
+		let answer = self.submitted_answers.get(&answer_point);
 		if answer.is_none() {
 			return self;
 		}
 		let &AnswerState { quiz_point, yomi_point } = answer.unwrap();
-		self.submitted_answer_states.remove(&answer_point);
-		if quiz_point >= self.quiz_states.0.len() {
+		self.submitted_answers.remove(&answer_point);
+		if quiz_point >= self.all_quizzes.0.len() {
 			return self;
 		}
-		let quiz = self.quiz_states.0.remove(quiz_point);
+		let quiz = self.all_quizzes.0.remove(quiz_point);
 		let new_quiz = quiz.attempt_solution(yomi_point, now);
-		self.quiz_states.0.insert(quiz_point, new_quiz);
+		self.all_quizzes.0.insert(quiz_point, new_quiz);
 		self.age = self.age + 1;
 		self
 	}
