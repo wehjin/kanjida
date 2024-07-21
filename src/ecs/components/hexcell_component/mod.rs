@@ -1,6 +1,5 @@
 use aframers::af_sys::components::AComponent;
 use aframers::af_sys::entities::AEntity;
-use aframers::browser;
 use aframers::browser::document;
 use aframers::components::{Color, Position};
 use aframers::components::core::ComponentValue;
@@ -9,7 +8,6 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::js_sys::Reflect;
 
-use crate::three_sys;
 use crate::aframe_ex::af_sys::AEntityEx;
 use crate::aframe_ex::components::core::{ComponentDefinition, Dependencies, Events};
 use crate::aframe_ex::components::geometry_component::{Circle, Geometry};
@@ -22,6 +20,7 @@ use crate::aframe_ex::schema::multi_property::MultiPropertySchema;
 use crate::ecs::components::hex_color_component::HexColor;
 use crate::ecs::components::hexcell_component::handlers::{handle_state_added, handle_state_removed};
 use crate::ecs::components::laserfocus_component;
+use crate::three_sys;
 use crate::three_sys::material::MeshBasicMaterial;
 use crate::three_sys::mesh::Mesh;
 use crate::views::settings::{FOCUS_RING_SELECTOR, FOCUS_RING_Z_OFFSET, SELECT_RING_SELECTOR, SELECT_RING_Z_OFFSET};
@@ -70,20 +69,17 @@ impl HexcellAComponent {
 	pub fn set_ring_color_from_entity_state(&self) {
 		log_value(&self.a_entity().id().into());
 		let focus_ring = self.focus_ring_entity();
-		browser::log(&format!("fr id: {}", focus_ring.id()));
 		let cell_is_focus_ring_target = match focus_ring.get_attribute("target") {
 			Some(target) if target == self.a_entity().id() => true,
 			_ => false
 		};
 		let select_ring = self.select_ring_entity();
-		browser::log(&format!("sr id: {}", select_ring.id()));
 		let cell_is_select_ring_target = match select_ring.get_attribute("target") {
 			Some(target) if target == self.a_entity().id() => true,
 			_ => false
 		};
 		let world = self.a_entity().unchecked_into::<AEntityEx>().world_position_in_new_vector();
 		let state = self.ring_color_from_entity_state();
-		browser::log(&format!("HexState: {:?}", state));
 		match state {
 			HexColor::Focused => {
 				focus_ring.set_attribute("target", &self.a_entity().id()).unwrap();
@@ -96,7 +92,6 @@ impl HexcellAComponent {
 			HexColor::FocusedAndSelected => {
 				focus_ring.set_attribute("target", &self.a_entity().id()).unwrap();
 				let position = Position(world.x(), world.y(), world.z() + FOCUS_RING_Z_OFFSET);
-				browser::log(&format!("fr position: {}", position.component_value().as_ref()));
 				Entity::from(focus_ring)
 					.set_component(Material::new().set_color(state.to_color())).unwrap()
 					.set_component(position).unwrap()
@@ -104,7 +99,6 @@ impl HexcellAComponent {
 				;
 				select_ring.set_attribute("target", &self.a_entity().id()).unwrap();
 				let position = Position(world.x(), world.y(), world.z() + SELECT_RING_Z_OFFSET);
-				browser::log(&format!("sr position: {}", position.component_value().as_ref()));
 				Entity::from(select_ring)
 					.set_component(Material::new().set_color(state.to_color())).unwrap()
 					.set_component(position).unwrap()
@@ -113,15 +107,12 @@ impl HexcellAComponent {
 			}
 			HexColor::Selected => {
 				select_ring.set_attribute("target", &self.a_entity().id()).unwrap();
-				browser::log("set the attribute");
 				let position = Position(world.x(), world.y(), world.z() + SELECT_RING_Z_OFFSET);
-				browser::log(&format!("sr position: {}", position.component_value().as_ref()));
 				Entity::from(select_ring)
 					.set_component(Material::new().set_color(state.to_color())).unwrap()
 					.set_component(position).unwrap()
 					.set_component(Visible::True).unwrap()
 				;
-				browser::log("updated the select ring");
 			}
 			HexColor::NeitherFocusedNorSelected => {
 				if cell_is_focus_ring_target {

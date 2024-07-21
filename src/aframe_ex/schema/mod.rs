@@ -6,5 +6,6 @@ pub trait Schema {
 
 pub mod fields;
 pub mod multi_property;
+pub mod settings;
 pub mod single_property;
 

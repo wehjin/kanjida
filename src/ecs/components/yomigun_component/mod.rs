@@ -90,14 +90,14 @@ mod lifecycle {
 pub mod handlers {
 	use aframers::af_sys::components::AComponent;
 	use aframers::af_sys::scenes::AScene;
-	use aframers::browser::log;
 	use aframers::components::{Color, Scale};
 	use aframers::entities::Entity;
-	use web_sys::Event;
+	use web_sys::{CustomEvent, Event};
 
 	use crate::aframe_ex::components::cursor_component::CursorState::CursorHovered;
 	use crate::aframe_ex::events::StateEvent;
 	use crate::aframe_ex::events::StateEventKind::{StateAdded, StateRemoved};
+	use crate::aframe_ex::js::log_value;
 	use crate::ecs::components::game_component::GameEvent;
 
 	pub fn yomigun_state_added(component: AComponent, js_event: Event) {
@@ -120,8 +120,8 @@ pub mod handlers {
 			}
 		}
 	}
-	pub fn yomigun_click(component: AComponent, _js_event: Event) {
-		log("YOMIGUN_CLICK: Emit SelectAnswer");
+	pub fn yomigun_click(component: AComponent, js_event: CustomEvent) {
+		log_value(&js_event);
 		do_emit_select_answer(component.a_entity().a_scene());
 	}
 
