@@ -17,7 +17,7 @@ use crate::aframe_ex::components::material::Material;
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::events::StateEventKind::{StateAdded, StateRemoved};
 use crate::aframe_ex::js::log_value;
-use crate::aframe_ex::schema::properties::Field;
+use crate::aframe_ex::schema::fields::Field;
 use crate::aframe_ex::schema::multi_property::MultiPropertySchema;
 use crate::ecs::components::hex_color_component::HexColor;
 use crate::ecs::components::hexcell_component::handlers::{handle_state_added, handle_state_removed};

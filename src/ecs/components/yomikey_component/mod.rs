@@ -7,7 +7,7 @@ use web_sys::Event;
 use crate::aframe_ex::af_sys::AEntityEx;
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::components::cursor_component::CursorEvent::{Click, MouseEnter, MouseLeave};
-use crate::aframe_ex::schema::properties::Field;
+use crate::aframe_ex::schema::fields::Field;
 use crate::aframe_ex::schema::single_property::SinglePropertySchema;
 use crate::ecs::components::game_component::GameEvent;
 use crate::ecs::components::yomikey_component::bindgen::YomikeyAComponent;

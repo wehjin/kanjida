@@ -4,7 +4,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::events::StateEventKind;
-use crate::aframe_ex::schema::properties::Field;
+use crate::aframe_ex::schema::fields::Field;
 use crate::aframe_ex::schema::single_property::SinglePropertySchema;
 use crate::ecs::components::hexgrid_component::other::SelectedEntity;
 

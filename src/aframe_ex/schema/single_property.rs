@@ -1,6 +1,6 @@
 use web_sys::js_sys::Object;
 use crate::aframe_ex::schema::Schema;
-use crate::aframe_ex::schema::properties::Field;
+use crate::aframe_ex::schema::fields::Field;
 
 #[must_use]
 pub struct SinglePropertySchema(Object);
