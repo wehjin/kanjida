@@ -4,6 +4,22 @@ use crate::aframe_ex::components::core::properties::{AsPropertyName, ComponentPr
 
 pub const ANIMATION: &'static str = "animation";
 
+
+#[derive(Debug, Copy, Clone)]
+pub enum AnimationEvent {
+	AnimationBegin,
+	AnimationComplete,
+}
+impl AsRef<str> for AnimationEvent {
+	//noinspection SpellCheckingInspection
+	fn as_ref(&self) -> &str {
+		match self {
+			AnimationEvent::AnimationBegin => "animationbegin",
+			AnimationEvent::AnimationComplete => "animationcomplete"
+		}
+	}
+}
+
 pub enum Easing {
 	EaseInQuad,
 	EaseOutQuad,

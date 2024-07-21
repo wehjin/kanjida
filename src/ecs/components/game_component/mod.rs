@@ -8,7 +8,7 @@ use wasm_bindgen::JsCast;
 use web_sys::CustomEvent;
 
 use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
-use crate::aframe_ex::components::animation_component::{Animation, Easing};
+use crate::aframe_ex::components::animation_component::{Animation, AnimationEvent, Easing};
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::js::log_value;
 use crate::aframe_ex::scenes::Scene;
@@ -45,11 +45,17 @@ pub fn register_game_component() {
 		.set_handler(GameEvent::SelectQuiz, handle_select_quiz)
 		.set_handler(GameEvent::SelectYomi, handle_select_yomi)
 		.set_handler(GameEvent::SubmitAnswer, handle_submit_answer)
+		.set_handler(AnimationEvent::AnimationComplete, handle_animation_complete)
 		;
 	ComponentDefinition::new()
 		.set_events(events)
 		.register("game");
 }
+fn handle_animation_complete(_comp: AComponent, event: CustomEvent) {
+	log(&format!("ANIMATION_COMPLETE: {:?}", &event));
+	log_value(&event);
+}
+
 fn handle_select_quiz(_comp: AComponent, event: CustomEvent) {
 	log_value(&event);
 	let quiz_point = event.detail().as_f64().map(|it| it as usize).unwrap_or(0);
