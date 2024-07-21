@@ -6,7 +6,8 @@ use web_sys::Event;
 
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::components::cursor_component::CursorEvent::{Click, MouseEnter, MouseLeave};
-use crate::aframe_ex::schema::{Field, SinglePropertySchema};
+use crate::aframe_ex::schema::properties::Field;
+use crate::aframe_ex::schema::single_property::SinglePropertySchema;
 use crate::ecs::components::game_component::GameEvent;
 use crate::game::QuizPoint;
 use crate::views::quiz_point_from_element_id;

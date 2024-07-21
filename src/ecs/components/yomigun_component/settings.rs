@@ -1,6 +1,6 @@
 use aframers::components::core::ComponentValue;
 
-use crate::aframe_ex::schema::Field;
+use crate::aframe_ex::schema::properties::Field;
 
 #[derive(Debug, Clone)]
 pub enum YomigunSetting {

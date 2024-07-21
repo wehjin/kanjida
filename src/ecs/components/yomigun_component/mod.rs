@@ -3,7 +3,7 @@ use aframers::components::core::ComponentValue;
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::components::cursor_component::CursorEvent::Click;
 use crate::aframe_ex::events::StateEventKind::{StateAdded, StateRemoved};
-use crate::aframe_ex::schema::MultiPropertySchema;
+use crate::aframe_ex::schema::multi_property::MultiPropertySchema;
 use crate::ecs::components::yomigun_component::handlers::{yomigun_click, yomigun_state_added, yomigun_state_removed};
 use crate::ecs::components::yomigun_component::lifecycle::{init, remove, update};
 use crate::ecs::components::yomigun_component::settings::YomigunSetting;
