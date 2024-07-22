@@ -15,6 +15,7 @@ use crate::ecs::components::hex_color_component::HexColor;
 use crate::ecs::components::hexcell_component::register_hexcell_component;
 use crate::ecs::components::hexgrid_component::register_hexgrid_component;
 use crate::ecs::components::laserfocus_component::register_laserfocus_component;
+use crate::ecs::components::quiz_form_component::register_quiz_form_component;
 use crate::ecs::components::yomigun_component::register_yomigun_component;
 use crate::ecs::components::yomikey_component::register_yomikey_component;
 use crate::ecs::entities::{camera_entity, controller_entity, ground_entity, hexgrid_entity, hint_entity, light_entity, origin_entity, sky_entity, yomigun_entity};
@@ -30,6 +31,7 @@ pub fn run() -> Result<(), JsValue> {
 }
 
 fn register_components() {
+	register_quiz_form_component();
 	register_laserfocus_component();
 	register_hexcell_component();
 	register_hexgrid_component();

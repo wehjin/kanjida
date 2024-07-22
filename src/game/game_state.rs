@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::fmt::{Debug, Formatter};
+use std::ops::Index;
 
 use chrono::{DateTime, Utc};
 use kanji_data::KanjiData;
@@ -13,6 +14,12 @@ pub struct QuizStates(pub Vec<QuizState>);
 impl Debug for QuizStates {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
 		write!(f, "QuizStates({})", self.0.len())
+	}
+}
+impl Index<QuizPoint> for QuizStates {
+	type Output = QuizState;
+	fn index(&self, index: QuizPoint) -> &Self::Output {
+		&self.0[index]
 	}
 }
 

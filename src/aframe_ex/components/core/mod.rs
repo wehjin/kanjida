@@ -6,7 +6,7 @@ use web_sys::Event;
 use web_sys::js_sys::{Array, Function, Object, Reflect};
 
 use crate::aframe_ex::js;
-use crate::aframe_ex::js::{aframers_bind_init_with_extra_state, aframers_bind_other_with_extra_state, aframers_bind_remove_with_extra_state, bind_this_to_component};
+use crate::aframe_ex::js::{aframers_bind_init_with_extra_state, aframers_bind_other_with_extra_state, aframers_bind_remove_with_extra_state, bind_this_to_component, bind_this_to_first};
 use crate::aframe_ex::schema::Schema;
 
 pub mod properties {
@@ -150,6 +150,14 @@ impl ComponentDefinition {
 			aframers_bind_remove_with_extra_state(unbound)
 		};
 		self.set_property("init", &bound_init).set_property("remove", &bound_remove)
+	}
+	pub fn set_init_ref<T>(self, value: impl Fn(&T) + Sized + 'static) -> Self
+	where
+		T: AsRef<AComponent> + RefFromWasmAbi + 'static,
+	{
+		let unbound = function_from_component_fn(value);
+		let bound = bind_this_to_first(unbound);
+		self.set_property("init", &bound)
 	}
 	pub fn set_init(self, value: impl Fn(AComponent) + 'static) -> Self {
 		let closure = Closure::wrap(Box::new(value) as Box<dyn Fn(AComponent)>);

@@ -1,6 +1,8 @@
-use kanji_data::KanjiData;
 use std::collections::{HashMap, HashSet};
+
 use chrono::{DateTime, Utc};
+use kanji_data::KanjiData;
+
 use crate::game::{KanjiPoint, YomiPoint};
 use crate::game::solution_state::SolutionState;
 use crate::views::yomi_data::{first_char_in_str, YomiChar};

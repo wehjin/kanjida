@@ -7,6 +7,7 @@ pub mod three_sys;
 mod ecs;
 mod game;
 mod run;
+mod queries;
 mod views;
 
 thread_local! {
