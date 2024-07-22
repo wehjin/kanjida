@@ -1,16 +1,16 @@
 use aframers::af_sys::components::AComponent;
 use aframers::browser::log;
 
-use attribute::QuizFormAttribute;
+use quiz_form::QuizForm;
 
 use crate::aframe_ex::components::core::ComponentDefinition;
-use crate::aframe_ex::js::log_value;
+use crate::aframe_ex::schema::SchemaProperty;
 use crate::aframe_ex::schema::single_property::SinglePropertySchema;
 
 const COMPONENT_NAME: &'static str = "quiz-form";
 
 pub fn register_quiz_form_component() {
-	let schema = SinglePropertySchema::from(QuizFormAttribute::default());
+	let schema = SinglePropertySchema::from(QuizForm::default());
 	ComponentDefinition::new()
 		.set_schema(schema)
 		.set_init_ref(init)
@@ -19,9 +19,9 @@ pub fn register_quiz_form_component() {
 }
 
 fn init(this: &AComponent) {
-	log(&format!("INIT {}", COMPONENT_NAME));
-	log_value(&this.data());
+	let quiz_form = QuizForm::parse_js(&this.data());
+	log(&format!("INIT {} {{ data: {:?} }}", COMPONENT_NAME, &quiz_form));
 }
 
-pub mod attribute;
+pub mod quiz_form;
 

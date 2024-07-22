@@ -20,7 +20,7 @@ impl Schema for SinglePropertySchema {
 }
 impl<T: SchemaProperty> From<T> for SinglePropertySchema {
 	fn from(value: T) -> Self {
-		let default = value.to_schema_property_default();
+		let default = value.create_js();
 		let type_ = value.to_schema_property_type();
 		Self::new_with_default(type_, default)
 	}

@@ -18,7 +18,9 @@ impl SchemaPropertyType {
 
 pub trait SchemaProperty {
 	fn to_schema_property_type(&self) -> SchemaPropertyType;
-	fn to_schema_property_default(&self) -> JsValue;
+	fn format(&self) -> String;
+	fn create_js(&self) -> JsValue;
+	fn parse_js(data: &JsValue) -> Self;
 }
 
 pub mod fields;

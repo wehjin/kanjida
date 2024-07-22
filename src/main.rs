@@ -3,6 +3,7 @@ use std::cell::RefCell;
 use game::game_state::GameState;
 
 pub mod aframe_ex;
+pub mod js_sys_ex;
 pub mod three_sys;
 mod ecs;
 mod game;

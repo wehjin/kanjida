@@ -1,12 +1,8 @@
+use crate::ecs::components::quiz_form_component::quiz_form::QuizForm;
 use crate::GAME;
 use crate::game::game_state::GameState;
 use crate::game::QuizPoint;
 
-#[derive(Debug, Clone)]
-pub struct QuizForm {
-	pub unsolved: usize,
-	pub solved: usize,
-}
 pub fn quiz_form_from_point(quiz_point: QuizPoint) -> QuizForm {
 	let quiz_form = GAME.with_borrow(|game| {
 		quiz_form_from_point_game(quiz_point, game)
