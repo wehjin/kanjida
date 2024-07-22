@@ -2,7 +2,6 @@ use aframers::af_sys::components::AComponent;
 use aframers::af_sys::entities::AEntity;
 use aframers::browser::document;
 use aframers::components::{Color, Position};
-use aframers::components::core::ComponentValue;
 use aframers::entities::Entity;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::wasm_bindgen;

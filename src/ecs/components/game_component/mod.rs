@@ -8,6 +8,10 @@ use chrono::Utc;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::CustomEvent;
+use web_sys::js_sys::Function;
+
+use AnimationEvent::AnimationComplete;
+use GameEvent::GradeAnswer;
 
 use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
 use crate::aframe_ex::components::animation_component::{Animation, AnimationEvent, Easing};
@@ -132,14 +136,14 @@ fn render_answer_sprite(answer_point: AnswerPoint, a_scene: AScene) {
 			.set_component(animation).unwrap();
 		{
 			let a_scene = scene.a_scene().clone();
-			sprite.a_entity().add_event_listener_with_callback(
-				AnimationEvent::AnimationComplete.as_ref(),
-				&Closure::<dyn Fn(CustomEvent)>::new(move |event: CustomEvent| {
-					log_value(&event);
-					a_scene.emit_event_with_details(GameEvent::GradeAnswer.as_ref(), &answer_point.into())
-				}).into_js_value().unchecked_ref(),
-			)
-				.unwrap();
+			sprite.a_entity()
+				.add_event_listener_with_callback(
+					AnimationComplete.as_ref(),
+					&Closure::once_into_js(move |event: CustomEvent| {
+						log_value(&event);
+						a_scene.emit_event_with_details(GradeAnswer.as_ref(), &answer_point.into())
+					}).unchecked_into::<Function>(),
+				).unwrap();
 		}
 		scene.add_entity(sprite).unwrap();
 	}
