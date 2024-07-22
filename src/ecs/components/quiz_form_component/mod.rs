@@ -20,7 +20,7 @@ pub fn register_quiz_form_component() {
 
 fn init(this: &AComponent) {
 	let quiz_form = QuizForm::parse_js(&this.data());
-	log(&format!("INIT {} {{ data: {:?} }}", COMPONENT_NAME, &quiz_form));
+	log(&format!("INIT: {:?}", &quiz_form));
 }
 
 pub mod quiz_form;

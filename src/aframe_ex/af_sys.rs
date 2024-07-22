@@ -2,6 +2,8 @@ use aframers::af_sys::entities::AEntity;
 use aframers::af_sys::scenes::AScene;
 use aframers::components::Position;
 use wasm_bindgen::prelude::wasm_bindgen;
+
+use crate::aframe_ex::schema::settings::ComponentAttribute;
 use crate::three_sys::object3d::Object3D;
 use crate::three_sys::vector::Vector3;
 
@@ -31,6 +33,12 @@ impl AEntityEx {
 		let cell_vector = Vector3::origin();
 		self.object3d().get_world_position(&cell_vector);
 		cell_vector
+	}
+	pub fn set_component_attribute(&self, attr: impl ComponentAttribute) {
+		self.set_attribute(
+			attr.as_attribute_name().as_ref(),
+			attr.as_attribute_str().as_ref(),
+		).unwrap();
 	}
 }
 

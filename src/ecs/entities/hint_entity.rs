@@ -5,8 +5,10 @@ use aframers::entities::Entity;
 use wasm_bindgen::{JsCast, JsValue};
 
 use crate::aframe_ex::{Align, Baseline};
+use crate::aframe_ex::af_sys::AEntityEx;
 use crate::aframe_ex::components::font_component::StockFont;
 use crate::aframe_ex::components::visible_component::Visible;
+use crate::ecs::components::quiz_form_component::quiz_form::QuizForm;
 
 pub const ENTITY_ID: &'static str = "hintEntity";
 
@@ -27,5 +29,7 @@ pub fn create_hint_cursor() -> Result<Entity, JsValue> {
 		.set_component(Scale(scale, scale, scale))?
 		.set_component(Visible::False)?
 		;
+	entity.a_entity().unchecked_ref::<AEntityEx>()
+		.set_component_attribute(QuizForm { unsolved: 1, solved: 0 });
 	Ok(entity)
 }
