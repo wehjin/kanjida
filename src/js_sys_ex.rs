@@ -1,10 +1,33 @@
-use wasm_bindgen::JsValue;
-use web_sys::js_sys::Reflect;
+use wasm_bindgen::{JsCast, JsValue};
+use web_sys::js_sys::{Object, Reflect};
 
 pub struct JsKey(JsValue);
 
 impl JsKey {
 	pub fn key(&self) -> &JsValue { &self.0 }
+}
+impl JsKey {
+	pub fn float(&self, object: &JsValue) -> f32 {
+		let value = Reflect::get(object, self.key()).unwrap()
+			.as_f64().unwrap()
+			;
+		value as f32
+	}
+	pub fn set_float(&self, object: &JsValue, value: f32) {
+		Reflect::set(object, self.key(), &value.into()).unwrap();
+	}
+}
+impl JsKey {
+	pub fn object(&self, object: &JsValue) -> Object {
+		let value = Reflect::get(object, self.key())
+			.unwrap();
+		value.unchecked_into()
+	}
+	pub fn set_object(&self, object: &JsValue, value: &Object) {
+		Reflect::set(object, self.key(), value.unchecked_ref()).unwrap();
+	}
+}
+impl JsKey {
 	pub fn usize(&self, object: &JsValue) -> usize {
 		let value = Reflect::get(object, self.key()).unwrap()
 			.as_f64()
