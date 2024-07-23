@@ -11,9 +11,23 @@ use crate::game::quiz_state::QuizState;
 
 #[derive(Clone, Default)]
 pub struct QuizStates(pub Vec<QuizState>);
+
+impl QuizStates {
+	pub fn total_score(&self) -> (usize, usize) {
+		let score = self.0.iter().fold(
+			(0usize, 0usize),
+			|(unsolved, solved), next| {
+				let (quiz_unsolved, quiz_solved) = next.score();
+				(unsolved + quiz_unsolved, solved + quiz_solved)
+			},
+		);
+		score
+	}
+}
 impl Debug for QuizStates {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-		write!(f, "QuizStates({})", self.0.len())
+		let (unsolved, solved) = self.total_score();
+		write!(f, "QuizStates {{ count: {}, unsolved: {}, solved: {} }})", self.0.len(), unsolved, solved)
 	}
 }
 impl Index<QuizPoint> for QuizStates {
@@ -41,6 +55,9 @@ pub struct GameState {
 }
 
 impl GameState {
+	pub fn total_score(&self) -> (usize, usize) {
+		self.all_quizzes.total_score()
+	}
 	pub fn quiz_hint(&self, quiz_point: QuizPoint) -> &'static str {
 		let quiz = &self.all_quizzes.0[quiz_point];
 		quiz.as_hint()

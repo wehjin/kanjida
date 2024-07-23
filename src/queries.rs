@@ -12,15 +12,6 @@ pub fn quiz_form_from_point(quiz_point: QuizPoint) -> QuizForm {
 
 fn quiz_form_from_point_game(quiz_point: QuizPoint, game: &GameState) -> QuizForm {
 	let quiz = &game.all_quizzes[quiz_point];
-	let (unsolved, solved) = quiz.solutions.iter().fold(
-		(0usize, 0usize),
-		|(unsolved, solved), (_, solution)| {
-			if solution.is_solved() {
-				(unsolved, solved + 1)
-			} else {
-				(unsolved + 1, solved)
-			}
-		},
-	);
+	let (unsolved, solved) = quiz.score();
 	QuizForm { unsolved, solved }
 }

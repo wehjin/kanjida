@@ -23,6 +23,20 @@ impl QuizState {
 	pub fn as_question(&self) -> &'static str {
 		KanjiData(self.kanji_point).as_glyph()
 	}
+
+	pub fn score(&self) -> (usize, usize) {
+		let score = self.solutions.iter().fold(
+			(0usize, 0usize),
+			|(unsolved, solved), (_, solution)| {
+				if solution.is_solved() {
+					(unsolved, solved + 1)
+				} else {
+					(unsolved + 1, solved)
+				}
+			},
+		);
+		score
+	}
 }
 
 impl QuizState {
