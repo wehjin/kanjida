@@ -4,8 +4,8 @@ use aframers::components::Position;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::aframe_ex::schema::settings::ComponentAttribute;
-use crate::three_sys::object3d::Object3D;
-use crate::three_sys::vector::Vector3;
+use crate::three_sys::Object3D;
+use crate::three_sys::Vector3;
 
 #[wasm_bindgen]
 extern "C" {

@@ -20,8 +20,8 @@ use crate::ecs::components::hex_color_component::HexColor;
 use crate::ecs::components::hexcell_component::handlers::{handle_state_added, handle_state_removed};
 use crate::ecs::components::laserfocus_component;
 use crate::three_sys;
-use crate::three_sys::material::MeshBasicMaterial;
-use crate::three_sys::mesh::Mesh;
+use crate::three_sys::Mesh;
+use crate::three_sys::MeshBasicMaterial;
 use crate::views::settings::{FOCUS_RING_SELECTOR, FOCUS_RING_Z_OFFSET, SELECT_RING_SELECTOR, SELECT_RING_Z_OFFSET};
 
 pub mod attribute;

@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::three_sys::geometry::BufferGeometry;
+use crate::three_sys::BufferGeometry;
 use crate::three_sys::material::Material;
 use crate::three_sys::object3d::Object3D;
 
@@ -12,6 +12,8 @@ extern "C" {
 	pub fn new() -> Mesh;
 	#[wasm_bindgen(constructor)]
 	pub fn new_with_geometry(geometry: &BufferGeometry) -> Mesh;
+	#[wasm_bindgen(constructor)]
+	pub fn new_with_geometry_and_material(geometry: &BufferGeometry, material: &Material) -> Mesh;
 	#[wasm_bindgen(method, getter)]
 	pub fn material(this: &Mesh) -> Material;
 	#[wasm_bindgen(method, setter)]

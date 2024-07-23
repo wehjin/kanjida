@@ -7,6 +7,10 @@ extern "C" {
 	pub type Material;
 	#[wasm_bindgen(constructor)]
 	pub fn new() -> Material;
+	#[wasm_bindgen(method, getter)]
+	pub fn name(this: &Material) -> String;
+	#[wasm_bindgen(method, setter)]
+	pub fn set_name(this: &Material, value: &str);
 	#[wasm_bindgen(method, getter, js_name = needsUpdate)]
 	pub fn needs_update(this: &Material) -> bool;
 	#[wasm_bindgen(method, setter, js_name = needsUpdate)]

@@ -2,18 +2,8 @@ use std::f32::consts::PI;
 
 use wasm_bindgen::prelude::wasm_bindgen;
 
-#[wasm_bindgen(js_namespace = THREE)]
-extern "C" {
-	pub type Geometry;
-}
-
-#[wasm_bindgen(js_namespace = THREE)]
-extern "C" {
-	#[wasm_bindgen(extends = Geometry)]
-	pub type BufferGeometry;
-	#[wasm_bindgen(constructor)]
-	pub fn new() -> BufferGeometry;
-}
+use crate::three_sys::BufferGeometry;
+use crate::three_sys::geometry::geometry::Geometry;
 
 #[wasm_bindgen(js_namespace = THREE)]
 extern "C" {
@@ -30,5 +20,6 @@ pub const CIRCLE_THETA_LENGTH_DEFAULT: f32 = 2. * PI;
 pub fn circle_with_segments(value: u32) -> CircleGeometry {
 	CircleGeometry::new(CIRCLE_RADIUS_DEFAULT, value, CIRCLE_THETA_STATE_DEFAULT, CIRCLE_THETA_LENGTH_DEFAULT)
 }
+
 
 

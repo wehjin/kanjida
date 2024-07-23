@@ -14,7 +14,8 @@ extern "C" {
 	pub fn y(this: &Vector3) -> f32;
 	#[wasm_bindgen(method, getter)]
 	pub fn z(this: &Vector3) -> f32;
-
+	#[wasm_bindgen(method)]
+	pub fn set(this: &Vector3, x: f32, y: f32, z: f32) -> Vector3;
 	#[wasm_bindgen(method, js_name = setX)]
 	pub fn set_x(this: &Vector3, value: f32) -> Vector3;
 	#[wasm_bindgen(method, js_name = setY)]

@@ -159,6 +159,14 @@ impl ComponentDefinition {
 		let bound = bind_this_to_first(unbound);
 		self.set_property("init", &bound)
 	}
+	pub fn set_update_ref<T>(self, value: impl Fn(&T) + Sized + 'static) -> Self
+	where
+		T: AsRef<AComponent> + RefFromWasmAbi + 'static,
+	{
+		let unbound = function_from_component_fn(value);
+		let bound = bind_this_to_first(unbound);
+		self.set_property("update", &bound)
+	}
 	pub fn set_init(self, value: impl Fn(AComponent) + 'static) -> Self {
 		let closure = Closure::wrap(Box::new(value) as Box<dyn Fn(AComponent)>);
 		let new_self = self.set_property("init", &js::to_init(&closure));
