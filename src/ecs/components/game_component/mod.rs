@@ -11,16 +11,20 @@ use web_sys::CustomEvent;
 use web_sys::js_sys::Function;
 
 use AnimationEvent::AnimationComplete;
-use GameEvent::GradeAnswer;
+use GameEvent::{SelectQuiz, SelectYomi, SubmitAnswer};
 
 use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
 use crate::aframe_ex::components::animation_component::{Animation, AnimationEvent, Easing};
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::js::log_value;
 use crate::aframe_ex::scenes::Scene;
+use crate::aframe_ex::schema::settings::ComponentAttribute;
+use crate::ecs::components::game_component::GameEvent::GradeAnswer;
 use crate::ecs::entities::create_sprite_entity;
+use crate::ecs::entities::hint_entity::get_hint_cursor;
 use crate::GAME;
 use crate::game::{AnswerPoint, QuizPoint, YomiPoint};
+use crate::queries::quiz_form_from_point;
 use crate::views::{element_id_from_answer_point, element_id_from_quiz_point, element_selector_from_answer_point};
 
 /// Enumerates game events.
@@ -38,20 +42,20 @@ pub enum GameEvent {
 impl AsRef<str> for GameEvent {
 	fn as_ref(&self) -> &str {
 		match self {
-			GameEvent::SelectQuiz => "game-select-quiz",
-			GameEvent::SelectYomi => "game-select-yomi",
-			GameEvent::SubmitAnswer => "game-submit-answer",
-			GameEvent::GradeAnswer => "game-grade-answer",
+			SelectQuiz => "game-select-quiz",
+			SelectYomi => "game-select-yomi",
+			SubmitAnswer => "game-submit-answer",
+			GradeAnswer => "game-grade-answer",
 		}
 	}
 }
 
 pub fn register_game_component() {
 	let events = Events::new()
-		.set_handler(GameEvent::SelectQuiz, select_quiz)
-		.set_handler(GameEvent::SelectYomi, select_yomi)
-		.set_handler(GameEvent::SubmitAnswer, submit_answer)
-		.set_handler(GameEvent::GradeAnswer, grade_answer)
+		.set_handler(SelectQuiz, select_quiz)
+		.set_handler(SelectYomi, select_yomi)
+		.set_handler(SubmitAnswer, submit_answer)
+		.set_handler(GradeAnswer, grade_answer)
 		;
 	ComponentDefinition::new()
 		.set_events(events)
@@ -66,11 +70,15 @@ fn grade_answer(comp: AComponent, event: CustomEvent) {
 	log(&format!("GRADE_ANSWER: {:?}", &game_state));
 	GAME.set(game_state);
 	// Update entities.
-	let selector = element_selector_from_answer_point(answer_point);
-	if let Ok(Some(sprite)) = comp.a_entity().a_scene().query_selector(&selector) {
-		sprite.remove();
+	{
+		let selector = element_selector_from_answer_point(answer_point);
+		if let Ok(Some(sprite)) = comp.a_entity().a_scene().query_selector(&selector) {
+			sprite.remove();
+		}
 	}
+	render_hint_cursor();
 }
+
 fn submit_answer(comp: AComponent, _event: CustomEvent) {
 	let game = GAME.take();
 	let (game_state, answer_point) = game.submit_answer();
@@ -81,6 +89,7 @@ fn submit_answer(comp: AComponent, _event: CustomEvent) {
 		render_answer_sprite(answer_point, comp.a_entity().a_scene());
 	}
 }
+
 fn select_yomi(_comp: AComponent, event: CustomEvent) {
 	let yomi_point = event.detail().as_f64().map(|detail| detail as usize).unwrap_or(0);
 	let game_state = GAME.take().select_yomi(yomi_point);
@@ -90,6 +99,7 @@ fn select_yomi(_comp: AComponent, event: CustomEvent) {
 	let selected_yomi = GAME.with_borrow(|game_state| game_state.selected_yomi);
 	render_yomigun(selected_yomi);
 }
+
 fn select_quiz(_comp: AComponent, event: CustomEvent) {
 	log_value(&event);
 	let quiz_point = event.detail().as_f64().map(|it| it as usize).unwrap_or(0);
@@ -99,6 +109,19 @@ fn select_quiz(_comp: AComponent, event: CustomEvent) {
 
 	let selected_quiz = GAME.with_borrow(|game_state| game_state.selected_quiz);
 	render_hexgrid(selected_quiz);
+	render_hint_cursor();
+}
+
+fn render_hint_cursor() {
+	let selected_quiz = GAME.with_borrow(|game| game.selected_quiz);
+	if let Some(quiz_point) = selected_quiz {
+		let quiz_form = quiz_form_from_point(quiz_point);
+		let hint = get_hint_cursor();
+		hint.set_attribute(
+			quiz_form.as_attribute_name().as_ref(),
+			quiz_form.as_attribute_str().as_ref(),
+		).unwrap();
+	}
 }
 fn render_hexgrid(selected_quiz: Option<QuizPoint>) {
 	if let Some(quiz_point) = selected_quiz {

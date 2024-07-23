@@ -33,3 +33,9 @@ pub fn create_hint_cursor() -> Result<Entity, JsValue> {
 		.set_component_attribute(QuizForm { unsolved: 1, solved: 0 });
 	Ok(entity)
 }
+
+pub fn get_hint_cursor() -> AEntityEx {
+	document().get_element_by_id(ENTITY_ID)
+		.unwrap()
+		.unchecked_into::<AEntityEx>()
+}
