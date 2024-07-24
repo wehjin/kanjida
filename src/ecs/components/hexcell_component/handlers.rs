@@ -2,7 +2,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{CustomEvent, Event};
 
 use crate::aframe_ex::events::StateEvent;
-use crate::ecs::components::hexcell_component::HexcellAComponent;
+use crate::ecs::components::hexcell_component::bindgen::HexcellAComponent;
 
 pub(crate) fn handle_state_added(component: HexcellAComponent, event: Event) {
 	let custom = event.unchecked_into::<CustomEvent>();
