@@ -4,7 +4,7 @@ use aframers::entities::Entity;
 use wasm_bindgen::JsValue;
 
 use crate::aframe_ex::components::source_component::Source;
-use crate::ecs::components::hexgrid_component::Hexgrid;
+use crate::ecs::components::hexgrid_component::hexgrid::Hexgrid;
 
 pub fn create_hexgrid() -> Result<Entity, JsValue> {
 	let entity = circle_entity()?

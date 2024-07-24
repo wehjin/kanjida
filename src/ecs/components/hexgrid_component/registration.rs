@@ -5,10 +5,11 @@ use hexgrid::coordinates::AxialCoord;
 use wasm_bindgen::JsCast;
 
 use crate::ecs::components::hexcell_component::attribute::Hexcell;
-use crate::ecs::components::hexgrid_component::{HexgridAComponent, SelectedEntity};
+use crate::ecs::components::hexgrid_component::bindgen::HexgridAComponent;
+use crate::ecs::components::hexgrid_component::SelectedEntity;
 use crate::GAME;
-use crate::views::element_id_from_quiz_point;
 use crate::game::quiz_state::QuizState;
+use crate::views::element_id_from_quiz_point;
 use crate::views::settings::PLAIN_RING_Z_OFFSET;
 
 pub fn init(component: AComponent) -> SelectedEntity {

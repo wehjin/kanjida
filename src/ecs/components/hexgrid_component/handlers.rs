@@ -8,7 +8,7 @@ use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::events::StateEvent;
 use crate::aframe_ex::Value;
-use crate::ecs::components::hexgrid_component::HexgridAComponent;
+use crate::ecs::components::hexgrid_component::bindgen::HexgridAComponent;
 use crate::ecs::entities::hint_entity;
 use crate::GAME;
 use crate::three_sys::Vector3;
