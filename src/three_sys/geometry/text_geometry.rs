@@ -19,6 +19,7 @@ thread_local! {
 	pub static DEPTH_KEY: RefCell<JsKey> = RefCell::new("depth".into());
 	pub static FONT_KEY: RefCell<JsKey> = RefCell::new("font".into());
 	pub static SIZE_KEY: RefCell<JsKey> = RefCell::new("size".into());
+	pub static CURVE_SEGMENTS_KEY: RefCell<JsKey> = RefCell::new("curveSegments".into());
 }
 
 pub struct TextGeometryParameters(Object);
@@ -42,5 +43,10 @@ impl TextGeometryParameters {
 		DEPTH_KEY.with_borrow(|key| {
 			key.set_float(self.as_js(), value);
 		});
+	}
+	pub fn set_curve_segments(&self, value: usize) {
+		CURVE_SEGMENTS_KEY.with_borrow(|key| {
+			key.set_usize(self.as_js(), value)
+		})
 	}
 }

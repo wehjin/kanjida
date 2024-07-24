@@ -72,7 +72,6 @@ pub fn init(component: AComponent) -> SelectedEntity {
 	SelectedEntity::none()
 }
 
-
 fn load_font_create_mesh(coords: Vec<AxialCoord>, entity: AEntityEx) {
 	FONT_LOADER.with_borrow(|loader| {
 		loader.load("assets/mplus-1m-light_1m-light.json", Closure::once_into_js(
@@ -108,15 +107,18 @@ fn create_text_geometry_params(font: &Object) -> TextGeometryParameters {
 	params.set_font(font);
 	params.set_size(1.);
 	params.set_depth(0.05);
+	params.set_curve_segments(4);
 	params
 }
+
+const KANJI_SCALE: f32 = 0.55;
 
 fn create_text_geometry(glyph: &str, pixel_coord: PixelCoord, params: &TextGeometryParameters) -> BufferGeometry {
 	let pixel_coord = pixel_coord.flip_y();
 	let text_geometry = TextGeometry::new(glyph, params.as_js());
 	let geometry = text_geometry
 		.translate(-0.65, -0.5, 0.)
-		.scale(0.55, 0.55, 0.55)
+		.scale(KANJI_SCALE, KANJI_SCALE, KANJI_SCALE)
 		.translate(pixel_coord.0, pixel_coord.1, 0.)
 		;
 	geometry

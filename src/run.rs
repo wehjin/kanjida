@@ -8,6 +8,7 @@ use hexgrid_entity::create_hexgrid;
 use hint_entity::create_hint_cursor;
 use yomigun_entity::create_yomigun;
 
+use crate::aframe_ex::components::stats_component::Stats;
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::scenes::Scene;
 use crate::ecs::components::game_component::{Game, register_game_component};
@@ -65,6 +66,7 @@ fn create_scene() -> Result<Scene, JsValue> {
 		.add_entity(controller_entity::make()?)?
 		.add_entity(camera_entity::make()?)?
 		.set_component(Game)?
+		.set_component_attribute(Stats)?
 		;
 	Ok(scene)
 }

@@ -5,6 +5,8 @@ use aframers::scene::create_scene;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::Element;
 
+use crate::aframe_ex::schema::settings::ComponentAttribute;
+
 pub struct Scene(AScene);
 
 impl Scene {
@@ -20,6 +22,10 @@ impl Scene {
 	}
 	pub fn set_component(self, component: impl ComponentValue) -> Result<Self, JsValue> {
 		self.0.set_attribute(component.component_name(), component.component_value().as_ref())?;
+		Ok(self)
+	}
+	pub fn set_component_attribute(self, value: impl ComponentAttribute) -> Result<Self, JsValue> {
+		self.0.set_attribute(value.as_attribute_name().as_ref(), value.as_attribute_str().as_ref())?;
 		Ok(self)
 	}
 	pub fn add_entity(self, entity: Entity) -> Result<Self, JsValue> {
