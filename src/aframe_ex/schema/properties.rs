@@ -10,6 +10,21 @@ thread_local! {
 	pub static Y_KEY: RefCell<JsKey> = RefCell::new("y".into());
 }
 
+pub struct UsizeSchemaProperty;
+impl UsizeSchemaProperty {
+	pub fn format(value: usize) -> String {
+		format!("{}", value)
+	}
+	pub fn create_js(value: usize) -> JsValue {
+		JsValue::from(value)
+	}
+	pub fn parse_js(data: &JsValue) -> usize {
+		let float = data.as_f64().unwrap();
+		float as usize
+	}
+}
+
+
 pub struct Vec2SchemaProperty;
 impl Vec2SchemaProperty {
 	pub fn format(x: usize, y: usize) -> String {

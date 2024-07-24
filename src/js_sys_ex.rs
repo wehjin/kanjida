@@ -7,6 +7,17 @@ impl JsKey {
 	pub fn key(&self) -> &JsValue { &self.0 }
 }
 impl JsKey {
+	pub fn string(&self, object: &JsValue) -> String {
+		let value = Reflect::get(object, self.key()).unwrap()
+			.as_string().unwrap()
+			;
+		value
+	}
+	pub fn set_string(&self, object: &JsValue, value: &str) {
+		Reflect::set(object, self.key(), &value.into()).unwrap();
+	}
+}
+impl JsKey {
 	pub fn float(&self, object: &JsValue) -> f32 {
 		let value = Reflect::get(object, self.key()).unwrap()
 			.as_f64().unwrap()

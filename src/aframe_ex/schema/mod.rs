@@ -6,12 +6,14 @@ pub trait Schema {
 }
 
 pub enum SchemaPropertyType {
+	Usize,
 	Vec2,
 }
 impl SchemaPropertyType {
 	pub fn as_str(&self) -> &'static str {
 		match self {
 			SchemaPropertyType::Vec2 => "vec2",
+			SchemaPropertyType::Usize => "int",
 		}
 	}
 }

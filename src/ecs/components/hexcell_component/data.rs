@@ -5,4 +5,6 @@ extern "C" {
 	pub type HexcellData;
 	#[wasm_bindgen(method, getter)]
 	pub fn glyph(this: &HexcellData) -> String;
+	#[wasm_bindgen(method, getter)]
+	pub fn status(this: &HexcellData) -> usize;
 }

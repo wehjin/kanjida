@@ -4,6 +4,7 @@ use aframers::af_sys::scenes::AScene;
 use aframers::browser::{document, log};
 use aframers::components::core::ComponentValue;
 use aframers::components::Position;
+use aframers::entities::Entity;
 use chrono::Utc;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
@@ -20,6 +21,7 @@ use crate::aframe_ex::js::log_value;
 use crate::aframe_ex::scenes::Scene;
 use crate::aframe_ex::schema::settings::ComponentAttribute;
 use crate::ecs::components::game_component::GameEvent::GradeAnswer;
+use crate::ecs::components::hexcell_component::attribute::Hexcell;
 use crate::ecs::entities::create_sprite_entity;
 use crate::ecs::entities::hint_entity::get_hint_cursor;
 use crate::GAME;
@@ -61,7 +63,7 @@ pub fn register_game_component() {
 		.set_events(events)
 		.register("game");
 }
-fn grade_answer(comp: AComponent, event: CustomEvent) {
+fn grade_answer(_comp: AComponent, event: CustomEvent) {
 	log_value(&event);
 	// Update state
 	let game = GAME.take();
@@ -70,13 +72,8 @@ fn grade_answer(comp: AComponent, event: CustomEvent) {
 	log(&format!("GRADE_ANSWER: {:?}", &game_state));
 	GAME.set(game_state);
 	// Update entities.
-	{
-		let selector = element_selector_from_answer_point(answer_point);
-		if let Ok(Some(sprite)) = comp.a_entity().a_scene().query_selector(&selector) {
-			sprite.remove();
-		}
-	}
-	render_hint_cursor();
+	dispose_answer_sprite(answer_point);
+	render_hint_cursor_and_quiz_status();
 }
 
 fn submit_answer(comp: AComponent, _event: CustomEvent) {
@@ -109,10 +106,17 @@ fn select_quiz(_comp: AComponent, event: CustomEvent) {
 
 	let selected_quiz = GAME.with_borrow(|game_state| game_state.selected_quiz);
 	render_hexgrid(selected_quiz);
-	render_hint_cursor();
+	render_hint_cursor_and_quiz_status();
 }
 
-fn render_hint_cursor() {
+fn dispose_answer_sprite(answer_point: AnswerPoint) {
+	let selector = element_selector_from_answer_point(answer_point);
+	if let Ok(Some(sprite)) = document().query_selector(&selector) {
+		sprite.remove();
+	}
+}
+
+fn render_hint_cursor_and_quiz_status() {
 	let selected_quiz = GAME.with_borrow(|game| game.selected_quiz);
 	if let Some(quiz_point) = selected_quiz {
 		let quiz_form = quiz_form_from_point(quiz_point);
@@ -121,6 +125,13 @@ fn render_hint_cursor() {
 			quiz_form.as_attribute_name().as_ref(),
 			quiz_form.as_attribute_str().as_ref(),
 		).unwrap();
+		if quiz_form.unsolved == 0 {
+			if let Some(quiz) = document().get_element_by_id(&element_id_from_quiz_point(quiz_point)) {
+				Entity::from(quiz.unchecked_into::<AEntity>())
+					.set_component(Hexcell::new().set_state(1)).unwrap()
+				;
+			}
+		}
 	}
 }
 fn render_hexgrid(selected_quiz: Option<QuizPoint>) {

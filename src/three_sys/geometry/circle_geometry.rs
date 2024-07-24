@@ -11,6 +11,8 @@ extern "C" {
 	pub type CircleGeometry;
 	#[wasm_bindgen(constructor)]
 	pub fn new(radius: f32, segments: u32, theta_start: f32, theta_length: f32) -> CircleGeometry;
+	#[wasm_bindgen(constructor)]
+	pub fn new_with_radius_and_segments(radius: f32, segments: u32) -> CircleGeometry;
 }
 
 pub const CIRCLE_RADIUS_DEFAULT: f32 = 1.;
