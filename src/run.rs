@@ -86,12 +86,6 @@ fn create_focus_ring() -> Result<Entity, JsValue> {
 }
 
 fn create_assets() -> Result<Element, JsValue> {
-	let img = document().create_element("img")?;
-	img.set_id("spiral");
-	img.set_attribute("src", "assets/spiral.png")?;
-	img.set_attribute("width", "2272")?;
-	img.set_attribute("height", "2272")?;
 	let assets = document().create_element("a-assets")?;
-	assets.append_child(&img)?;
 	Ok(assets)
 }

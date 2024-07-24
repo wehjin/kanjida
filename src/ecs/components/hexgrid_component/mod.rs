@@ -1,11 +1,15 @@
-use ::hexgrid::coordinates::AxialCoord;
+use ::hexgrid::coordinates::{AxialCoord, PixelCoord};
 use aframers::af_sys::components::AComponent;
 use aframers::components::Position;
 use aframers::entities::{create_entity, Entity};
+use kanji_data::KanjiData;
+use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
+use web_sys::js_sys::{Array, Object};
 
 use hexgrid::Hexgrid;
 
+use crate::aframe_ex::af_sys::AEntityEx;
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::events::StateEventKind;
 use crate::aframe_ex::schema::fields::Field;
@@ -13,8 +17,10 @@ use crate::aframe_ex::schema::single_property::SinglePropertySchema;
 use crate::ecs::components::hexcell_component::attribute::Hexcell;
 use crate::ecs::components::hexgrid_component::bindgen::HexgridAComponent;
 use crate::ecs::components::hexgrid_component::other::SelectedEntity;
+use crate::ecs::components::quiz_form_component::FONT_LOADER;
 use crate::GAME;
 use crate::game::quiz_state::QuizState;
+use crate::three_sys::{BufferGeometry, Color, merge_geometries, Mesh, MeshBasicMaterial, TextGeometry, TextGeometryParameters};
 use crate::views::element_id_from_quiz_point;
 use crate::views::settings::PLAIN_RING_Z_OFFSET;
 
@@ -62,8 +68,64 @@ pub fn init(component: AComponent) -> SelectedEntity {
 		let cell = cell.set_component(position).unwrap();
 		grid = grid.append_child(cell).unwrap();
 	}
-
+	load_font_create_mesh(spiral_coords, component.a_entity().unchecked_into());
 	SelectedEntity::none()
+}
+
+
+fn load_font_create_mesh(coords: Vec<AxialCoord>, entity: AEntityEx) {
+	FONT_LOADER.with_borrow(|loader| {
+		loader.load("assets/mplus-1m-light_1m-light.json", Closure::once_into_js(
+			move |font: &Object| {
+				create_mesh_with_font(coords, entity, font);
+			}
+		).unchecked_ref());
+	})
+}
+
+fn create_mesh_with_font(coords: Vec<AxialCoord>, entity: AEntityEx, font: &Object) {
+	let geometry = create_geometry(coords, font);
+	let material = create_material();
+	let mesh = Mesh::new_with_geometry_and_material(&geometry, &material);
+	mesh.set_name("kanji-grid");
+	entity.object3d().add(&mesh);
+}
+
+fn create_geometry(coords: Vec<AxialCoord>, font: &Object) -> BufferGeometry {
+	let params = create_text_geometry_params(font);
+	let array = Array::new_with_length(coords.len() as u32);
+	for i in 0..coords.len() {
+		let coord = &coords[i];
+		let glyph = KanjiData(i).as_glyph();
+		let geometry = create_text_geometry(glyph, coord.to_pixel(), &params);
+		array.set(i as u32, geometry.unchecked_into());
+	}
+	merge_geometries(&array, false)
+}
+
+fn create_text_geometry_params(font: &Object) -> TextGeometryParameters {
+	let params = TextGeometryParameters::new();
+	params.set_font(font);
+	params.set_size(1.);
+	params.set_depth(0.05);
+	params
+}
+
+fn create_text_geometry(glyph: &str, pixel_coord: PixelCoord, params: &TextGeometryParameters) -> BufferGeometry {
+	let pixel_coord = pixel_coord.flip_y();
+	let text_geometry = TextGeometry::new(glyph, params.as_js());
+	let geometry = text_geometry
+		.translate(-0.65, -0.5, 0.)
+		.scale(0.55, 0.55, 0.55)
+		.translate(pixel_coord.0, pixel_coord.1, 0.)
+		;
+	geometry
+}
+
+fn create_material() -> MeshBasicMaterial {
+	let material = MeshBasicMaterial::new();
+	material.set_color(&Color::new_str("Silver"));
+	material
 }
 
 fn hexcell_entity(quiz_state: &QuizState) -> Entity {
