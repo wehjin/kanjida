@@ -16,6 +16,7 @@ use GameEvent::{GradeAnswer, SelectQuiz, SelectYomi, SubmitAnswer, ToggleSolutio
 use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
 use crate::aframe_ex::components::animation_component::{Animation, AnimationEvent, Easing};
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
+use crate::aframe_ex::components::oculus_touch_controls_component::OculusTouchControlsEvent::AButtonDown;
 use crate::aframe_ex::js::log_value;
 use crate::aframe_ex::scenes::Scene;
 use crate::aframe_ex::schema::settings::ComponentAttribute;
@@ -40,10 +41,16 @@ pub fn register_game_component() {
 		.set_handler(SubmitAnswer, submit_answer)
 		.set_handler(GradeAnswer, grade_answer)
 		.set_handler(ToggleSolution, toggle_solution)
+		.set_handler(AButtonDown, on_a_button_down)
 		;
 	ComponentDefinition::new()
 		.set_events(events)
 		.register("game");
+}
+
+fn on_a_button_down(comp: AComponent, event: CustomEvent) {
+	log_value(&event);
+	comp.a_entity().a_scene().emit_event(ToggleSolution.as_ref());
 }
 
 fn toggle_solution(_comp: AComponent, event: CustomEvent) {
