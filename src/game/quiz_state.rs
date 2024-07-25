@@ -19,8 +19,19 @@ pub struct QuizState {
 }
 
 impl QuizState {
-	pub fn as_hint(&self) -> &'static str {
-		KanjiData(self.kanji_point).as_meaning()
+	pub fn to_hint(&self) -> String {
+		let data = KanjiData(self.kanji_point);
+		let meaning = data.as_meaning();
+		let reveal = match self.is_revealed {
+			true => {
+				let onyomis = data.as_onyomi().iter()
+					.map(|&it| it.to_string())
+					.collect::<Vec<_>>();
+				onyomis.join(", ")
+			}
+			false => " ".to_string()
+		};
+		format!("{}\n\n\n{}", meaning, &reveal)
 	}
 	pub fn as_question(&self) -> &'static str {
 		KanjiData(self.kanji_point).as_glyph()

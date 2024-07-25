@@ -19,9 +19,10 @@ use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::js::log_value;
 use crate::aframe_ex::scenes::Scene;
 use crate::aframe_ex::schema::settings::ComponentAttribute;
+use crate::aframe_ex::Value;
 use crate::ecs::components::hexcell_component::attribute::Hexcell;
 use crate::ecs::components::quiz_form_component::quiz_form::QuizForm;
-use crate::ecs::entities::create_sprite_entity;
+use crate::ecs::entities::{create_sprite_entity, hint_entity};
 use crate::ecs::entities::hint_entity::get_hint_cursor;
 use crate::GAME;
 use crate::game::{AnswerPoint, QuizPoint, YomiPoint};
@@ -46,7 +47,7 @@ pub fn register_game_component() {
 }
 
 fn toggle_solution(_comp: AComponent, event: CustomEvent) {
-	update_game("TOGGLE_SOLUTION", event, |mut game, _event| {
+	let quiz_point = update_game("TOGGLE_SOLUTION", event, |mut game, _event| {
 		match game.selected_quiz {
 			Some(quiz_point) => {
 				game.all_quizzes = game.all_quizzes.swap(quiz_point, QuizState::toggle_revealed);
@@ -56,6 +57,12 @@ fn toggle_solution(_comp: AComponent, event: CustomEvent) {
 		}
 	});
 	render_hint_cursor_and_quiz_status();
+	if let Some(quiz_point) = quiz_point {
+		let hint = GAME.with_borrow(|game| game.quiz_hint(quiz_point));
+		hint_entity::get()
+			.set_component(Value(hint.to_uppercase())).unwrap()
+		;
+	}
 }
 
 fn grade_answer(_comp: AComponent, event: CustomEvent) {

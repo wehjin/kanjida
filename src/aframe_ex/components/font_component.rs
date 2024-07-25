@@ -1,6 +1,31 @@
 use aframers::components::core::ComponentValue;
 
 #[derive(Debug, Copy, Clone)]
+pub struct CustomFont(pub &'static str);
+impl ComponentValue for CustomFont {
+	fn component_name(&self) -> &str {
+		"font"
+	}
+	fn component_value(&self) -> impl AsRef<str> {
+		self.0
+	}
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct Negate(pub bool);
+impl ComponentValue for Negate {
+	fn component_name(&self) -> &str {
+		"negate"
+	}
+	fn component_value(&self) -> impl AsRef<str> {
+		match self.0 {
+			true => "true",
+			false => "false",
+		}
+	}
+}
+
+#[derive(Debug, Copy, Clone)]
 pub enum StockFont {
 	Roboto,
 	AileronSemiBold,

@@ -16,7 +16,7 @@ impl QuizStates {
 	pub fn swap(mut self, index: usize, f: impl Fn(QuizState) -> QuizState) -> Self {
 		let state = self.0.remove(index);
 		let new_state = f(state);
-		self.0.insert(0, new_state);
+		self.0.insert(index, new_state);
 		self
 	}
 	pub fn total_unsolved_solved_revealed(&self) -> (usize, usize, usize) {
@@ -72,9 +72,9 @@ impl GameState {
 	pub fn total_unsolved_solved_revealed(&self) -> (usize, usize, usize) {
 		self.all_quizzes.total_unsolved_solved_revealed()
 	}
-	pub fn quiz_hint(&self, quiz_point: QuizPoint) -> &'static str {
+	pub fn quiz_hint(&self, quiz_point: QuizPoint) -> String {
 		let quiz = &self.all_quizzes.0[quiz_point];
-		quiz.as_hint()
+		quiz.to_hint()
 	}
 	pub fn as_quiz_states(&self) -> &Vec<QuizState> {
 		&self.all_quizzes.0

@@ -6,9 +6,10 @@ use wasm_bindgen::{JsCast, JsValue};
 
 use crate::aframe_ex::{Align, Anchor, Baseline};
 use crate::aframe_ex::af_sys::AEntityEx;
-use crate::aframe_ex::components::font_component::StockFont;
+use crate::aframe_ex::components::font_component::{CustomFont, Negate};
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::ecs::components::quiz_form_component::quiz_form::QuizForm;
+use crate::views::yomi_data::YOMI_FONT;
 
 pub const ENTITY_ID: &'static str = "hintEntity";
 
@@ -25,7 +26,8 @@ pub fn create_hint_cursor() -> Result<Entity, JsValue> {
 		.set_component(Baseline::Center)?
 		.set_component(Anchor::Align)?
 		.set_component(Color::Web("Yellow".into()))?
-		.set_component(StockFont::Roboto)?
+		.set_component(CustomFont(YOMI_FONT))?
+		.set_component(Negate(false))?
 		.set_component(Position(0.0, 1.6, -11.0))?
 		.set_component(Scale(scale, scale, scale))?
 		.set_component(Visible::False)?

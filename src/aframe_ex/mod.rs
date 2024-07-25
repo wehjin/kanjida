@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter};
 
+use aframers::components::{Height, Width};
 use aframers::components::core::ComponentValue;
-use aframers::components::Width;
 
 pub mod af_sys;
 pub mod components;
@@ -19,6 +19,7 @@ pub struct Text {
 	anchor: Option<Anchor>,
 	baseline: Option<Baseline>,
 	font: Option<String>,
+	height: Option<Height>,
 	value: Option<String>,
 	width: Option<Width>,
 	wrap_count: Option<f32>,
@@ -42,6 +43,10 @@ impl Text {
 		self.font = Some(value.as_ref().to_string());
 		self
 	}
+	pub fn set_height(mut self, value: Height) -> Self {
+		self.height = Some(value);
+		self
+	}
 	pub fn set_value(self, value: impl AsRef<str>) -> Self {
 		Self { value: Some(value.as_ref().into()), ..self }
 	}
@@ -62,6 +67,7 @@ impl Text {
 			anchor: None,
 			baseline: None,
 			font: None,
+			height: None,
 			value: None,
 			width: None,
 			wrap_count: None,
@@ -87,6 +93,9 @@ impl ComponentValue for Text {
 		if let Some(value) = &self.font {
 			clauses.push("negate: false".into());
 			clauses.push(format!("font: {}", value));
+		}
+		if let Some(value) = self.height {
+			clauses.push(format!("height: {}", value.component_value().as_ref()));
 		}
 		if let Some(value) = &self.value {
 			clauses.push(format!("value: {}", value));
