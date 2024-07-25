@@ -5,7 +5,7 @@ use kanji_data::KanjiData;
 
 use crate::game::{KanjiPoint, YomiPoint};
 use crate::game::solution_state::SolutionState;
-use crate::views::yomi_data::{first_char_in_str, YomiChar};
+use crate::views::yomi_data::{first_char_in_str, split_string_first_char, YomiChar};
 
 /// Holds the state of a quiz.
 #[derive(Debug, Clone)]
@@ -25,7 +25,14 @@ impl QuizState {
 		let reveal = match self.is_revealed {
 			true => {
 				let onyomis = data.as_onyomi().iter()
-					.map(|&it| it.to_string())
+					.map(|&it| {
+						if it.chars().count() > 1 {
+							let (first, rest) = split_string_first_char(it);
+							format!("{}({})", &first, &rest)
+						} else {
+							it.to_string()
+						}
+					})
 					.collect::<Vec<_>>();
 				onyomis.join(", ")
 			}

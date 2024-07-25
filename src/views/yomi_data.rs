@@ -36,3 +36,10 @@ impl YomiChar {
 pub fn first_char_in_str(s: &str) -> char {
 	s.chars().next().unwrap_or(' ')
 }
+
+pub fn split_string_first_char(s: &str) -> (String, String) {
+	let mut chars = s.chars();
+	let first = chars.next().unwrap_or(' ').to_string();
+	let remaining = chars.collect::<String>();
+	(first, remaining)
+}
