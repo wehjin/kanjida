@@ -12,6 +12,6 @@ pub fn quiz_form_from_point(quiz_point: QuizPoint) -> QuizForm {
 
 fn quiz_form_from_point_game(quiz_point: QuizPoint, game: &GameState) -> QuizForm {
 	let quiz = &game.all_quizzes[quiz_point];
-	let (unsolved, solved) = quiz.score();
-	QuizForm { unsolved, solved }
+	let (unsolved, solved, revealed) = quiz.unsolved_solved_revealed();
+	QuizForm { unsolved, solved, revealed }
 }

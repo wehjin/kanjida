@@ -38,8 +38,9 @@ fn update_hint_entity(center: &Vector3, quiz_id: &str) {
 		let quiz_point = quiz_point_from_element_id(quiz_id);
 		game.quiz_hint(quiz_point).to_string()
 	});
+	let hint = format!("{}\n\n\nabcコンサート", &hint);
 	hint_entity::get()
-		.set_component(Position(center.x(), center.y() + 0.8, center.z() + HINT_Z_OFFSET)).unwrap()
+		.set_component(Position(center.x(), center.y(), center.z() + HINT_Z_OFFSET)).unwrap()
 		.set_component(Value(hint.to_uppercase())).unwrap()
 		.set_component(Visible::True).unwrap()
 	;

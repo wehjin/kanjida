@@ -2,7 +2,6 @@ use aframers::af_sys::components::AComponent;
 use aframers::af_sys::entities::AEntity;
 use aframers::af_sys::scenes::AScene;
 use aframers::browser::{document, log};
-use aframers::components::core::ComponentValue;
 use aframers::components::Position;
 use aframers::entities::Entity;
 use chrono::Utc;
@@ -12,7 +11,7 @@ use web_sys::CustomEvent;
 use web_sys::js_sys::Function;
 
 use AnimationEvent::AnimationComplete;
-use GameEvent::{SelectQuiz, SelectYomi, SubmitAnswer};
+use GameEvent::{GradeAnswer, SelectQuiz, SelectYomi, SubmitAnswer, ToggleSolution};
 
 use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
 use crate::aframe_ex::components::animation_component::{Animation, AnimationEvent, Easing};
@@ -20,37 +19,18 @@ use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::js::log_value;
 use crate::aframe_ex::scenes::Scene;
 use crate::aframe_ex::schema::settings::ComponentAttribute;
-use crate::ecs::components::game_component::GameEvent::GradeAnswer;
 use crate::ecs::components::hexcell_component::attribute::Hexcell;
+use crate::ecs::components::quiz_form_component::quiz_form::QuizForm;
 use crate::ecs::entities::create_sprite_entity;
 use crate::ecs::entities::hint_entity::get_hint_cursor;
 use crate::GAME;
 use crate::game::{AnswerPoint, QuizPoint, YomiPoint};
+use crate::game::game_state::GameState;
+use crate::game::quiz_state::QuizState;
 use crate::queries::quiz_form_from_point;
 use crate::views::{element_id_from_answer_point, element_id_from_quiz_point, element_selector_from_answer_point};
 
-/// Enumerates game events.
-#[derive(Debug, Clone)]
-pub enum GameEvent {
-	/// Selects a quiz to be the target of an answer.
-	SelectQuiz,
-	/// Selects a yomi to use in the next answer.
-	SelectYomi,
-	/// Submits an answer using the selected yomi and quiz.
-	SubmitAnswer,
-	/// Verify an answer against the solutions in its quiz.
-	GradeAnswer,
-}
-impl AsRef<str> for GameEvent {
-	fn as_ref(&self) -> &str {
-		match self {
-			SelectQuiz => "game-select-quiz",
-			SelectYomi => "game-select-yomi",
-			SubmitAnswer => "game-submit-answer",
-			GradeAnswer => "game-grade-answer",
-		}
-	}
-}
+pub mod game;
 
 pub fn register_game_component() {
 	let events = Events::new()
@@ -58,58 +38,76 @@ pub fn register_game_component() {
 		.set_handler(SelectYomi, select_yomi)
 		.set_handler(SubmitAnswer, submit_answer)
 		.set_handler(GradeAnswer, grade_answer)
+		.set_handler(ToggleSolution, toggle_solution)
 		;
 	ComponentDefinition::new()
 		.set_events(events)
 		.register("game");
 }
-fn grade_answer(_comp: AComponent, event: CustomEvent) {
-	log_value(&event);
-	// Update state
-	let game = GAME.take();
-	let answer_point = event.detail().as_f64().unwrap() as AnswerPoint;
-	let game_state = game.grade_answer(answer_point, Utc::now());
-	log(&format!("GRADE_ANSWER: {:?}", &game_state));
-	GAME.set(game_state);
-	// Update entities.
-	dispose_answer_sprite(answer_point);
+
+fn toggle_solution(_comp: AComponent, event: CustomEvent) {
+	update_game("TOGGLE_SOLUTION", event, |mut game, _event| {
+		match game.selected_quiz {
+			Some(quiz_point) => {
+				game.all_quizzes = game.all_quizzes.swap(quiz_point, QuizState::toggle_revealed);
+				(game, Some(quiz_point))
+			}
+			None => (game, None),
+		}
+	});
 	render_hint_cursor_and_quiz_status();
 }
 
-fn submit_answer(comp: AComponent, _event: CustomEvent) {
-	let game = GAME.take();
-	let (game_state, answer_point) = game.submit_answer();
-	log(&format!("SUBMIT_ANSWER: {:?}", &game_state));
-	GAME.set(game_state);
+fn grade_answer(_comp: AComponent, event: CustomEvent) {
+	let answer_point = update_game("GRADE_ANSWER", event, |state, event| {
+		let answer_point = event.detail().as_f64().unwrap() as AnswerPoint;
+		(state.grade_answer(answer_point, Utc::now()), answer_point)
+	});
+	// Update entities.
+	erase_answer_sprite(answer_point);
+	render_hint_cursor_and_quiz_status();
+}
 
+fn submit_answer(comp: AComponent, event: CustomEvent) {
+	let answer_point = update_game("SUBMIT_ANSWER", event, |state, _event| {
+		state.submit_answer()
+	});
 	if let Some(answer_point) = answer_point {
 		render_answer_sprite(answer_point, comp.a_entity().a_scene());
 	}
 }
 
 fn select_yomi(_comp: AComponent, event: CustomEvent) {
-	let yomi_point = event.detail().as_f64().map(|detail| detail as usize).unwrap_or(0);
-	let game_state = GAME.take().select_yomi(yomi_point);
-	log(&format!("SELECT_YOMI: {:?}", &game_state));
-	GAME.set(game_state);
-
+	update_game("SELECT_YOMI", event, |state, event| {
+		let yomi_point = event.detail().as_f64().map(|detail| detail as usize).unwrap_or(0);
+		let game_state = state.select_yomi(yomi_point);
+		(game_state, ())
+	});
 	let selected_yomi = GAME.with_borrow(|game_state| game_state.selected_yomi);
 	render_yomigun(selected_yomi);
 }
 
 fn select_quiz(_comp: AComponent, event: CustomEvent) {
-	log_value(&event);
-	let quiz_point = event.detail().as_f64().map(|it| it as usize).unwrap_or(0);
-	let game_state = GAME.take().select_quiz(quiz_point);
-	log(&format!("SELECT_QUIZ: {:?}", &game_state));
-	GAME.set(game_state);
-
+	update_game("SELECT_QUIZ", event, |state, event| {
+		let quiz_point = event.detail().as_f64().map(|it| it as usize).unwrap_or(0);
+		let game_state = state.select_quiz(quiz_point);
+		(game_state, ())
+	});
 	let selected_quiz = GAME.with_borrow(|game_state| game_state.selected_quiz);
 	render_hexgrid(selected_quiz);
 	render_hint_cursor_and_quiz_status();
 }
 
-fn dispose_answer_sprite(answer_point: AnswerPoint) {
+fn update_game<T>(name: impl AsRef<str>, event: CustomEvent, step: impl Fn(GameState, CustomEvent) -> (GameState, T)) -> T {
+	log_value(&event);
+	let state = GAME.take();
+	let (new_state, effects) = step(state, event);
+	log(&format!("{}: {:?}", name.as_ref(), &new_state));
+	GAME.set(new_state);
+	effects
+}
+
+fn erase_answer_sprite(answer_point: AnswerPoint) {
 	let selector = element_selector_from_answer_point(answer_point);
 	if let Ok(Some(sprite)) = document().query_selector(&selector) {
 		sprite.remove();
@@ -120,20 +118,29 @@ fn render_hint_cursor_and_quiz_status() {
 	let selected_quiz = GAME.with_borrow(|game| game.selected_quiz);
 	if let Some(quiz_point) = selected_quiz {
 		let quiz_form = quiz_form_from_point(quiz_point);
-		let hint = get_hint_cursor();
-		hint.set_attribute(
-			quiz_form.as_attribute_name().as_ref(),
-			quiz_form.as_attribute_str().as_ref(),
-		).unwrap();
-		if quiz_form.unsolved == 0 {
-			if let Some(quiz) = document().get_element_by_id(&element_id_from_quiz_point(quiz_point)) {
-				Entity::from(quiz.unchecked_into::<AEntity>())
-					.set_component(Hexcell::new().set_state(1)).unwrap()
-				;
-			}
+		render_hint_cursor(quiz_form);
+		render_quiz_status(quiz_point, quiz_form);
+	}
+}
+
+fn render_quiz_status(quiz_point: QuizPoint, quiz_form: QuizForm) {
+	if quiz_form.unsolved == 0 {
+		if let Some(quiz) = document().get_element_by_id(&element_id_from_quiz_point(quiz_point)) {
+			Entity::from(quiz.unchecked_into::<AEntity>())
+				.set_component(Hexcell::new().set_state(1)).unwrap()
+			;
 		}
 	}
 }
+
+fn render_hint_cursor(quiz_form: QuizForm) {
+	let hint = get_hint_cursor();
+	hint.set_attribute(
+		quiz_form.as_attribute_name().as_ref(),
+		quiz_form.as_attribute_str().as_ref(),
+	).unwrap();
+}
+
 fn render_hexgrid(selected_quiz: Option<QuizPoint>) {
 	if let Some(quiz_point) = selected_quiz {
 		let cell_selector = format!("#{}", element_id_from_quiz_point(quiz_point));
@@ -183,10 +190,29 @@ fn render_answer_sprite(answer_point: AnswerPoint, a_scene: AScene) {
 	}
 }
 
-pub struct Game;
-impl ComponentValue for Game {
-	fn component_name(&self) -> &str { "game" }
-	fn component_value(&self) -> impl AsRef<str> { "true" }
+/// Enumerates game events.
+#[derive(Debug, Clone)]
+pub enum GameEvent {
+	/// Selects a quiz to be the target of an answer.
+	SelectQuiz,
+	/// Selects a yomi to use in the next answer.
+	SelectYomi,
+	/// Submits an answer using the selected yomi and quiz.
+	SubmitAnswer,
+	/// Verify an answer against the solutions in its quiz.
+	GradeAnswer,
+	/// Reveals or hides the solution for the selected quiz.
+	ToggleSolution,
 }
 
-
+impl AsRef<str> for GameEvent {
+	fn as_ref(&self) -> &str {
+		match self {
+			SelectQuiz => "game-select-quiz",
+			SelectYomi => "game-select-yomi",
+			SubmitAnswer => "game-submit-answer",
+			GradeAnswer => "game-grade-answer",
+			ToggleSolution => "game-toggle-solution",
+		}
+	}
+}

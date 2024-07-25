@@ -1,7 +1,7 @@
 use wasm_bindgen::JsValue;
 
 use crate::aframe_ex::schema::{SchemaProperty, SchemaPropertyType};
-use crate::aframe_ex::schema::properties::Vec2SchemaProperty;
+use crate::aframe_ex::schema::properties::Vec3SchemaProperty;
 use crate::aframe_ex::schema::settings::ComponentAttribute;
 use crate::ecs::components::quiz_form_component::COMPONENT_NAME;
 
@@ -9,21 +9,22 @@ use crate::ecs::components::quiz_form_component::COMPONENT_NAME;
 pub struct QuizForm {
 	pub unsolved: usize,
 	pub solved: usize,
+	pub revealed: usize,
 }
 
 impl SchemaProperty for QuizForm {
 	fn to_schema_property_type(&self) -> SchemaPropertyType {
-		SchemaPropertyType::Vec2
+		SchemaPropertyType::Vec3
 	}
 	fn format(&self) -> String {
-		Vec2SchemaProperty::format(self.unsolved, self.solved)
+		Vec3SchemaProperty::format(self.unsolved, self.solved, self.revealed)
 	}
 	fn create_js(&self) -> JsValue {
-		Vec2SchemaProperty::create_js(self.unsolved, self.solved)
+		Vec3SchemaProperty::create_js(self.unsolved, self.solved, self.revealed)
 	}
 	fn parse_js(data: &JsValue) -> Self {
-		let (x, y) = Vec2SchemaProperty::parse_js(data);
-		Self { unsolved: x, solved: y }
+		let (x, y, z) = Vec3SchemaProperty::parse_js(data);
+		Self { unsolved: x, solved: y, revealed: z }
 	}
 }
 

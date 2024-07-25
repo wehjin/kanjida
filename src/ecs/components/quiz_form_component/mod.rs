@@ -40,7 +40,7 @@ const OFFSET_INTENSITY: f32 = 0.25;
 const X_FACTOR: f32 = 1.5;
 const Y_FACTOR: f32 = 1.732;
 const X_OFFSET: f32 = X_FACTOR * OFFSET_INTENSITY;
-const Y_OFFSET: f32 = Y_FACTOR * OFFSET_INTENSITY;
+const Y_OFFSET: f32 = Y_FACTOR * OFFSET_INTENSITY * 0.5;
 
 thread_local! {
 	pub static FONT_LOADER: RefCell<FontLoader> = RefCell::new(FontLoader::new());
@@ -48,28 +48,28 @@ thread_local! {
 }
 
 fn update_entity(entity: &AEntityEx, quiz_form: &QuizForm) {
-	let QuizForm { unsolved, solved } = *quiz_form;
-	render_indicators(unsolved, solved, entity.object3d());
+	let QuizForm { unsolved, solved, revealed } = *quiz_form;
+	render_indicators(unsolved, solved, revealed, entity.object3d());
 }
 
-fn render_indicators(unsolved: usize, solved: usize, object3d: Object3D) {
+fn render_indicators(unsolved: usize, solved: usize, revealed: usize, object3d: Object3D) {
 	let font = FONT.with_borrow(|font| font.clone());
 	match font {
 		None => {
 			FONT_LOADER.with_borrow(|loader| {
 				loader.load(FONT_URL, Closure::once_into_js(move |font: &Object| {
 					FONT.set(Some(font.clone()));
-					render_indicators_with_font(font, unsolved, solved, object3d);
+					render_indicators_with_font(font, unsolved, solved, revealed, object3d);
 				}).unchecked_ref());
 			})
 		}
 		Some(font) => {
-			render_indicators_with_font(&font, unsolved, solved, object3d);
+			render_indicators_with_font(&font, unsolved, solved, revealed, object3d);
 		}
 	}
 }
 
-fn render_indicators_with_font(font: &Object, unsolved: usize, solved: usize, object3d: Object3D) {
+fn render_indicators_with_font(font: &Object, unsolved: usize, solved: usize, revealed: usize, object3d: Object3D) {
 	match object3d.get_object_by_name("unsolved") {
 		None => add_indicator("unsolved", Position(-X_OFFSET, -Y_OFFSET, 0.), unsolved, "Yellow", font),
 		Some(mesh) => update_count(mesh.unchecked_into(), unsolved, font),

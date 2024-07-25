@@ -4,7 +4,7 @@ use aframers::components::{Color, Position, Scale};
 use aframers::entities::Entity;
 use wasm_bindgen::{JsCast, JsValue};
 
-use crate::aframe_ex::{Align, Baseline};
+use crate::aframe_ex::{Align, Anchor, Baseline};
 use crate::aframe_ex::af_sys::AEntityEx;
 use crate::aframe_ex::components::font_component::StockFont;
 use crate::aframe_ex::components::visible_component::Visible;
@@ -23,14 +23,15 @@ pub fn create_hint_cursor() -> Result<Entity, JsValue> {
 		.set_id(ENTITY_ID)?
 		.set_component(Align::Center)?
 		.set_component(Baseline::Center)?
+		.set_component(Anchor::Align)?
 		.set_component(Color::Web("Yellow".into()))?
-		.set_component(StockFont::Monoid)?
+		.set_component(StockFont::Roboto)?
 		.set_component(Position(0.0, 1.6, -11.0))?
 		.set_component(Scale(scale, scale, scale))?
 		.set_component(Visible::False)?
 		;
 	entity.a_entity().unchecked_ref::<AEntityEx>()
-		.set_component_attribute(QuizForm { unsolved: 1, solved: 0 });
+		.set_component_attribute(QuizForm { unsolved: 1, solved: 0, revealed: 0 });
 	Ok(entity)
 }
 

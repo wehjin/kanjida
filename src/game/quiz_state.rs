@@ -14,6 +14,8 @@ pub struct QuizState {
 	pub kanji_point: KanjiPoint,
 	/// Solutions to the quiz.
 	pub solutions: HashMap<char, SolutionState>,
+	/// True if the quiz solution is revealed.
+	pub is_revealed: bool,
 }
 
 impl QuizState {
@@ -24,14 +26,15 @@ impl QuizState {
 		KanjiData(self.kanji_point).as_glyph()
 	}
 
-	pub fn score(&self) -> (usize, usize) {
+	pub fn unsolved_solved_revealed(&self) -> (usize, usize, usize) {
+		let revealed = self.is_revealed as usize;
 		let score = self.solutions.iter().fold(
-			(0usize, 0usize),
-			|(unsolved, solved), (_, solution)| {
+			(0usize, 0usize, revealed),
+			|(unsolved, solved, revealed), (_, solution)| {
 				if solution.is_solved() {
-					(unsolved, solved + 1)
+					(unsolved, solved + 1, revealed)
 				} else {
-					(unsolved + 1, solved)
+					(unsolved + 1, solved, revealed)
 				}
 			},
 		);
@@ -54,7 +57,7 @@ impl QuizState {
 			.map(|first_char| (first_char, SolutionState::init()))
 			.collect::<HashMap<_, _>>()
 			;
-		Self { kanji_point, solutions }
+		Self { kanji_point, solutions, is_revealed: false }
 	}
 	pub fn attempt_solution(mut self, yomi_point: YomiPoint, now: DateTime<Utc>) -> Self {
 		let search_ch = YomiChar(yomi_point).to_char();
@@ -62,6 +65,10 @@ impl QuizState {
 			let solution = solution.succeed(now);
 			self.solutions.insert(search_ch, solution);
 		}
+		self
+	}
+	pub fn toggle_revealed(mut self) -> Self {
+		self.is_revealed = !self.is_revealed;
 		self
 	}
 }

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::fmt::{Debug, Formatter};
-use std::ops::Index;
+use std::ops::{Index, IndexMut};
 
 use chrono::{DateTime, Utc};
 use kanji_data::KanjiData;
@@ -13,12 +13,18 @@ use crate::game::quiz_state::QuizState;
 pub struct QuizStates(pub Vec<QuizState>);
 
 impl QuizStates {
-	pub fn total_score(&self) -> (usize, usize) {
+	pub fn swap(mut self, index: usize, f: impl Fn(QuizState) -> QuizState) -> Self {
+		let state = self.0.remove(index);
+		let new_state = f(state);
+		self.0.insert(0, new_state);
+		self
+	}
+	pub fn total_unsolved_solved_revealed(&self) -> (usize, usize, usize) {
 		let score = self.0.iter().fold(
-			(0usize, 0usize),
-			|(unsolved, solved), next| {
-				let (quiz_unsolved, quiz_solved) = next.score();
-				(unsolved + quiz_unsolved, solved + quiz_solved)
+			(0usize, 0usize, 0usize),
+			|(unsolved, solved, revealed), quiz| {
+				let (quiz_unsolved, quiz_solved, quiz_revealed) = quiz.unsolved_solved_revealed();
+				(unsolved + quiz_unsolved, solved + quiz_solved, revealed + quiz_revealed)
 			},
 		);
 		score
@@ -26,8 +32,16 @@ impl QuizStates {
 }
 impl Debug for QuizStates {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-		let (unsolved, solved) = self.total_score();
-		write!(f, "QuizStates {{ count: {}, unsolved: {}, solved: {} }})", self.0.len(), unsolved, solved)
+		let (unsolved, solved, revealed) = self.total_unsolved_solved_revealed();
+		write!(
+			f, "QuizStates {{ count: {}, unsolved: {}, solved: {}, revealed: {} }})",
+			self.0.len(), unsolved, solved, revealed
+		)
+	}
+}
+impl IndexMut<QuizPoint> for QuizStates {
+	fn index_mut(&mut self, index: QuizPoint) -> &mut Self::Output {
+		&mut self.0[index]
 	}
 }
 impl Index<QuizPoint> for QuizStates {
@@ -55,8 +69,8 @@ pub struct GameState {
 }
 
 impl GameState {
-	pub fn total_score(&self) -> (usize, usize) {
-		self.all_quizzes.total_score()
+	pub fn total_unsolved_solved_revealed(&self) -> (usize, usize, usize) {
+		self.all_quizzes.total_unsolved_solved_revealed()
 	}
 	pub fn quiz_hint(&self, quiz_point: QuizPoint) -> &'static str {
 		let quiz = &self.all_quizzes.0[quiz_point];
