@@ -1,6 +1,8 @@
 use aframers::browser::document;
-use aframers::components::{Position, Rotation, Scale};
+use aframers::components::{Color, Position, Rotation, Scale, Width};
 use aframers::entities::{create_plane_entity, Entity};
+use kanji_data::examples::KanjiExample;
+use kanji_data::KanjiData;
 use wasm_bindgen::JsValue;
 use web_sys::Element;
 
@@ -8,6 +10,7 @@ use hexgrid_entity::create_hexgrid;
 use hint_entity::create_hint_cursor;
 use yomigun_entity::create_yomigun;
 
+use crate::aframe_ex::{Align, Anchor, Baseline, Text};
 use crate::aframe_ex::components::stats_component::Stats;
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::scenes::Scene;
@@ -24,6 +27,7 @@ use crate::ecs::entities::{camera_entity, controller_entity, ground_entity, hexg
 use crate::ecs::entities::answers_entity::create_answers_panel;
 use crate::ecs::entities::ring_entity::try_ring_entity;
 use crate::views::settings::{FOCUS_RING_ID, SELECT_RING_ID};
+use crate::views::yomi_data::YOMI_FONT;
 
 pub fn run() -> Result<(), JsValue> {
 	register_components();
@@ -68,12 +72,37 @@ fn create_scene() -> Result<Scene, JsValue> {
 		.add_entity(camera_entity::make()?)?
 		.set_component_attribute(Game)?
 		.set_component_attribute(Stats)?
+		.add_entity(create_details_screen())?
 		;
 	Ok(scene)
 }
 
-fn create_details_screen() -> Result<Entity, JsValue> {
-	create_plane_entity()?.set_id("details")
+fn create_details_screen() -> Entity {
+	let kd = KanjiData(2);
+	let mut sections = Vec::new();
+	let examples = kd.as_examples();
+	for example in examples {
+		let KanjiExample { sound, meaning, .. } = example;
+		let details = format!("{}\n        {}\n", sound, meaning);
+		sections.push(details);
+	}
+	let details = sections.join("");
+	let text = Text::new()
+		.set_value(&details)
+		.set_font(YOMI_FONT)
+		.set_baseline(Baseline::Center)
+		.set_align(Align::Left)
+		.set_anchor(Anchor::Center)
+		.set_width(Width(0.9))
+		;
+	let entity = create_plane_entity().unwrap()
+		.set_id("details").unwrap()
+		.set_component_attribute(Color::WebStr("Honeydew")).unwrap()
+		.set_component_attribute(Position(-1.2, 1.0, -1.2)).unwrap()
+		.set_component_attribute(Rotation(-60., 40., 0.)).unwrap()
+		.set_component_attribute(text).unwrap()
+		;
+	entity
 }
 
 fn create_select_ring() -> Result<Entity, JsValue> {

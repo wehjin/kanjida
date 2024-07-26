@@ -1,5 +1,5 @@
 //noinspection SpellCheckingInspection
-pub const YOMI_FONT: &'static str = "assets/NanumGothicCodingNonKanji1024-msdf.json";
+pub const YOMI_FONT: &'static str = "assets/NanumGothicCodingWithXmpls-msdf.json";
 pub const YOMI_GLYPHS: [&'static str; 61] = [
 	"ア", "イ", "ウ", "エ", "オ", "カ", "ガ", "キ",
 	"ギ", "ク", "グ", "ケ", "ゲ", "コ", "ゴ", "サ",
