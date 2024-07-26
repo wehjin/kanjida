@@ -8,6 +8,7 @@ use kanji_data::KanjiData;
 use crate::game::{AnswerPoint, QuizPoint, YomiPoint};
 use crate::game::answer_state::AnswerState;
 use crate::game::quiz_state::QuizState;
+use crate::queries::query_details_at_kanji_point;
 
 #[derive(Clone, Default)]
 pub struct QuizStates(pub Vec<QuizState>);
@@ -75,6 +76,15 @@ impl GameState {
 	pub fn quiz_hint(&self, quiz_point: QuizPoint) -> String {
 		let quiz = &self.all_quizzes.0[quiz_point];
 		quiz.to_hint()
+	}
+	pub fn quiz_details(&self, quiz_point: QuizPoint) -> Option<String> {
+		let quiz = &self.all_quizzes.0[quiz_point];
+		if quiz.is_revealed {
+			let details = query_details_at_kanji_point(quiz.kanji_point);
+			Some(details)
+		} else {
+			None
+		}
 	}
 	pub fn as_quiz_states(&self) -> &Vec<QuizState> {
 		&self.all_quizzes.0

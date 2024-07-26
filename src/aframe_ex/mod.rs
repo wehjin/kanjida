@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-use aframers::components::{Height, Width};
+use aframers::components::{Color, Height, Width};
 use aframers::components::core::{ComponentAttribute, ComponentSetting};
 
 pub mod af_sys;
@@ -18,6 +18,7 @@ pub struct Text {
 	align: Option<Align>,
 	anchor: Option<Anchor>,
 	baseline: Option<Baseline>,
+	color: Option<Color>,
 	font: Option<String>,
 	height: Option<Height>,
 	value: Option<String>,
@@ -37,6 +38,10 @@ impl Text {
 	}
 	pub fn set_baseline(mut self, value: Baseline) -> Self {
 		self.baseline = Some(value);
+		self
+	}
+	pub fn set_color(mut self, value: Color) -> Self {
+		self.color = Some(value);
 		self
 	}
 	pub fn set_font(mut self, value: impl AsRef<str>) -> Self {
@@ -66,6 +71,7 @@ impl Text {
 			align: None,
 			anchor: None,
 			baseline: None,
+			color: None,
 			font: None,
 			height: None,
 			value: None,
@@ -89,6 +95,9 @@ impl ComponentAttribute for Text {
 		}
 		if let Some(value) = self.baseline {
 			clauses.push(format!("baseline: {}", value));
+		}
+		if let Some(value) = &self.color {
+			clauses.push(format!("color: {}", value.as_setting_str().as_ref()));
 		}
 		if let Some(value) = &self.font {
 			clauses.push("negate: false".into());

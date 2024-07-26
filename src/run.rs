@@ -1,9 +1,9 @@
+use aframers::af_sys::entities::AEntity;
 use aframers::browser::document;
 use aframers::components::{Color, Position, Rotation, Scale, Width};
 use aframers::entities::{create_plane_entity, Entity};
-use kanji_data::examples::KanjiExample;
-use kanji_data::KanjiData;
-use wasm_bindgen::JsValue;
+use Color::WebStr;
+use wasm_bindgen::{JsCast, JsValue};
 use web_sys::Element;
 
 use hexgrid_entity::create_hexgrid;
@@ -78,31 +78,26 @@ fn create_scene() -> Result<Scene, JsValue> {
 }
 
 fn create_details_screen() -> Entity {
-	let kd = KanjiData(2);
-	let mut sections = Vec::new();
-	let examples = kd.as_examples();
-	for example in examples {
-		let KanjiExample { sound, meaning, .. } = example;
-		let details = format!("{}\n        {}\n", sound, meaning);
-		sections.push(details);
-	}
-	let details = sections.join("");
 	let text = Text::new()
-		.set_value(&details)
 		.set_font(YOMI_FONT)
 		.set_baseline(Baseline::Center)
 		.set_align(Align::Left)
 		.set_anchor(Anchor::Center)
 		.set_width(Width(0.9))
+		.set_color(WebStr("DarkSlateGray"))
 		;
 	let entity = create_plane_entity().unwrap()
 		.set_id("details").unwrap()
-		.set_component_attribute(Color::WebStr("Honeydew")).unwrap()
-		.set_component_attribute(Position(-1.2, 1.0, -1.2)).unwrap()
-		.set_component_attribute(Rotation(-60., 40., 0.)).unwrap()
+		.set_component_attribute(WebStr("Honeydew")).unwrap()
+		.set_component_attribute(Position(-1.2, 0.9, -1.2)).unwrap()
+		.set_component_attribute(Rotation(-30., 40., 0.)).unwrap()
 		.set_component_attribute(text).unwrap()
 		;
 	entity
+}
+pub fn get_details_screen() -> Entity {
+	let element = document().get_element_by_id("details").unwrap();
+	Entity::from(element.unchecked_into::<AEntity>())
 }
 
 fn create_select_ring() -> Result<Entity, JsValue> {

@@ -30,17 +30,17 @@ use crate::game::{AnswerPoint, QuizPoint, YomiPoint};
 use crate::game::game_state::GameState;
 use crate::game::quiz_state::QuizState;
 use crate::queries::quiz_form_from_point;
-use crate::views::{element_id_from_answer_point, element_id_from_quiz_point, element_selector_from_answer_point};
+use crate::views::{element_id_from_answer_point, element_id_from_quiz_point, element_selector_from_answer_point, render_details_entity_text};
 
 pub mod game;
 
 pub fn register_game_component() {
 	let events = Events::new()
-		.set_handler(SelectQuiz, select_quiz)
-		.set_handler(SelectYomi, select_yomi)
-		.set_handler(SubmitAnswer, submit_answer)
-		.set_handler(GradeAnswer, grade_answer)
-		.set_handler(ToggleSolution, toggle_solution)
+		.set_handler(SelectQuiz, on_select_quiz)
+		.set_handler(SelectYomi, on_select_yomi)
+		.set_handler(SubmitAnswer, on_submit_answer)
+		.set_handler(GradeAnswer, on_grade_answer)
+		.set_handler(ToggleSolution, on_toggle_selection)
 		.set_handler(AButtonDown, on_a_button_down)
 		;
 	ComponentDefinition::new()
@@ -53,7 +53,7 @@ fn on_a_button_down(comp: AComponent, event: CustomEvent) {
 	comp.a_entity().a_scene().emit_event(ToggleSolution.as_ref());
 }
 
-fn toggle_solution(_comp: AComponent, event: CustomEvent) {
+fn on_toggle_selection(_comp: AComponent, event: CustomEvent) {
 	let quiz_point = update_game("TOGGLE_SOLUTION", event, |mut game, _event| {
 		match game.selected_quiz {
 			Some(quiz_point) => {
@@ -65,14 +65,19 @@ fn toggle_solution(_comp: AComponent, event: CustomEvent) {
 	});
 	render_hint_cursor_and_quiz_status();
 	if let Some(quiz_point) = quiz_point {
-		let hint = GAME.with_borrow(|game| game.quiz_hint(quiz_point));
+		let (hint, details) = GAME.with_borrow(|game| {
+			let hint = game.quiz_hint(quiz_point);
+			let details = game.quiz_details(quiz_point);
+			(hint, details)
+		});
 		hint_entity::get()
 			.set_component_attribute(Value(hint.to_uppercase())).unwrap()
 		;
+		render_details_entity_text(details);
 	}
 }
 
-fn grade_answer(_comp: AComponent, event: CustomEvent) {
+fn on_grade_answer(_comp: AComponent, event: CustomEvent) {
 	let answer_point = update_game("GRADE_ANSWER", event, |state, event| {
 		let answer_point = event.detail().as_f64().unwrap() as AnswerPoint;
 		(state.grade_answer(answer_point, Utc::now()), answer_point)
@@ -82,7 +87,7 @@ fn grade_answer(_comp: AComponent, event: CustomEvent) {
 	render_hint_cursor_and_quiz_status();
 }
 
-fn submit_answer(comp: AComponent, event: CustomEvent) {
+fn on_submit_answer(comp: AComponent, event: CustomEvent) {
 	let answer_point = update_game("SUBMIT_ANSWER", event, |state, _event| {
 		state.submit_answer()
 	});
@@ -91,7 +96,7 @@ fn submit_answer(comp: AComponent, event: CustomEvent) {
 	}
 }
 
-fn select_yomi(_comp: AComponent, event: CustomEvent) {
+fn on_select_yomi(_comp: AComponent, event: CustomEvent) {
 	update_game("SELECT_YOMI", event, |state, event| {
 		let yomi_point = event.detail().as_f64().map(|detail| detail as usize).unwrap_or(0);
 		let game_state = state.select_yomi(yomi_point);
@@ -101,7 +106,7 @@ fn select_yomi(_comp: AComponent, event: CustomEvent) {
 	render_yomigun(selected_yomi);
 }
 
-fn select_quiz(_comp: AComponent, event: CustomEvent) {
+fn on_select_quiz(_comp: AComponent, event: CustomEvent) {
 	update_game("SELECT_QUIZ", event, |state, event| {
 		let quiz_point = event.detail().as_f64().map(|it| it as usize).unwrap_or(0);
 		let game_state = state.select_quiz(quiz_point);
@@ -110,6 +115,10 @@ fn select_quiz(_comp: AComponent, event: CustomEvent) {
 	let selected_quiz = GAME.with_borrow(|game_state| game_state.selected_quiz);
 	render_hexgrid(selected_quiz);
 	render_hint_cursor_and_quiz_status();
+	if let Some(quiz_point) = selected_quiz {
+		let details = GAME.with_borrow(|game| game.quiz_details(quiz_point));
+		render_details_entity_text(details);
+	}
 }
 
 fn update_game<T>(name: impl AsRef<str>, event: CustomEvent, step: impl Fn(GameState, CustomEvent) -> (GameState, T)) -> T {
