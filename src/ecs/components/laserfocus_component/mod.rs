@@ -1,7 +1,7 @@
 use aframers::af_sys::components::AComponent;
 use aframers::af_sys::entities::AEntity;
 use aframers::browser::log;
-use aframers::components::core::ComponentValue;
+use aframers::components::core::ComponentAttribute;
 use web_sys::Event;
 
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
@@ -50,10 +50,10 @@ fn handle_leave(a_component: AComponent, _event: Event) {
 pub enum Laserfocus {
 	On
 }
-impl ComponentValue for Laserfocus {
-	fn component_name(&self) -> &str { NAME }
+impl ComponentAttribute for Laserfocus {
+	fn as_attribute_name(&self) -> impl AsRef<str> { NAME }
 
-	fn component_value(&self) -> impl AsRef<str> { self }
+	fn as_attribute_str(&self) -> impl AsRef<str> { self }
 }
 impl AsRef<str> for Laserfocus {
 	fn as_ref(&self) -> &str {

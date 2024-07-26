@@ -1,23 +1,23 @@
-use aframers::components::core::ComponentValue;
+use aframers::components::core::ComponentAttribute;
 
 #[derive(Debug, Copy, Clone)]
 pub struct CustomFont(pub &'static str);
-impl ComponentValue for CustomFont {
-	fn component_name(&self) -> &str {
+impl ComponentAttribute for CustomFont {
+	fn as_attribute_name(&self) -> impl AsRef<str> {
 		"font"
 	}
-	fn component_value(&self) -> impl AsRef<str> {
+	fn as_attribute_str(&self) -> impl AsRef<str> {
 		self.0
 	}
 }
 
 #[derive(Debug, Copy, Clone)]
 pub struct Negate(pub bool);
-impl ComponentValue for Negate {
-	fn component_name(&self) -> &str {
+impl ComponentAttribute for Negate {
+	fn as_attribute_name(&self) -> impl AsRef<str> {
 		"negate"
 	}
-	fn component_value(&self) -> impl AsRef<str> {
+	fn as_attribute_str(&self) -> impl AsRef<str> {
 		match self.0 {
 			true => "true",
 			false => "false",
@@ -53,7 +53,7 @@ impl AsRef<str> for StockFont {
 		}
 	}
 }
-impl ComponentValue for StockFont {
-	fn component_name(&self) -> &str { "font" }
-	fn component_value(&self) -> impl AsRef<str> { self }
+impl ComponentAttribute for StockFont {
+	fn as_attribute_name(&self) -> impl AsRef<str> { "font" }
+	fn as_attribute_str(&self) -> impl AsRef<str> { self }
 }

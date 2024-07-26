@@ -1,9 +1,9 @@
-use aframers::components::core::ComponentValue;
+use aframers::components::core::ComponentAttribute;
 
 pub struct Game;
 
-impl ComponentValue for Game {
-	fn component_name(&self) -> &str { "game" }
-	fn component_value(&self) -> impl AsRef<str> { "true" }
+impl ComponentAttribute for Game {
+	fn as_attribute_name(&self) -> impl AsRef<str> { "game" }
+	fn as_attribute_str(&self) -> impl AsRef<str> { "true" }
 }
 

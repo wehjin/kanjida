@@ -10,7 +10,7 @@ use crate::aframe_ex::js::{aframers_bind_init_with_extra_state, aframers_bind_ot
 use crate::aframe_ex::schema::Schema;
 
 pub mod properties {
-	use aframers::components::core::{ComponentValue, ToPropertyValue};
+	use aframers::components::core::ToPropertyValue;
 
 	pub trait ComponentProperty: AsPropertyName + ToPropertyValue {
 		fn to_attribute_string(&self) -> String {
@@ -19,12 +19,6 @@ pub mod properties {
 	}
 	pub trait AsPropertyName {
 		fn as_property_name(&self) -> &str;
-	}
-
-	impl<T: ComponentValue> AsPropertyName for T {
-		fn as_property_name(&self) -> &str {
-			self.component_name()
-		}
 	}
 
 	pub struct MultiPropertyAttributeValue(Vec<String>);

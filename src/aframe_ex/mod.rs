@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter};
 
 use aframers::components::{Height, Width};
-use aframers::components::core::ComponentValue;
+use aframers::components::core::{ComponentAttribute, ComponentSetting};
 
 pub mod af_sys;
 pub mod components;
@@ -76,10 +76,10 @@ impl Text {
 	}
 }
 
-impl ComponentValue for Text {
-	fn component_name(&self) -> &str { "text" }
+impl ComponentAttribute for Text {
+	fn as_attribute_name(&self) -> impl AsRef<str> { "text" }
 
-	fn component_value(&self) -> impl AsRef<str> {
+	fn as_attribute_str(&self) -> impl AsRef<str> {
 		let mut clauses = vec![];
 		if let Some(value) = self.align {
 			clauses.push(format!("align: {}", value));
@@ -95,13 +95,13 @@ impl ComponentValue for Text {
 			clauses.push(format!("font: {}", value));
 		}
 		if let Some(value) = self.height {
-			clauses.push(format!("height: {}", value.component_value().as_ref()));
+			clauses.push(format!("height: {}", value.as_setting_str().as_ref()));
 		}
 		if let Some(value) = &self.value {
 			clauses.push(format!("value: {}", value));
 		}
 		if let Some(value) = self.width {
-			clauses.push(format!("width: {}", value.component_value().as_ref()));
+			clauses.push(format!("width: {}", value.as_setting_str().as_ref()));
 		}
 		if let Some(value) = self.wrap_count {
 			clauses.push(format!("wrapCount: {}", value));
@@ -125,9 +125,18 @@ impl AsRef<str> for Anchor {
 		}
 	}
 }
-impl ComponentValue for Anchor {
-	fn component_name(&self) -> &str { "anchor" }
-	fn component_value(&self) -> impl AsRef<str> { self }
+impl ComponentSetting for Anchor {
+	fn as_setting_name(&self) -> impl AsRef<str> { "anchor" }
+	fn as_setting_str(&self) -> impl AsRef<str> { self }
+}
+impl ComponentAttribute for Anchor {
+	fn as_attribute_name(&self) -> impl AsRef<str> {
+		self.as_setting_name()
+	}
+
+	fn as_attribute_str(&self) -> impl AsRef<str> {
+		self.as_setting_str()
+	}
 }
 impl Display for Anchor {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -141,9 +150,17 @@ impl<T: AsRef<str> + Sized> AsRef<str> for Value<T> {
 		self.0.as_ref()
 	}
 }
-impl<T: AsRef<str> + Sized> ComponentValue for Value<T> {
-	fn component_name(&self) -> &str { "value" }
-	fn component_value(&self) -> impl AsRef<str> { self }
+impl<T: AsRef<str> + Sized> ComponentSetting for Value<T> {
+	fn as_setting_name(&self) -> impl AsRef<str> { "value" }
+	fn as_setting_str(&self) -> impl AsRef<str> { self }
+}
+impl<T: AsRef<str> + Sized> ComponentAttribute for Value<T> {
+	fn as_attribute_name(&self) -> impl AsRef<str> {
+		self.as_setting_name()
+	}
+	fn as_attribute_str(&self) -> impl AsRef<str> {
+		self.as_setting_str()
+	}
 }
 
 #[derive(Copy, Clone)]
@@ -157,9 +174,18 @@ impl AsRef<str> for Align {
 		}
 	}
 }
-impl ComponentValue for Align {
-	fn component_name(&self) -> &str { "align" }
-	fn component_value(&self) -> impl AsRef<str> { self }
+impl ComponentSetting for Align {
+	fn as_setting_name(&self) -> impl AsRef<str> { "align" }
+	fn as_setting_str(&self) -> impl AsRef<str> { self }
+}
+impl ComponentAttribute for Align {
+	fn as_attribute_name(&self) -> impl AsRef<str> {
+		self.as_setting_name()
+	}
+
+	fn as_attribute_str(&self) -> impl AsRef<str> {
+		self.as_setting_str()
+	}
 }
 impl Display for Align {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -178,9 +204,18 @@ impl AsRef<str> for Baseline {
 		}
 	}
 }
-impl ComponentValue for Baseline {
-	fn component_name(&self) -> &str { "baseline" }
-	fn component_value(&self) -> impl AsRef<str> { self }
+impl ComponentSetting for Baseline {
+	fn as_setting_name(&self) -> impl AsRef<str> { "baseline" }
+	fn as_setting_str(&self) -> impl AsRef<str> { self }
+}
+impl ComponentAttribute for Baseline {
+	fn as_attribute_name(&self) -> impl AsRef<str> {
+		self.as_setting_name()
+	}
+
+	fn as_attribute_str(&self) -> impl AsRef<str> {
+		self.as_setting_str()
+	}
 }
 impl Display for Baseline {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -209,10 +244,10 @@ impl RingGeometry {
 	}
 }
 
-impl ComponentValue for RingGeometry {
-	fn component_name(&self) -> &str { "geometry" }
+impl ComponentAttribute for RingGeometry {
+	fn as_attribute_name(&self) -> impl AsRef<str> { "geometry" }
 
-	fn component_value(&self) -> impl AsRef<str> {
+	fn as_attribute_str(&self) -> impl AsRef<str> {
 		let mut clauses = vec!["primitive:ring".to_string()];
 		if let Some(value) = self.radius_inner {
 			clauses.push(format!("radiusInner: {}", value));

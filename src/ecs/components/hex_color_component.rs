@@ -1,5 +1,5 @@
 use aframers::components::Color;
-use aframers::components::core::ComponentValue;
+use aframers::components::core::ComponentAttribute;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum HexColor {
@@ -25,7 +25,7 @@ impl AsRef<str> for HexColor {
 	}
 }
 
-impl ComponentValue for HexColor {
-	fn component_name(&self) -> &str { "color" }
-	fn component_value(&self) -> impl AsRef<str> { self }
+impl ComponentAttribute for HexColor {
+	fn as_attribute_name(&self) -> impl AsRef<str> { "color" }
+	fn as_attribute_str(&self) -> impl AsRef<str> { self }
 }

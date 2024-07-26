@@ -54,7 +54,7 @@ fn init(this: &HexcellAComponent) {
 	// ray-casting target.
 	{
 		let geometry = rear_geometry();
-		Entity::from(this.a_entity()).set_component(geometry).unwrap();
+		Entity::from(this.a_entity()).set_component_attribute(geometry).unwrap();
 	}
 	// Update the mesh second after merging the first ray-cast geometry
 	// with a second status-indicator geometry.

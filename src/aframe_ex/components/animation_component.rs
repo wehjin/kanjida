@@ -1,4 +1,4 @@
-use aframers::components::core::{ComponentValue, ToPropertyValue};
+use aframers::components::core::{ComponentAttribute, ToPropertyValue};
 
 use crate::aframe_ex::components::core::properties::{AsPropertyName, ComponentProperty, MultiPropertyAttributeValue};
 
@@ -95,10 +95,10 @@ impl Animation {
 }
 
 
-impl ComponentValue for Animation {
-	fn component_name(&self) -> &str { ANIMATION }
+impl ComponentAttribute for Animation {
+	fn as_attribute_name(&self) -> impl AsRef<str> { ANIMATION }
 
-	fn component_value(&self) -> impl AsRef<str> {
+	fn as_attribute_str(&self) -> impl AsRef<str> {
 		MultiPropertyAttributeValue::new()
 			.add_property_value("property", &self.property_path)
 			.add_property_value("isRawProperty", &self.is_raw_property_path)

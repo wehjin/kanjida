@@ -1,5 +1,5 @@
 use aframers::components::Color;
-use aframers::components::core::ComponentValue;
+use aframers::components::core::ComponentSetting;
 use wasm_bindgen::JsValue;
 use web_sys::js_sys::{Object, Reflect};
 
@@ -23,7 +23,7 @@ pub struct Field(JsValue, FieldType);
 
 impl Field {
 	pub fn color(value: Color) -> Self {
-		Self(value.component_value().as_ref().into(), FieldType::Color)
+		Self(value.as_setting_str().as_ref().into(), FieldType::Color)
 	}
 	pub fn string(s: impl AsRef<str>) -> Self {
 		Self(JsValue::from_str(s.as_ref()), FieldType::String)

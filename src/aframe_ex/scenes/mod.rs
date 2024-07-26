@@ -1,5 +1,5 @@
 use aframers::af_sys::scenes::AScene;
-use aframers::components::core::{ComponentAttribute, ComponentValue};
+use aframers::components::core::ComponentAttribute;
 use aframers::entities::Entity;
 use aframers::scene::create_scene;
 use wasm_bindgen::{JsCast, JsValue};
@@ -17,10 +17,6 @@ impl Scene {
 	pub fn new() -> Result<Self, JsValue> {
 		let a_scene = create_scene()?.unchecked_into::<AScene>();
 		Ok(Self(a_scene))
-	}
-	pub fn set_component(self, component: impl ComponentValue) -> Result<Self, JsValue> {
-		self.0.set_attribute(component.component_name(), component.component_value().as_ref())?;
-		Ok(self)
 	}
 	pub fn set_component_attribute(self, value: impl ComponentAttribute) -> Result<Self, JsValue> {
 		self.0.set_attribute(value.as_attribute_name().as_ref(), value.as_attribute_str().as_ref())?;

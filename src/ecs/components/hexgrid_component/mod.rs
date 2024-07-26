@@ -65,7 +65,7 @@ pub fn init(component: AComponent) -> SelectedEntity {
 		let pixel = spiral_coords[i].to_pixel();
 		let (x, y) = pixel.flip_y();
 		let position = Position(x, y, PLAIN_RING_Z_OFFSET);
-		let cell = cell.set_component(position).unwrap();
+		let cell = cell.set_component_attribute(position).unwrap();
 		grid = grid.append_child(cell).unwrap();
 	}
 	load_font_create_mesh(spiral_coords, component.a_entity().unchecked_into());
@@ -133,7 +133,7 @@ fn create_material() -> MeshBasicMaterial {
 fn hexcell_entity(quiz_state: &QuizState) -> Entity {
 	let glyph = quiz_state.as_question();
 	let entity = create_entity().unwrap()
-		.set_component(Hexcell::new().set_glyph(glyph)).unwrap()
+		.set_component_attribute(Hexcell::new().set_glyph(glyph)).unwrap()
 		;
 	entity
 }

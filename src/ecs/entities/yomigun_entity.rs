@@ -8,8 +8,8 @@ use crate::views::yomi_data::YomiChar;
 pub fn create_yomigun() -> Result<Entity, JsValue> {
 	let chest = create_plane_entity()?
 		.set_id("yomigun")?
-		.set_component(Color::Web("Silver".into()))?
-		.set_component(Yomigun::from(YomiChar(0).to_code()))?
+		.set_component_attribute(Color::Web("Silver".into()))?
+		.set_component_attribute(Yomigun::from(YomiChar(0).to_code()))?
 		;
 	Ok(chest)
 }

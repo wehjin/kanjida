@@ -1,4 +1,4 @@
-use aframers::components::core::ComponentValue;
+use aframers::components::core::ComponentAttribute;
 
 pub trait Primitive {
 	fn as_str(&self) -> &str;
@@ -44,10 +44,10 @@ impl Geometry<Circle> {
 	}
 }
 
-impl<T: Primitive> ComponentValue for Geometry<T> {
-	fn component_name(&self) -> &str { "geometry" }
+impl<T: Primitive> ComponentAttribute for Geometry<T> {
+	fn as_attribute_name(&self) -> impl AsRef<str> { "geometry" }
 
-	fn component_value(&self) -> impl AsRef<str> {
+	fn as_attribute_str(&self) -> impl AsRef<str> {
 		let mut clauses = vec![];
 		if let Some(primitive) = &self.primitive {
 			let clause = format!("primitive: {}", primitive.as_str());

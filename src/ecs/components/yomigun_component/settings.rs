@@ -1,4 +1,4 @@
-use aframers::components::core::ComponentValue;
+use aframers::components::core::ComponentSetting;
 
 use crate::aframe_ex::schema::fields::Field;
 
@@ -13,13 +13,13 @@ impl YomigunSetting {
 		}
 	}
 }
-impl ComponentValue for YomigunSetting {
-	fn component_name(&self) -> &str {
+impl ComponentSetting for YomigunSetting {
+	fn as_setting_name(&self) -> impl AsRef<str> {
 		match self {
 			YomigunSetting::YomiCode(_) => "yomiCode"
 		}
 	}
-	fn component_value(&self) -> impl AsRef<str> {
+	fn as_setting_str(&self) -> impl AsRef<str> {
 		match self {
 			YomigunSetting::YomiCode(value) => format!("{}", *value)
 		}

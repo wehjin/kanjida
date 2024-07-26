@@ -8,8 +8,8 @@ const TARGETS: &'static str = "[hexcell],[yomigun],[yomikey],#answers";
 
 pub fn make() -> Result<Entity, JsValue> {
 	let entity = create_entity()?
-		.set_component(LaserControls::new().set_hand(Hand::Right))?
-		.set_component(Raycaster::new().set_objects(TARGETS))?
+		.set_component_attribute(LaserControls::new().set_hand(Hand::Right))?
+		.set_component_attribute(Raycaster::new().set_objects(TARGETS))?
 		;
 	Ok(entity)
 }

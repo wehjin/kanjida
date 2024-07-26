@@ -1,5 +1,5 @@
 use aframers::components::Color;
-use aframers::components::core::ComponentValue;
+use aframers::components::core::{ComponentAttribute, ComponentSetting};
 
 #[derive(Default)]
 pub struct Material {
@@ -29,13 +29,13 @@ impl Material {
 	}
 }
 
-impl ComponentValue for Material {
-	fn component_name(&self) -> &str { "material" }
+impl ComponentAttribute for Material {
+	fn as_attribute_name(&self) -> impl AsRef<str> { "material" }
 
-	fn component_value(&self) -> impl AsRef<str> {
+	fn as_attribute_str(&self) -> impl AsRef<str> {
 		let mut clauses = vec![];
 		if let Some(color) = &self.color {
-			clauses.push(format!("color: {}", color.component_value().as_ref()));
+			clauses.push(format!("color: {}", color.as_setting_str().as_ref()));
 		}
 		if let Some(value) = self.opacity {
 			clauses.push(format!("opacity: {}", value));

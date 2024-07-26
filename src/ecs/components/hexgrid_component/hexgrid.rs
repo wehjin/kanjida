@@ -1,4 +1,5 @@
-use aframers::components::core::ComponentValue;
+use aframers::components::core::ComponentAttribute;
+
 use crate::ecs::components::hexgrid_component::HEXGRID_COMPONENT_NAME;
 
 pub enum Hexgrid { Enabled }
@@ -9,7 +10,7 @@ impl AsRef<str> for Hexgrid {
 	}
 }
 
-impl ComponentValue for Hexgrid {
-	fn component_name(&self) -> &str { HEXGRID_COMPONENT_NAME }
-	fn component_value(&self) -> impl AsRef<str> { "enabled" }
+impl ComponentAttribute for Hexgrid {
+	fn as_attribute_name(&self) -> impl AsRef<str>{ HEXGRID_COMPONENT_NAME }
+	fn as_attribute_str(&self) -> impl AsRef<str> { "enabled" }
 }

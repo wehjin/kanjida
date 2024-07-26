@@ -1,4 +1,4 @@
-use aframers::components::core::ComponentValue;
+use aframers::components::core::ComponentSetting;
 
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::components::cursor_component::CursorEvent::Click;
@@ -12,7 +12,7 @@ pub const YOMIGUN: &'static str = "yomigun";
 
 
 pub mod attribute {
-	use aframers::components::core::ComponentValue;
+	use aframers::components::core::{ComponentAttribute, ComponentSetting};
 
 	use crate::ecs::components::yomigun_component::settings::YomigunSetting;
 	use crate::ecs::components::yomigun_component::YOMIGUN;
@@ -27,13 +27,11 @@ pub mod attribute {
 		}
 	}
 
-	impl ComponentValue for Yomigun {
-		fn component_name(&self) -> &str { YOMIGUN }
-		fn component_value(&self) -> impl AsRef<str> {
+	impl ComponentAttribute for Yomigun {
+		fn as_attribute_name(&self) -> impl AsRef<str> { YOMIGUN }
+		fn as_attribute_str(&self) -> impl AsRef<str> {
 			let settings = self.0.iter()
-				.map(|setting| {
-					setting.as_attribute_str().as_ref().to_string()
-				})
+				.map(|setting| setting.as_setting_str().as_ref().to_string())
 				.collect::<Vec<_>>()
 				.join("; ")
 				;
@@ -50,7 +48,8 @@ pub fn register_yomigun_component() {
 		;
 	let schema = {
 		let yomi_code = YomigunSetting::YomiCode(0);
-		MultiPropertySchema::new().push(yomi_code.component_name(), yomi_code.to_field())
+		let setting_name = yomi_code.as_setting_name();
+		MultiPropertySchema::new().push(setting_name.as_ref(), yomi_code.to_field())
 	};
 	ComponentDefinition::new()
 		.set_events(events)
@@ -71,7 +70,7 @@ mod lifecycle {
 	pub fn init(this: &YomigunAComponent) {
 		let yomi_code = this.yomigun_data().yomi_code();
 		Entity::from(this.a_entity())
-			.set_component(yomi_text(YomiChar(yomi_code))).unwrap()
+			.set_component_attribute(yomi_text(YomiChar(yomi_code))).unwrap()
 		;
 	}
 	pub fn update(this: &YomigunAComponent) {
@@ -104,8 +103,8 @@ pub mod handlers {
 		if let Some(event) = StateEvent::try_from_js(&js_event, StateAdded) {
 			if event.state() == CursorHovered.as_ref() {
 				Entity::from(component.a_entity())
-					.set_component(Scale(1.05, 1.05, 1.05)).unwrap()
-					.set_component(Color::Web("gold".into())).unwrap()
+					.set_component_attribute(Scale(1.05, 1.05, 1.05)).unwrap()
+					.set_component_attribute(Color::Web("gold".into())).unwrap()
 				;
 			}
 		}
@@ -114,8 +113,8 @@ pub mod handlers {
 		if let Some(event) = StateEvent::try_from_js(&js_event, StateRemoved) {
 			if event.state() == CursorHovered.as_ref() {
 				Entity::from(component.a_entity())
-					.set_component(Scale(1., 1., 1.)).unwrap()
-					.set_component(Color::Web("silver".into())).unwrap()
+					.set_component_attribute(Scale(1., 1., 1.)).unwrap()
+					.set_component_attribute(Color::Web("silver".into())).unwrap()
 				;
 			}
 		}

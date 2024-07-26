@@ -53,20 +53,20 @@ fn create_scene() -> Result<Scene, JsValue> {
 		.add_entity(create_focus_ring()?)?
 		.add_entity(create_select_ring()?)?
 		.add_entity(create_yomigun()?
-			.set_component(Position(0., 0.3, -1.6))?
-			.set_component(Rotation(-50., 0., 0.))?
+			.set_component_attribute(Position(0., 0.3, -1.6))?
+			.set_component_attribute(Rotation(-50., 0., 0.))?
 		)?
 		.add_entity(create_answers_panel()?
-			.set_component(Rotation(-2., -45., 0.)).unwrap()
-			.set_component(Position(1.4, 1.35, -1.4)).unwrap()
-			.set_component(Scale(1.3, 1.3, 1.3)).unwrap()
+			.set_component_attribute(Rotation(-2., -45., 0.)).unwrap()
+			.set_component_attribute(Position(1.4, 1.35, -1.4)).unwrap()
+			.set_component_attribute(Scale(1.3, 1.3, 1.3)).unwrap()
 		)?
 		.add_entity(create_hexgrid()?
-			.set_component(Position(0.0, 1.6, -12.0))?
+			.set_component_attribute(Position(0.0, 1.6, -12.0))?
 		)?
 		.add_entity(controller_entity::make()?)?
 		.add_entity(camera_entity::make()?)?
-		.set_component(Game)?
+		.set_component_attribute(Game)?
 		.set_component_attribute(Stats)?
 		;
 	Ok(scene)
@@ -79,7 +79,7 @@ fn create_details_screen() -> Result<Entity, JsValue> {
 fn create_select_ring() -> Result<Entity, JsValue> {
 	let select_ring = try_ring_entity(HexColor::Selected.as_ref())
 		.unwrap().set_id(SELECT_RING_ID)?
-		.set_component(Visible::False)?
+		.set_component_attribute(Visible::False)?
 		;
 	Ok(select_ring)
 }
@@ -87,7 +87,7 @@ fn create_select_ring() -> Result<Entity, JsValue> {
 fn create_focus_ring() -> Result<Entity, JsValue> {
 	let focus_ring = try_ring_entity(HexColor::Focused.as_ref())
 		.unwrap().set_id(FOCUS_RING_ID)?
-		.set_component(Visible::False)?
+		.set_component_attribute(Visible::False)?
 		;
 	Ok(focus_ring)
 }

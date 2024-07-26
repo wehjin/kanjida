@@ -1,4 +1,4 @@
-use aframers::components::core::ComponentValue;
+use aframers::components::core::ComponentAttribute;
 
 #[derive(Debug, Copy, Clone)]
 pub enum Visible {
@@ -13,7 +13,7 @@ impl AsRef<str> for Visible {
 		}
 	}
 }
-impl ComponentValue for Visible {
-	fn component_name(&self) -> &str { "visible" }
-	fn component_value(&self) -> impl AsRef<str> { self }
+impl ComponentAttribute for Visible {
+	fn as_attribute_name(&self) -> impl AsRef<str> { "visible" }
+	fn as_attribute_str(&self) -> impl AsRef<str> { self }
 }

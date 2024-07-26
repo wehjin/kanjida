@@ -1,4 +1,4 @@
-use aframers::components::core::ComponentValue;
+use aframers::components::core::ComponentAttribute;
 
 pub enum Hand {
 	Left,
@@ -25,10 +25,10 @@ impl LaserControls {
 	}
 }
 
-impl ComponentValue for LaserControls {
-	fn component_name(&self) -> &str { "laser-controls" }
+impl ComponentAttribute for LaserControls {
+	fn as_attribute_name(&self) -> impl AsRef<str> { "laser-controls" }
 
-	fn component_value(&self) -> impl AsRef<str> {
+	fn as_attribute_str(&self) -> impl AsRef<str> {
 		let mut clauses = vec![];
 		if let Some(hand) = &self.hand {
 			let clause = format!("hand: {}", hand.as_str());

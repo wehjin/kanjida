@@ -39,9 +39,9 @@ fn update_hint_entity(center: &Vector3, quiz_id: &str) {
 		game.quiz_hint(quiz_point)
 	});
 	hint_entity::get()
-		.set_component(Position(center.x(), center.y(), center.z() + HINT_Z_OFFSET)).unwrap()
-		.set_component(Value(hint.to_uppercase())).unwrap()
-		.set_component(Visible::True).unwrap()
+		.set_component_attribute(Position(center.x(), center.y(), center.z() + HINT_Z_OFFSET)).unwrap()
+		.set_component_attribute(Value(hint.to_uppercase())).unwrap()
+		.set_component_attribute(Visible::True).unwrap()
 	;
 }
 

@@ -6,7 +6,7 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::aframe_ex::af_sys::AEntityEx;
-use crate::aframe_ex::components::material::Material;
+use crate::aframe_ex::components::material_component::Material;
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::js::log_value;
 use crate::ecs::components::hex_color_component::HexColor;
@@ -67,45 +67,45 @@ impl HexcellAComponent {
 			HexColor::Focused => {
 				focus_ring.set_attribute("target", &self.a_entity().id()).unwrap();
 				Entity::from(focus_ring)
-					.set_component(Material::new().set_color(state.to_color())).unwrap()
-					.set_component(Position(world.x(), world.y(), world.z() + FOCUS_RING_Z_OFFSET)).unwrap()
-					.set_component(Visible::True).unwrap()
+					.set_component_attribute(Material::new().set_color(state.to_color())).unwrap()
+					.set_component_attribute(Position(world.x(), world.y(), world.z() + FOCUS_RING_Z_OFFSET)).unwrap()
+					.set_component_attribute(Visible::True).unwrap()
 				;
 			}
 			HexColor::FocusedAndSelected => {
 				focus_ring.set_attribute("target", &self.a_entity().id()).unwrap();
 				let position = Position(world.x(), world.y(), world.z() + FOCUS_RING_Z_OFFSET);
 				Entity::from(focus_ring)
-					.set_component(Material::new().set_color(state.to_color())).unwrap()
-					.set_component(position).unwrap()
-					.set_component(Visible::True).unwrap()
+					.set_component_attribute(Material::new().set_color(state.to_color())).unwrap()
+					.set_component_attribute(position).unwrap()
+					.set_component_attribute(Visible::True).unwrap()
 				;
 				select_ring.set_attribute("target", &self.a_entity().id()).unwrap();
 				let position = Position(world.x(), world.y(), world.z() + SELECT_RING_Z_OFFSET);
 				Entity::from(select_ring)
-					.set_component(Material::new().set_color(state.to_color())).unwrap()
-					.set_component(position).unwrap()
-					.set_component(Visible::True).unwrap()
+					.set_component_attribute(Material::new().set_color(state.to_color())).unwrap()
+					.set_component_attribute(position).unwrap()
+					.set_component_attribute(Visible::True).unwrap()
 				;
 			}
 			HexColor::Selected => {
 				select_ring.set_attribute("target", &self.a_entity().id()).unwrap();
 				let position = Position(world.x(), world.y(), world.z() + SELECT_RING_Z_OFFSET);
 				Entity::from(select_ring)
-					.set_component(Material::new().set_color(state.to_color())).unwrap()
-					.set_component(position).unwrap()
-					.set_component(Visible::True).unwrap()
+					.set_component_attribute(Material::new().set_color(state.to_color())).unwrap()
+					.set_component_attribute(position).unwrap()
+					.set_component_attribute(Visible::True).unwrap()
 				;
 			}
 			HexColor::NeitherFocusedNorSelected => {
 				if cell_is_focus_ring_target {
 					Entity::from(focus_ring.unchecked_into::<AEntity>())
-						.set_component(Visible::False).unwrap()
+						.set_component_attribute(Visible::False).unwrap()
 					;
 				}
 				if cell_is_select_ring_target {
 					Entity::from(select_ring.unchecked_into::<AEntity>())
-						.set_component(Visible::False).unwrap()
+						.set_component_attribute(Visible::False).unwrap()
 					;
 				}
 			}

@@ -4,7 +4,7 @@ use wasm_bindgen::JsValue;
 
 pub fn make() -> Result<Entity, JsValue> {
 	let camera = create_camera_entity()?
-		.set_component(Position(0.0, 1.6, 0.0))?
+		.set_component_attribute(Position(0.0, 1.6, 0.0))?
 		;
 	Ok(camera)
 }

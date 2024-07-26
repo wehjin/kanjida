@@ -9,7 +9,7 @@ use crate::views::yomi_data::YomiChar;
 pub fn create_answers_panel() -> Result<Entity, JsValue> {
 	let mut panel = create_plane_entity()?
 		.set_id("answers")?
-		.set_component(Color::Web("MintCream".into()))?
+		.set_component_attribute(Color::Web("MintCream".into()))?
 		;
 	for (i, key_pos) in KeyPos::all().into_iter().enumerate() {
 		panel = append_key(panel, key_pos, i)?;
@@ -33,16 +33,16 @@ fn append_key(panel: Entity, key_pos: KeyPos, yomi_code: usize) -> Result<Entity
 	};
 	let plain = create_plane_entity()?
 		.set_id(key_pos.to_id("yomikey"))?
-		.set_component(Yomikey(yomi_code))?
+		.set_component_attribute(Yomikey(yomi_code))?
 		;
 	let yomi_char = YomiChar(yomi_code);
 	let decorated = match yomi_char.is_glyph() {
-		true => plain.set_component(yomi_text(yomi_char))?,
+		true => plain.set_component_attribute(yomi_text(yomi_char))?,
 		false => plain,
 	};
 	let positioned = decorated
-		.set_component(Scale(KEY_SIZE, KEY_SIZE, 1.))?
-		.set_component(position)?
+		.set_component_attribute(Scale(KEY_SIZE, KEY_SIZE, 1.))?
+		.set_component_attribute(position)?
 		;
 	panel.append_child(positioned)
 }

@@ -67,7 +67,7 @@ fn toggle_solution(_comp: AComponent, event: CustomEvent) {
 	if let Some(quiz_point) = quiz_point {
 		let hint = GAME.with_borrow(|game| game.quiz_hint(quiz_point));
 		hint_entity::get()
-			.set_component(Value(hint.to_uppercase())).unwrap()
+			.set_component_attribute(Value(hint.to_uppercase())).unwrap()
 		;
 	}
 }
@@ -141,7 +141,7 @@ fn render_quiz_status(quiz_point: QuizPoint, quiz_form: QuizForm) {
 	if quiz_form.unsolved == 0 {
 		if let Some(quiz) = document().get_element_by_id(&element_id_from_quiz_point(quiz_point)) {
 			Entity::from(quiz.unchecked_into::<AEntity>())
-				.set_component(Hexcell::new().set_state(1)).unwrap()
+				.set_component_attribute(Hexcell::new().set_state(1)).unwrap()
 			;
 		}
 	}
@@ -188,7 +188,7 @@ fn render_answer_sprite(answer_point: AnswerPoint, a_scene: AScene) {
 		let id = element_id_from_answer_point(answer_point);
 		let sprite = create_sprite_entity(start)
 			.set_id(id).unwrap()
-			.set_component(animation).unwrap();
+			.set_component_attribute(animation).unwrap();
 		{
 			let a_scene = scene.a_scene().clone();
 			sprite.a_entity()

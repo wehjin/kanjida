@@ -1,6 +1,6 @@
 use aframers::af_sys::scenes::AScene;
 use aframers::browser::log;
-use aframers::components::core::ComponentValue;
+use aframers::components::core::ComponentAttribute;
 use wasm_bindgen::JsCast;
 use web_sys::Event;
 
@@ -18,9 +18,9 @@ const YOMIKEY_COMPONENT: &'static str = "yomikey";
 
 #[derive(Debug, Copy, Clone)]
 pub struct Yomikey(pub usize);
-impl ComponentValue for Yomikey {
-	fn component_name(&self) -> &str { YOMIKEY_COMPONENT }
-	fn component_value(&self) -> impl AsRef<str> { format!("{}", self.0) }
+impl ComponentAttribute for Yomikey {
+	fn as_attribute_name(&self) -> impl AsRef<str> { YOMIKEY_COMPONENT }
+	fn as_attribute_str(&self) -> impl AsRef<str> { format!("{}", self.0) }
 }
 
 mod bindgen;

@@ -1,4 +1,4 @@
-use aframers::components::core::ComponentValue;
+use aframers::components::core::ComponentAttribute;
 
 #[derive(Default)]
 pub struct Hexcell {
@@ -15,10 +15,10 @@ impl Hexcell {
 		Self { status: Some(value), ..self }
 	}
 }
-impl ComponentValue for Hexcell {
-	fn component_name(&self) -> &str { "hexcell" }
+impl ComponentAttribute for Hexcell {
+	fn as_attribute_name(&self) ->impl AsRef<str> { "hexcell" }
 
-	fn component_value(&self) -> impl AsRef<str> {
+	fn as_attribute_str(&self) -> impl AsRef<str> {
 		let mut clauses = vec![];
 		if let Some(value) = &self.glyph {
 			clauses.push(format!("glyph: {}", value));

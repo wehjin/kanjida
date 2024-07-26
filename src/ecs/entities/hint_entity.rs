@@ -22,15 +22,15 @@ pub fn create_hint_cursor() -> Result<Entity, JsValue> {
 	let scale = 2.5;
 	let entity = Entity::from(a_entity_create("a-text")?)
 		.set_id(ENTITY_ID)?
-		.set_component(Align::Center)?
-		.set_component(Baseline::Center)?
-		.set_component(Anchor::Align)?
-		.set_component(Color::Web("Yellow".into()))?
-		.set_component(CustomFont(YOMI_FONT))?
-		.set_component(Negate(false))?
-		.set_component(Position(0.0, 1.6, -11.0))?
-		.set_component(Scale(scale, scale, scale))?
-		.set_component(Visible::False)?
+		.set_component_attribute(Align::Center)?
+		.set_component_attribute(Baseline::Center)?
+		.set_component_attribute(Anchor::Align)?
+		.set_component_attribute(Color::Web("Yellow".into()))?
+		.set_component_attribute(CustomFont(YOMI_FONT))?
+		.set_component_attribute(Negate(false))?
+		.set_component_attribute(Position(0.0, 1.6, -11.0))?
+		.set_component_attribute(Scale(scale, scale, scale))?
+		.set_component_attribute(Visible::False)?
 		;
 	entity.a_entity().unchecked_ref::<AEntityEx>()
 		.set_component_attribute(QuizForm { unsolved: 1, solved: 0, revealed: 0 });

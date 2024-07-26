@@ -16,7 +16,7 @@ pub mod sky_entity;
 pub fn create_sprite_entity(position: Position) -> Entity {
 	const SPRITE_SCALE: f32 = 0.6;
 	create_box_entity().unwrap()
-		.set_component(Scale(SPRITE_SCALE, SPRITE_SCALE, SPRITE_SCALE)).unwrap()
-		.set_component(position).unwrap()
-		.set_component(Color::Web("tomato".into())).unwrap()
+		.set_component_attribute(Scale(SPRITE_SCALE, SPRITE_SCALE, SPRITE_SCALE)).unwrap()
+		.set_component_attribute(position).unwrap()
+		.set_component_attribute(Color::Web("tomato".into())).unwrap()
 }
