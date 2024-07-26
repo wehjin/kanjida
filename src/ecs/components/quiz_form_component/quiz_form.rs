@@ -1,8 +1,8 @@
+use aframers::components::core::ComponentAttribute;
 use wasm_bindgen::JsValue;
 
 use crate::aframe_ex::schema::{SchemaProperty, SchemaPropertyType};
 use crate::aframe_ex::schema::properties::Vec3SchemaProperty;
-use crate::aframe_ex::schema::settings::ComponentAttribute;
 use crate::ecs::components::quiz_form_component::COMPONENT_NAME;
 
 #[derive(Debug, Copy, Clone, Default)]

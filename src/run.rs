@@ -1,6 +1,6 @@
 use aframers::browser::document;
 use aframers::components::{Position, Rotation, Scale};
-use aframers::entities::Entity;
+use aframers::entities::{create_plane_entity, Entity};
 use wasm_bindgen::JsValue;
 use web_sys::Element;
 
@@ -70,6 +70,10 @@ fn create_scene() -> Result<Scene, JsValue> {
 		.set_component_attribute(Stats)?
 		;
 	Ok(scene)
+}
+
+fn create_details_screen() -> Result<Entity, JsValue> {
+	create_plane_entity()?.set_id("details")
 }
 
 fn create_select_ring() -> Result<Entity, JsValue> {

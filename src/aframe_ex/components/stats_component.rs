@@ -1,4 +1,4 @@
-use crate::aframe_ex::schema::settings::ComponentAttribute;
+use aframers::components::core::ComponentAttribute;
 
 pub struct Stats;
 impl ComponentAttribute for Stats {

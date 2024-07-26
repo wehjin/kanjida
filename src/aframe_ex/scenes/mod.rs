@@ -1,11 +1,9 @@
 use aframers::af_sys::scenes::AScene;
-use aframers::components::core::ComponentValue;
+use aframers::components::core::{ComponentAttribute, ComponentValue};
 use aframers::entities::Entity;
 use aframers::scene::create_scene;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::Element;
-
-use crate::aframe_ex::schema::settings::ComponentAttribute;
 
 pub struct Scene(AScene);
 

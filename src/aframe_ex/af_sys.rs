@@ -1,9 +1,9 @@
 use aframers::af_sys::entities::AEntity;
 use aframers::af_sys::scenes::AScene;
+use aframers::components::core::ComponentAttribute;
 use aframers::components::Position;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::aframe_ex::schema::settings::ComponentAttribute;
 use crate::three_sys::Object3D;
 use crate::three_sys::Vector3;
 

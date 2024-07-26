@@ -5,7 +5,7 @@ version = 3
 [[package]]
 name = "aframers"
 version = "0.1.0"
-source = "git+https://github.com/wehjin/aframers.git#523dc88f9556fa2db63ec517b03ddd3b4f681280"
+source = "git+https://github.com/wehjin/aframers.git#cdd29c523898c6f8e509048c09b0cb83844f6ce1"
 dependencies = [
  "wasm-bindgen",
  "web-sys",
@@ -200,7 +200,7 @@ dependencies = [
 [[package]]
 name = "kanji-data"
 version = "0.1.0"
-source = "git+https://github.com/wehjin/kanji-data.git#2b87d0fe92fd171602fc084d013099493ae05484"
+source = "git+https://github.com/wehjin/kanji-data.git#931e23c6c80b388c3aca0ee853862c564e17dd64"
 dependencies = [
  "anyhow",
  "csv",
@@ -361,9 +361,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.71"
+version = "2.0.72"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b146dcf730474b4bcd16c311627b31ede9ab149045db4d6088b3becaea046462"
+checksum = "dc4b9b9bf2add8093d3f2c0204471e951b2285580335de42f9d2534f3ae7a8af"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -378,9 +378,9 @@ checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
 
 [[package]]
 name = "version_check"
-version = "0.9.4"
+version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
+checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "wasi"
