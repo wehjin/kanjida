@@ -5,6 +5,8 @@ use aframers::scene::create_scene;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::Element;
 
+pub mod core;
+
 pub struct Scene(AScene);
 
 impl Scene {

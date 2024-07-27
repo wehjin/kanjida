@@ -17,6 +17,8 @@ extern "C" {
 	pub fn get_object3d_kind(this: &AEntityEx, kind: &str) -> Object3D;
 	#[wasm_bindgen(method, js_name = setObject3D)]
 	pub fn set_object3d_kind(this: &AEntityEx, kind: &str, object: &Object3D);
+	#[wasm_bindgen(method, js_name = setAttribute)]
+	pub fn set_attribute_property(this: &AEntityEx, attribute: &str, property: &str, value: &str);
 }
 
 impl AEntityEx {
@@ -44,7 +46,7 @@ impl AEntityEx {
 
 #[wasm_bindgen]
 extern "C" {
-	#[wasm_bindgen(extends = AScene)]
+	#[wasm_bindgen(extends = AScene, extends = AEntityEx)]
 	pub type ASceneEx;
 
 	#[wasm_bindgen(method, getter)]

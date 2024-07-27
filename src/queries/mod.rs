@@ -5,6 +5,9 @@ use crate::GAME;
 use crate::game::game_state::GameState;
 use crate::game::QuizPoint;
 
+
+
+
 pub fn quiz_form_from_point(quiz_point: QuizPoint) -> QuizForm {
 	let quiz_form = GAME.with_borrow(|game| {
 		quiz_form_from_point_game(quiz_point, game)

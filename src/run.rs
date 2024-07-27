@@ -1,9 +1,8 @@
-use aframers::af_sys::entities::AEntity;
 use aframers::browser::document;
 use aframers::components::{Color, Position, Rotation, Scale, Width};
 use aframers::entities::{create_plane_entity, Entity};
 use Color::WebStr;
-use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen::JsValue;
 use web_sys::Element;
 
 use hexgrid_entity::create_hexgrid;
@@ -95,10 +94,7 @@ fn create_details_screen() -> Entity {
 		;
 	entity
 }
-pub fn get_details_screen() -> Entity {
-	let element = document().get_element_by_id("details").unwrap();
-	Entity::from(element.unchecked_into::<AEntity>())
-}
+pub const DETAILS_SCREEN_SELECTOR: &'static str = "#details";
 
 fn create_select_ring() -> Result<Entity, JsValue> {
 	let select_ring = try_ring_entity(HexColor::Selected.as_ref())
