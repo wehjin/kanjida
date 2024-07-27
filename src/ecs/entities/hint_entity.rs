@@ -12,6 +12,7 @@ use crate::ecs::components::quiz_form_component::quiz_form::QuizForm;
 use crate::views::yomi_data::YOMI_FONT;
 
 pub const ENTITY_ID: &'static str = "hintEntity";
+pub const HINT_ENTITY_SELECTOR: &'static str = "#hintEntity";
 
 pub fn get() -> Entity {
 	let element = document().get_element_by_id(ENTITY_ID).unwrap().unchecked_into::<AEntity>();

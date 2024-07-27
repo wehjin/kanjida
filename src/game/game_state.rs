@@ -72,10 +72,6 @@ impl GameState {
 	pub fn total_unsolved_solved_revealed(&self) -> (usize, usize, usize) {
 		self.all_quizzes.total_unsolved_solved_revealed()
 	}
-	pub fn quiz_hint(&self, quiz_point: QuizPoint) -> String {
-		let quiz = &self.all_quizzes.0[quiz_point];
-		quiz.to_hint()
-	}
 	pub fn as_quiz_states(&self) -> &Vec<QuizState> {
 		&self.all_quizzes.0
 	}

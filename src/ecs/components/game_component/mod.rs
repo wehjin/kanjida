@@ -19,18 +19,17 @@ use crate::aframe_ex::components::animation_component::{Animation, AnimationEven
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::components::oculus_touch_controls_component::OculusTouchControlsEvent::AButtonDown;
 use crate::aframe_ex::js::log_value;
-use crate::aframe_ex::scenes::core::apply_scene_effects;
+use crate::aframe_ex::scenes::core::scene_apply_effects;
 use crate::aframe_ex::scenes::Scene;
-use crate::aframe_ex::Value;
 use crate::ecs::components::hexcell_component::attribute::Hexcell;
 use crate::ecs::components::quiz_form_component::quiz_form::QuizForm;
-use crate::ecs::entities::{create_sprite_entity, hint_entity};
+use crate::ecs::entities::create_sprite_entity;
 use crate::ecs::entities::hint_entity::get_hint_cursor;
 use crate::GAME;
 use crate::game::{AnswerPoint, QuizPoint, YomiPoint};
 use crate::game::game_material::GameMaterial;
 use crate::game::game_state::GameState;
-use crate::game::game_view::derive_game_effects;
+use crate::game::game_view::game_derive_effects;
 use crate::game::quiz_state::QuizState;
 use crate::queries::quiz_form_from_point;
 use crate::views::{element_id_from_answer_point, element_id_from_quiz_point, element_selector_from_answer_point};
@@ -57,7 +56,7 @@ fn on_a_button_down(comp: AComponent, event: CustomEvent) {
 }
 
 fn on_toggle_selection(_comp: AComponent, event: CustomEvent) {
-	let quiz_point = update_game("TOGGLE_SOLUTION", event, |mut game, _event| {
+	update_game("TOGGLE_SOLUTION", event, |mut game, _event| {
 		match game.selected_quiz {
 			Some(quiz_point) => {
 				game.all_quizzes = game.all_quizzes.swap(quiz_point, QuizState::toggle_revealed);
@@ -67,12 +66,6 @@ fn on_toggle_selection(_comp: AComponent, event: CustomEvent) {
 		}
 	});
 	render_hint_cursor_and_quiz_status();
-	if let Some(quiz_point) = quiz_point {
-		let hint = GAME.with_borrow(|game| game.quiz_hint(quiz_point));
-		hint_entity::get()
-			.set_component_attribute(Value(hint.to_uppercase())).unwrap()
-		;
-	}
 	render_scene()
 }
 
@@ -120,8 +113,8 @@ fn on_select_quiz(_comp: AComponent, event: CustomEvent) {
 
 fn render_scene() {
 	let game_material = GAME.with_borrow(GameMaterial::derive);
-	let game_effects = derive_game_effects(&game_material);
-	apply_scene_effects(game_effects);
+	let scene_effects = game_derive_effects(&game_material);
+	scene_apply_effects(&ASceneEx::get(), scene_effects)
 }
 
 fn update_game<T>(name: impl AsRef<str>, event: CustomEvent, step: impl Fn(GameState, CustomEvent) -> (GameState, T)) -> T {

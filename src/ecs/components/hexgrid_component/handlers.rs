@@ -7,12 +7,9 @@ use web_sys::{CustomEvent, Event};
 use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::events::StateEvent;
-use crate::aframe_ex::Value;
 use crate::ecs::components::hexgrid_component::bindgen::HexgridAComponent;
 use crate::ecs::entities::hint_entity;
-use crate::GAME;
 use crate::three_sys::Vector3;
-use crate::views::quiz_point_from_element_id;
 use crate::views::settings::HINT_Z_OFFSET;
 
 pub fn handle_state_added(component: AComponent, event: Event) {
@@ -23,7 +20,7 @@ pub fn handle_state_added(component: AComponent, event: Event) {
 			"selected" => {
 				let cell = custom.target().unwrap().unchecked_into::<AEntity>();
 				let cell_world_position = cell.unchecked_ref::<AEntityEx>().world_position_in_new_vector();
-				update_hint_entity(&cell_world_position, cell.id().as_str());
+				update_hint_entity(&cell_world_position);
 				update_component_with_selected_entity_notifying_old(&component, &cell);
 				let scene = component.a_entity().a_scene().unchecked_into::<ASceneEx>();
 				scene.set_yomigun_target_position(Some(cell_world_position));
@@ -33,14 +30,9 @@ pub fn handle_state_added(component: AComponent, event: Event) {
 	}
 }
 
-fn update_hint_entity(center: &Vector3, quiz_id: &str) {
-	let hint = GAME.with_borrow(|game| {
-		let quiz_point = quiz_point_from_element_id(quiz_id);
-		game.quiz_hint(quiz_point)
-	});
+fn update_hint_entity(center: &Vector3) {
 	hint_entity::get()
 		.set_component_attribute(Position(center.x(), center.y(), center.z() + HINT_Z_OFFSET)).unwrap()
-		.set_component_attribute(Value(hint.to_uppercase())).unwrap()
 		.set_component_attribute(Visible::True).unwrap()
 	;
 }

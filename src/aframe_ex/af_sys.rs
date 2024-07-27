@@ -1,7 +1,9 @@
 use aframers::af_sys::entities::AEntity;
 use aframers::af_sys::scenes::AScene;
+use aframers::browser::document;
 use aframers::components::core::ComponentAttribute;
 use aframers::components::Position;
+use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::three_sys::Object3D;
@@ -53,4 +55,11 @@ extern "C" {
 	pub fn yomigun_target_position(this: &ASceneEx) -> Option<Vector3>;
 	#[wasm_bindgen(method, setter, structural)]
 	pub fn set_yomigun_target_position(this: &ASceneEx, value: Option<Vector3>);
+}
+
+impl ASceneEx {
+	pub fn get() -> Self {
+		let element = document().query_selector("a-scene").unwrap().unwrap();
+		element.unchecked_into::<ASceneEx>()
+	}
 }
