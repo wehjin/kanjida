@@ -1,22 +1,22 @@
 use wasm_bindgen::JsCast;
 
 use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
-use crate::aframe_ex::scenes::core::SceneEffect::{Ecsv, Ecv, EntityAddState};
+use crate::aframe_ex::scenes::core::SceneEffect::{EntityAddState, SetComponent, SetComponentProperty};
 
 pub enum SceneEffect {
-	Ecsv(String, String, String, String),
-	Ecv(String, String, String),
+	SetComponentProperty(String, String, String, String),
+	SetComponent(String, String, String),
 	EntityAddState(String, String),
 }
 
 impl SceneEffect {
-	pub fn ecsv(e: impl AsRef<str>, c: impl AsRef<str>, s: impl AsRef<str>, value: impl AsRef<str>) -> Self {
-		Ecsv(e.as_ref().to_string(), c.as_ref().to_string(), s.as_ref().to_string(), value.as_ref().to_string())
+	pub fn set_component_property(entity: impl AsRef<str>, component: impl AsRef<str>, setting: impl AsRef<str>, value: impl AsRef<str>) -> Self {
+		SetComponentProperty(entity.as_ref().to_string(), component.as_ref().to_string(), setting.as_ref().to_string(), value.as_ref().to_string())
 	}
-	pub fn ecv(e: impl AsRef<str>, c: impl AsRef<str>, value: impl AsRef<str>) -> Self {
-		Ecv(e.as_ref().to_string(), c.as_ref().to_string(), value.as_ref().to_string())
+	pub fn set_component(entity: impl AsRef<str>, component: impl AsRef<str>, value: impl AsRef<str>) -> Self {
+		SetComponent(entity.as_ref().to_string(), component.as_ref().to_string(), value.as_ref().to_string())
 	}
-	pub fn entity_add_state(entity: impl AsRef<str>, state: impl AsRef<str>) -> Self {
+	pub fn add_state(entity: impl AsRef<str>, state: impl AsRef<str>) -> Self {
 		EntityAddState(entity.as_ref().to_string(), state.as_ref().to_string())
 	}
 }
@@ -24,12 +24,13 @@ impl SceneEffect {
 impl SceneEffect {
 	pub fn apply_in_scene(&self, scene: &ASceneEx) {
 		match self {
-			Ecsv(entity, component, setting, value) => {
-				let entity_element = scene.query_selector(entity).unwrap().unwrap();
+			SetComponentProperty(entity, component, setting, value) => {
+				let entity_element = scene.query_selector(entity).unwrap()
+					.unwrap_or_else(|| panic!("No element for selector '{}'", entity));
 				let entity = entity_element.unchecked_ref::<AEntityEx>();
 				entity.set_attribute_property(component, setting, value);
 			}
-			Ecv(entity, component, value) => {
+			SetComponent(entity, component, value) => {
 				let entity_element = scene.query_selector(entity).unwrap().unwrap();
 				let entity = entity_element.unchecked_ref::<AEntityEx>();
 				entity.set_attribute(component, value).unwrap();

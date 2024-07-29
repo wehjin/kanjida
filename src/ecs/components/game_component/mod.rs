@@ -2,9 +2,7 @@ use aframers::af_sys::components::AComponent;
 use aframers::af_sys::entities::AEntity;
 use aframers::af_sys::scenes::AScene;
 use aframers::browser::{document, log};
-use aframers::components::core::ComponentAttribute;
 use aframers::components::Position;
-use aframers::entities::Entity;
 use chrono::Utc;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
@@ -22,17 +20,14 @@ use crate::aframe_ex::components::oculus_touch_controls_component::OculusTouchCo
 use crate::aframe_ex::js::log_value;
 use crate::aframe_ex::scenes::core::scene_apply_effects;
 use crate::aframe_ex::scenes::Scene;
-use crate::ecs::components::hexcell_component::attribute::Hexcell;
-use crate::ecs::components::quiz_form_component::quiz_form::QuizForm;
 use crate::ecs::entities::create_sprite_entity;
-use crate::ecs::entities::hint_entity::get_hint_cursor;
 use crate::GAME;
-use crate::game::{AnswerPoint, QuizPoint, YomiPoint};
+use crate::game::{AnswerPoint, YomiPoint};
 use crate::game::game_material::GameMaterial;
 use crate::game::game_view::game_derive_effects;
 use crate::game::states::game_state::GameState;
 use crate::game::states::selected_quiz_state::SelectedQuizState;
-use crate::views::{element_id_from_answer_point, element_id_from_quiz_point, element_selector_from_answer_point};
+use crate::views::{answer_point_element_selector, element_id_from_answer_point};
 
 pub mod game;
 
@@ -64,8 +59,7 @@ fn on_toggle_solution(_comp: AComponent, event: CustomEvent) {
 		game.selected_quiz = selected_quiz;
 		(game, ())
 	});
-	let game_material = render_scene();
-	render_hint_cursor_and_quiz_status(&game_material);
+	render_scene();
 }
 
 fn on_grade_answer(_comp: AComponent, event: CustomEvent) {
@@ -75,8 +69,7 @@ fn on_grade_answer(_comp: AComponent, event: CustomEvent) {
 	});
 	// Update entities.
 	erase_answer_sprite(answer_point);
-	let game_material = render_scene();
-	render_hint_cursor_and_quiz_status(&game_material);
+	render_scene();
 }
 
 fn on_submit_answer(comp: AComponent, event: CustomEvent) {
@@ -105,62 +98,33 @@ fn on_select_quiz(_comp: AComponent, event: CustomEvent) {
 		game.selected_quiz = selected_quiz;
 		(game, ())
 	});
-	let game_material = render_scene();
-	render_hint_cursor_and_quiz_status(&game_material);
+	render_scene();
 }
 
-fn render_scene() -> GameMaterial {
+fn render_scene() {
 	let game_material = GAME.with_borrow(GameMaterial::derive);
 	let scene_effects = game_derive_effects(&game_material);
 	scene_apply_effects(&ASceneEx::get(), scene_effects);
-	game_material
 }
 
 fn update_game<T>(name: impl AsRef<str>, event: CustomEvent, step: impl Fn(GameState, CustomEvent) -> (GameState, T)) -> T {
 	log_value(&event);
 	let game = GAME.take();
 	let age = game.age;
-	let (mut new_game, effects) = step(game, event);
-	new_game.age = age + 1;
-	log(&format!("{}: {:?}", name.as_ref(), &new_game));
-	GAME.set(new_game);
+	let (stepped_game, effects) = step(game, event);
+	let aged_game = GameState { age: age + 1, ..stepped_game };
+	log(&format!("{}: {:?}", name.as_ref(), &aged_game));
+	GAME.set(aged_game);
 	effects
 }
 
 fn erase_answer_sprite(answer_point: AnswerPoint) {
-	let selector = element_selector_from_answer_point(answer_point);
+	let selector = answer_point_element_selector(answer_point);
 	if let Ok(Some(sprite)) = document().query_selector(&selector) {
 		sprite.remove();
 	}
 }
 
-fn render_hint_cursor_and_quiz_status(material: &GameMaterial) {
-	match (material.quiz_form, material.selected_quiz_point) {
-		(Some(quiz_form), Some(quiz_point)) => {
-			render_hint_cursor(quiz_form);
-			render_quiz_status(quiz_point, quiz_form);
-		}
-		_ => ()
-	}
-}
-
-fn render_quiz_status(quiz_point: QuizPoint, quiz_form: QuizForm) {
-	if quiz_form.unsolved == 0 {
-		if let Some(quiz) = document().get_element_by_id(&element_id_from_quiz_point(quiz_point)) {
-			Entity::from(quiz.unchecked_into::<AEntity>())
-				.set_component_attribute(Hexcell::new().set_state(1)).unwrap()
-			;
-		}
-	}
-}
-
-fn render_hint_cursor(quiz_form: QuizForm) {
-	let hint = get_hint_cursor();
-	hint.set_attribute(
-		quiz_form.as_attribute_name().as_ref(),
-		quiz_form.as_attribute_str().as_ref(),
-	).unwrap();
-}
 fn render_yomigun(selected_yomi: YomiPoint) {
 	let yomigun = document().query_selector("#yomigun").unwrap().unwrap();
 	yomigun.unchecked_ref::<AEntity>()

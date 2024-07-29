@@ -13,10 +13,13 @@ pub fn quiz_point_from_element_id(id: impl AsRef<str> + Sized) -> QuizPoint {
 	let quiz_point = usize::from_str(&id[5..]).unwrap();
 	quiz_point
 }
+pub fn quiz_point_element_selector(quiz_point: QuizPoint) -> String {
+	format!("#{}", element_id_from_quiz_point(quiz_point))
+}
 
 pub fn element_id_from_answer_point(answer_point: AnswerPoint) -> String {
 	format!("{}-{}", "answer", answer_point)
 }
-pub fn element_selector_from_answer_point(answer_point: AnswerPoint) -> String {
+pub fn answer_point_element_selector(answer_point: AnswerPoint) -> String {
 	format!("#{}", element_id_from_answer_point(answer_point))
 }

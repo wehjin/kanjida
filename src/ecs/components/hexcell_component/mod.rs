@@ -26,7 +26,8 @@ pub mod bindgen;
 pub mod data;
 pub mod handlers;
 
-const COMPONENT_NAME: &'static str = "hexcell";
+pub const COMPONENT_NAME: &'static str = "hexcell";
+pub const STATUS_SETTING: &'static str = "status";
 
 pub fn register_hexcell_component() {
 	let dependencies = Dependencies::new(laserfocus_component::NAME);
@@ -36,7 +37,7 @@ pub fn register_hexcell_component() {
 		;
 	let schema = MultiPropertySchema::new()
 		.push("glyph", Field::string("美"))
-		.push("status", Field::usize(0))
+		.push(STATUS_SETTING, Field::usize(0))
 		;
 	ComponentDefinition::new()
 		.set_dependencies(dependencies)
