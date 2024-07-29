@@ -13,6 +13,7 @@ use web_sys::js_sys::Function;
 
 use AnimationEvent::AnimationComplete;
 use GameEvent::{GradeAnswer, SelectQuiz, SelectYomi, SubmitAnswer, ToggleSolution};
+use SelectedQuizState::{Selected, Unselected};
 
 use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
 use crate::aframe_ex::components::animation_component::{Animation, AnimationEvent, Easing};
@@ -28,10 +29,9 @@ use crate::ecs::entities::hint_entity::get_hint_cursor;
 use crate::GAME;
 use crate::game::{AnswerPoint, QuizPoint, YomiPoint};
 use crate::game::game_material::GameMaterial;
-use crate::game::states::game_state::GameState;
 use crate::game::game_view::game_derive_effects;
-use crate::game::states::quiz_state::QuizState;
-use crate::queries::quiz_form_from_point;
+use crate::game::states::game_state::GameState;
+use crate::game::states::selected_quiz_state::SelectedQuizState;
 use crate::views::{element_id_from_answer_point, element_id_from_quiz_point, element_selector_from_answer_point};
 
 pub mod game;
@@ -42,7 +42,7 @@ pub fn register_game_component() {
 		.set_handler(SelectYomi, on_select_yomi)
 		.set_handler(SubmitAnswer, on_submit_answer)
 		.set_handler(GradeAnswer, on_grade_answer)
-		.set_handler(ToggleSolution, on_toggle_selection)
+		.set_handler(ToggleSolution, on_toggle_solution)
 		.set_handler(AButtonDown, on_a_button_down)
 		;
 	ComponentDefinition::new()
@@ -55,18 +55,17 @@ fn on_a_button_down(comp: AComponent, event: CustomEvent) {
 	comp.a_entity().a_scene().emit_event(ToggleSolution.as_ref());
 }
 
-fn on_toggle_selection(_comp: AComponent, event: CustomEvent) {
+fn on_toggle_solution(_comp: AComponent, event: CustomEvent) {
 	update_game("TOGGLE_SOLUTION", event, |mut game, _event| {
-		match game.selected_quiz {
-			Some(quiz_point) => {
-				game.all_quizzes = game.all_quizzes.swap(quiz_point, QuizState::toggle_revealed);
-				(game, Some(quiz_point))
-			}
-			None => (game, None),
-		}
+		let selected_quiz = match game.selected_quiz {
+			Selected { quiz_point, revealed } => Selected { quiz_point, revealed: !revealed },
+			Unselected => game.selected_quiz,
+		};
+		game.selected_quiz = selected_quiz;
+		(game, ())
 	});
-	render_hint_cursor_and_quiz_status();
-	render_scene()
+	let game_material = render_scene();
+	render_hint_cursor_and_quiz_status(&game_material);
 }
 
 fn on_grade_answer(_comp: AComponent, event: CustomEvent) {
@@ -76,7 +75,8 @@ fn on_grade_answer(_comp: AComponent, event: CustomEvent) {
 	});
 	// Update entities.
 	erase_answer_sprite(answer_point);
-	render_hint_cursor_and_quiz_status();
+	let game_material = render_scene();
+	render_hint_cursor_and_quiz_status(&game_material);
 }
 
 fn on_submit_answer(comp: AComponent, event: CustomEvent) {
@@ -99,30 +99,31 @@ fn on_select_yomi(_comp: AComponent, event: CustomEvent) {
 }
 
 fn on_select_quiz(_comp: AComponent, event: CustomEvent) {
-	update_game("SELECT_QUIZ", event, |state, event| {
+	update_game("SELECT_QUIZ", event, |mut game, event| {
 		let quiz_point = event.detail().as_f64().map(|it| it as usize).unwrap_or(0);
-		let game_state = state.select_quiz(quiz_point);
-		(game_state, ())
+		let selected_quiz = Selected { quiz_point, revealed: false };
+		game.selected_quiz = selected_quiz;
+		(game, ())
 	});
-
-	let selected_quiz = GAME.with_borrow(|game_state| game_state.selected_quiz);
-	render_hexgrid(selected_quiz);
-	render_hint_cursor_and_quiz_status();
-	render_scene();
+	let game_material = render_scene();
+	render_hint_cursor_and_quiz_status(&game_material);
 }
 
-fn render_scene() {
+fn render_scene() -> GameMaterial {
 	let game_material = GAME.with_borrow(GameMaterial::derive);
 	let scene_effects = game_derive_effects(&game_material);
-	scene_apply_effects(&ASceneEx::get(), scene_effects)
+	scene_apply_effects(&ASceneEx::get(), scene_effects);
+	game_material
 }
 
 fn update_game<T>(name: impl AsRef<str>, event: CustomEvent, step: impl Fn(GameState, CustomEvent) -> (GameState, T)) -> T {
 	log_value(&event);
-	let state = GAME.take();
-	let (new_state, effects) = step(state, event);
-	log(&format!("{}: {:?}", name.as_ref(), &new_state));
-	GAME.set(new_state);
+	let game = GAME.take();
+	let age = game.age;
+	let (mut new_game, effects) = step(game, event);
+	new_game.age = age + 1;
+	log(&format!("{}: {:?}", name.as_ref(), &new_game));
+	GAME.set(new_game);
 	effects
 }
 
@@ -133,12 +134,13 @@ fn erase_answer_sprite(answer_point: AnswerPoint) {
 	}
 }
 
-fn render_hint_cursor_and_quiz_status() {
-	let selected_quiz = GAME.with_borrow(|game| game.selected_quiz);
-	if let Some(quiz_point) = selected_quiz {
-		let quiz_form = quiz_form_from_point(quiz_point);
-		render_hint_cursor(quiz_form);
-		render_quiz_status(quiz_point, quiz_form);
+fn render_hint_cursor_and_quiz_status(material: &GameMaterial) {
+	match (material.quiz_form, material.selected_quiz_point) {
+		(Some(quiz_form), Some(quiz_point)) => {
+			render_hint_cursor(quiz_form);
+			render_quiz_status(quiz_point, quiz_form);
+		}
+		_ => ()
 	}
 }
 
@@ -158,14 +160,6 @@ fn render_hint_cursor(quiz_form: QuizForm) {
 		quiz_form.as_attribute_name().as_ref(),
 		quiz_form.as_attribute_str().as_ref(),
 	).unwrap();
-}
-
-fn render_hexgrid(selected_quiz: Option<QuizPoint>) {
-	if let Some(quiz_point) = selected_quiz {
-		let cell_selector = format!("#{}", element_id_from_quiz_point(quiz_point));
-		let cell_element = document().query_selector(&cell_selector).unwrap().unwrap();
-		cell_element.unchecked_ref::<AEntity>().add_state("selected");
-	}
 }
 fn render_yomigun(selected_yomi: YomiPoint) {
 	let yomigun = document().query_selector("#yomigun").unwrap().unwrap();

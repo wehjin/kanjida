@@ -1,11 +1,12 @@
 use wasm_bindgen::JsCast;
 
 use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
-use crate::aframe_ex::scenes::core::SceneEffect::{Ecsv, Ecv};
+use crate::aframe_ex::scenes::core::SceneEffect::{Ecsv, Ecv, EntityAddState};
 
 pub enum SceneEffect {
 	Ecsv(String, String, String, String),
 	Ecv(String, String, String),
+	EntityAddState(String, String),
 }
 
 impl SceneEffect {
@@ -14,6 +15,9 @@ impl SceneEffect {
 	}
 	pub fn ecv(e: impl AsRef<str>, c: impl AsRef<str>, value: impl AsRef<str>) -> Self {
 		Ecv(e.as_ref().to_string(), c.as_ref().to_string(), value.as_ref().to_string())
+	}
+	pub fn entity_add_state(entity: impl AsRef<str>, state: impl AsRef<str>) -> Self {
+		EntityAddState(entity.as_ref().to_string(), state.as_ref().to_string())
 	}
 }
 
@@ -29,6 +33,13 @@ impl SceneEffect {
 				let entity_element = scene.query_selector(entity).unwrap().unwrap();
 				let entity = entity_element.unchecked_ref::<AEntityEx>();
 				entity.set_attribute(component, value).unwrap();
+			}
+			EntityAddState(entity, state) => {
+				let entity_element = scene.query_selector(entity).unwrap().unwrap();
+				let entity = entity_element.unchecked_ref::<AEntityEx>();
+				if !entity.is_state(state) {
+					entity.add_state(state);
+				}
 			}
 		}
 	}

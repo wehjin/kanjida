@@ -5,7 +5,7 @@ use kanji_data::KanjiData;
 
 use crate::game::{KanjiPoint, YomiPoint};
 use crate::game::states::solution_state::SolutionState;
-use crate::views::yomi_data::{first_char_in_str, split_string_first_char, YomiChar};
+use crate::views::yomi_data::{first_char_in_str, YomiChar};
 
 /// Holds the state of a quiz.
 #[derive(Debug, Clone)]
@@ -14,45 +14,21 @@ pub struct QuizState {
 	pub kanji_point: KanjiPoint,
 	/// Solutions to the quiz.
 	pub solutions: HashMap<char, SolutionState>,
-	/// True if the quiz solution is revealed.
-	pub is_revealed: bool,
 }
 
 impl QuizState {
-	pub fn to_hint(&self) -> String {
-		let data = KanjiData(self.kanji_point);
-		let meaning = data.as_meaning();
-		let reveal = match self.is_revealed {
-			true => {
-				let onyomis = data.as_onyomi().iter()
-					.map(|&it| {
-						if it.chars().count() > 1 {
-							let (first, rest) = split_string_first_char(it);
-							format!("{}({})", &first, &rest)
-						} else {
-							it.to_string()
-						}
-					})
-					.collect::<Vec<_>>();
-				onyomis.join(", ")
-			}
-			false => " ".to_string()
-		};
-		format!("{}\n\n\n{}", meaning, &reveal)
-	}
 	pub fn as_question(&self) -> &'static str {
 		KanjiData(self.kanji_point).as_glyph()
 	}
 
-	pub fn unsolved_solved_revealed(&self) -> (usize, usize, usize) {
-		let revealed = self.is_revealed as usize;
+	pub fn unsolved_solved(&self) -> (usize, usize) {
 		let score = self.solutions.iter().fold(
-			(0usize, 0usize, revealed),
-			|(unsolved, solved, revealed), (_, solution)| {
+			(0usize, 0usize),
+			|(unsolved, solved), (_, solution)| {
 				if solution.is_solved() {
-					(unsolved, solved + 1, revealed)
+					(unsolved, solved + 1)
 				} else {
-					(unsolved + 1, solved, revealed)
+					(unsolved + 1, solved)
 				}
 			},
 		);
@@ -75,7 +51,7 @@ impl QuizState {
 			.map(|first_char| (first_char, SolutionState::init()))
 			.collect::<HashMap<_, _>>()
 			;
-		Self { kanji_point, solutions, is_revealed: false }
+		Self { kanji_point, solutions }
 	}
 	pub fn attempt_solution(mut self, yomi_point: YomiPoint, now: DateTime<Utc>) -> Self {
 		let search_ch = YomiChar(yomi_point).to_char();
@@ -83,10 +59,6 @@ impl QuizState {
 			let solution = solution.succeed(now);
 			self.solutions.insert(search_ch, solution);
 		}
-		self
-	}
-	pub fn toggle_revealed(mut self) -> Self {
-		self.is_revealed = !self.is_revealed;
 		self
 	}
 }
