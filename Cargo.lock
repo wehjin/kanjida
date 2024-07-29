@@ -200,7 +200,7 @@ dependencies = [
 [[package]]
 name = "kanji-data"
 version = "0.1.0"
-source = "git+https://github.com/wehjin/kanji-data.git#931e23c6c80b388c3aca0ee853862c564e17dd64"
+source = "git+https://github.com/wehjin/kanji-data.git#c48c1c8cad2417156f89a7021594e6ba6ad239eb"
 dependencies = [
  "anyhow",
  "csv",

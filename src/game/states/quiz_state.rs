@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use kanji_data::KanjiData;
 
 use crate::game::{KanjiPoint, YomiPoint};
-use crate::game::solution_state::SolutionState;
+use crate::game::states::solution_state::SolutionState;
 use crate::views::yomi_data::{first_char_in_str, split_string_first_char, YomiChar};
 
 /// Holds the state of a quiz.

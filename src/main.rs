@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use game::game_state::GameState;
+use game::states::game_state::GameState;
 
 pub mod aframe_ex;
 pub mod js_sys_ex;

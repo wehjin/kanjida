@@ -28,9 +28,9 @@ use crate::ecs::entities::hint_entity::get_hint_cursor;
 use crate::GAME;
 use crate::game::{AnswerPoint, QuizPoint, YomiPoint};
 use crate::game::game_material::GameMaterial;
-use crate::game::game_state::GameState;
+use crate::game::states::game_state::GameState;
 use crate::game::game_view::game_derive_effects;
-use crate::game::quiz_state::QuizState;
+use crate::game::states::quiz_state::QuizState;
 use crate::queries::quiz_form_from_point;
 use crate::views::{element_id_from_answer_point, element_id_from_quiz_point, element_selector_from_answer_point};
 

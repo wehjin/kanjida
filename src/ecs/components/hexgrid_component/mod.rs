@@ -19,7 +19,7 @@ use crate::ecs::components::hexgrid_component::bindgen::HexgridAComponent;
 use crate::ecs::components::hexgrid_component::other::SelectedEntity;
 use crate::ecs::components::quiz_form_component::FONT_LOADER;
 use crate::GAME;
-use crate::game::quiz_state::QuizState;
+use crate::game::states::quiz_state::QuizState;
 use crate::three_sys::{BufferGeometry, Color, merge_geometries, Mesh, MeshBasicMaterial, TextGeometry, TextGeometryParameters};
 use crate::views::element_id_from_quiz_point;
 use crate::views::settings::PLAIN_RING_Z_OFFSET;

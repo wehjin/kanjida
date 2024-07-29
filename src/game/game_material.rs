@@ -1,6 +1,6 @@
 use kanji_data::KanjiData;
 
-use crate::game::game_state::GameState;
+use crate::game::states::game_state::GameState;
 use crate::queries::query_details_at_kanji_point;
 use crate::views::yomi_data::split_string_first_char;
 

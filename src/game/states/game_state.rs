@@ -6,8 +6,8 @@ use chrono::{DateTime, Utc};
 use kanji_data::KanjiData;
 
 use crate::game::{AnswerPoint, QuizPoint, YomiPoint};
-use crate::game::answer_state::AnswerState;
-use crate::game::quiz_state::QuizState;
+use crate::game::states::answer_state::AnswerState;
+use crate::game::states::quiz_state::QuizState;
 
 #[derive(Clone, Default)]
 pub struct QuizStates(pub Vec<QuizState>);

@@ -2,7 +2,7 @@ use kanji_data::KanjiData;
 use kanji_data::examples::KanjiExample;
 use crate::ecs::components::quiz_form_component::quiz_form::QuizForm;
 use crate::GAME;
-use crate::game::game_state::GameState;
+use crate::game::states::game_state::GameState;
 use crate::game::QuizPoint;
 
 
