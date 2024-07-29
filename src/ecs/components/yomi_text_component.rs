@@ -1,6 +1,8 @@
 use aframers::components::Width;
 
-use crate::aframe_ex::{Align, Baseline, Text};
+use crate::aframe_ex::components::baseline_component::Baseline;
+use crate::aframe_ex::components::align_component::Align;
+use crate::aframe_ex::components::text_component::Text;
 use crate::views::yomi_data::YomiChar;
 
 pub fn yomi_text(yomi_char: YomiChar) -> Text {

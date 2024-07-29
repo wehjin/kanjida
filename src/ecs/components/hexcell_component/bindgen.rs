@@ -5,7 +5,7 @@ use aframers::entities::Entity;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::aframe_ex::af_sys::AEntityEx;
+use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::components::material_component::Material;
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::js::log_value;

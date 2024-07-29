@@ -9,8 +9,11 @@ use hexgrid_entity::create_hexgrid;
 use hint_entity::create_hint_cursor;
 use yomigun_entity::create_yomigun;
 
-use crate::aframe_ex::{Align, Anchor, Baseline, Text};
+use crate::aframe_ex::components::baseline_component::Baseline;
+use crate::aframe_ex::components::align_component::Align;
+use crate::aframe_ex::components::anchor_component::Anchor;
 use crate::aframe_ex::components::stats_component::Stats;
+use crate::aframe_ex::components::text_component::Text;
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::scenes::Scene;
 use crate::ecs::components::game_component::game::Game;

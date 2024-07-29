@@ -13,7 +13,7 @@ use AnimationEvent::AnimationComplete;
 use GameEvent::{GradeAnswer, SelectQuiz, SelectYomi, SubmitAnswer, ToggleSolution};
 use SelectedQuizState::{Selected, Unselected};
 
-use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
+use crate::aframe_ex::scene_entity_bindgen::{AEntityEx, ASceneEx};
 use crate::aframe_ex::components::animation_component::{Animation, AnimationEvent, Easing};
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::components::oculus_touch_controls_component::OculusTouchControlsEvent::AButtonDown;

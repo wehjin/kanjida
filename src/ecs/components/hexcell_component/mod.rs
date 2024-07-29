@@ -6,7 +6,7 @@ use web_sys::js_sys::{Array, Reflect};
 
 use three_sys::RingGeometry;
 
-use crate::aframe_ex::af_sys::AEntityEx;
+use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::components::core::{ComponentDefinition, Dependencies, Events};
 use crate::aframe_ex::components::geometry_component::{Circle, Geometry};
 use crate::aframe_ex::events::StateEventKind::{StateAdded, StateRemoved};

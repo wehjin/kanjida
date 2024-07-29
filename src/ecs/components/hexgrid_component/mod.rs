@@ -9,7 +9,7 @@ use web_sys::js_sys::{Array, Object};
 
 use hexgrid::Hexgrid;
 
-use crate::aframe_ex::af_sys::AEntityEx;
+use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::events::StateEventKind;
 use crate::aframe_ex::schema::fields::Field;

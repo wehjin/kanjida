@@ -4,7 +4,7 @@ use aframers::components::Position;
 use wasm_bindgen::JsCast;
 use web_sys::{CustomEvent, Event};
 
-use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
+use crate::aframe_ex::scene_entity_bindgen::{AEntityEx, ASceneEx};
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::events::StateEvent;
 use crate::ecs::components::hexgrid_component::bindgen::HexgridAComponent;

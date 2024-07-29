@@ -4,7 +4,7 @@ use aframers::components::core::ComponentAttribute;
 use wasm_bindgen::JsCast;
 use web_sys::Event;
 
-use crate::aframe_ex::af_sys::AEntityEx;
+use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::components::cursor_component::CursorEvent::{Click, MouseEnter, MouseLeave};
 use crate::aframe_ex::schema::fields::Field;

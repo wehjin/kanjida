@@ -1,6 +1,6 @@
 use wasm_bindgen::JsCast;
 
-use crate::aframe_ex::af_sys::{AEntityEx, ASceneEx};
+use crate::aframe_ex::scene_entity_bindgen::{AEntityEx, ASceneEx};
 use crate::aframe_ex::scenes::core::SceneEffect::{EntityAddState, SetComponent, SetComponentProperty};
 
 pub enum SceneEffect {

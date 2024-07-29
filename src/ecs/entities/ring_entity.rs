@@ -3,7 +3,7 @@ use aframers::entities::{create_entity, Entity};
 use wasm_bindgen::JsValue;
 
 use crate::aframe_ex::components::material_component::Material;
-use crate::aframe_ex::RingGeometry;
+use crate::aframe_ex::components::ring_geometry_component::RingGeometry;
 
 pub fn try_ring_entity(color: impl AsRef<str>) -> Result<Entity, JsValue> {
 	let entity = create_entity()?

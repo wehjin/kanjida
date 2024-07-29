@@ -9,7 +9,7 @@ use web_sys::js_sys::Object;
 
 use quiz_form::QuizForm;
 
-use crate::aframe_ex::af_sys::AEntityEx;
+use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::components::core::ComponentDefinition;
 use crate::aframe_ex::schema::SchemaProperty;
 use crate::aframe_ex::schema::single_property::SinglePropertySchema;
