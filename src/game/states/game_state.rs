@@ -9,9 +9,35 @@ use crate::game::{AnswerPoint, QuizPoint, YomiPoint};
 use crate::game::states::answer_state::AnswerState;
 use crate::game::states::quiz_state::QuizState;
 
+/// Holds game state.
+#[derive(Debug, Clone, Default)]
+pub struct GameState {
+	/// Available quizzes.
+	pub all_quizzes: QuizStates,
+	/// The selected quiz.
+	pub selected_quiz: Option<QuizPoint>,
+	/// The selected yomi point. This is used when submitting an answer.
+	pub selected_yomi: YomiPoint,
+	/// An unused answer point.
+	pub unused_answer_point: AnswerPoint,
+	/// Submitted answers.
+	pub submitted_answers: HashMap<AnswerPoint, AnswerState>,
+	/// The age of the game. This advances with each event.
+	pub age: usize,
+}
+
+impl GameState {
+	pub fn total_unsolved_solved_revealed(&self) -> (usize, usize, usize) {
+		self.all_quizzes.total_unsolved_solved_revealed()
+	}
+	pub fn as_quiz_states(&self) -> &Vec<QuizState> {
+		&self.all_quizzes.0
+	}
+}
+
+
 #[derive(Clone, Default)]
 pub struct QuizStates(pub Vec<QuizState>);
-
 impl QuizStates {
 	pub fn swap(mut self, index: usize, f: impl Fn(QuizState) -> QuizState) -> Self {
 		let state = self.0.remove(index);
@@ -39,41 +65,17 @@ impl Debug for QuizStates {
 		)
 	}
 }
+
 impl IndexMut<QuizPoint> for QuizStates {
 	fn index_mut(&mut self, index: QuizPoint) -> &mut Self::Output {
 		&mut self.0[index]
 	}
 }
+
 impl Index<QuizPoint> for QuizStates {
 	type Output = QuizState;
 	fn index(&self, index: QuizPoint) -> &Self::Output {
 		&self.0[index]
-	}
-}
-
-/// Holds game state.
-#[derive(Debug, Clone, Default)]
-pub struct GameState {
-	/// Available quizzes.
-	pub all_quizzes: QuizStates,
-	/// The selected quiz.
-	pub selected_quiz: Option<QuizPoint>,
-	/// The selected yomi point. This is used when submitting an answer.
-	pub selected_yomi: YomiPoint,
-	/// An unused answer point.
-	pub unused_answer_point: AnswerPoint,
-	/// Submitted answers.
-	pub submitted_answers: HashMap<AnswerPoint, AnswerState>,
-	/// The age of the game. This advances with each event.
-	pub age: usize,
-}
-
-impl GameState {
-	pub fn total_unsolved_solved_revealed(&self) -> (usize, usize, usize) {
-		self.all_quizzes.total_unsolved_solved_revealed()
-	}
-	pub fn as_quiz_states(&self) -> &Vec<QuizState> {
-		&self.all_quizzes.0
 	}
 }
 
