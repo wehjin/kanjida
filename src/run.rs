@@ -5,6 +5,7 @@ use Color::WebStr;
 use wasm_bindgen::JsValue;
 use web_sys::Element;
 
+use controller_entity::create_right_controller;
 use hexgrid_entity::create_hexgrid;
 use hint_entity::create_hint_cursor;
 use yomigun_entity::create_yomigun;
@@ -21,12 +22,14 @@ use crate::ecs::components::game_component::register_game_component;
 use crate::ecs::components::hex_color_component::HexColor;
 use crate::ecs::components::hexcell_component::register_hexcell_component;
 use crate::ecs::components::hexgrid_component::register_hexgrid_component;
+use crate::ecs::components::keystaff_component::register_keystaff_component;
 use crate::ecs::components::laserfocus_component::register_laserfocus_component;
 use crate::ecs::components::quiz_form_component::register_quiz_form_component;
 use crate::ecs::components::yomigun_component::register_yomigun_component;
 use crate::ecs::components::yomikey_component::register_yomikey_component;
 use crate::ecs::entities::{camera_entity, controller_entity, ground_entity, hexgrid_entity, hint_entity, light_entity, origin_entity, sky_entity, yomigun_entity};
 use crate::ecs::entities::answers_entity::create_answers_panel;
+use crate::ecs::entities::keystaff_entity::create_keystaff;
 use crate::ecs::entities::ring_entity::try_ring_entity;
 use crate::views::settings::{FOCUS_RING_ID, SELECT_RING_ID};
 use crate::views::yomi_data::YOMI_FONT;
@@ -39,6 +42,7 @@ pub fn register_components() {
 	register_yomikey_component();
 	register_yomigun_component();
 	register_game_component();
+	register_keystaff_component();
 }
 
 pub fn init_scene() -> Result<Scene, JsValue> {
@@ -63,11 +67,14 @@ pub fn init_scene() -> Result<Scene, JsValue> {
 		.add_entity(create_hexgrid()?
 			.set_component_attribute(Position(0.0, 1.6, -12.0))?
 		)?
-		.add_entity(controller_entity::make()?)?
+		.add_entity(create_right_controller()?)?
 		.add_entity(camera_entity::make()?)?
 		.set_component_attribute(Game)?
 		.set_component_attribute(Stats)?
 		.add_entity(create_details_screen())?
+		.add_entity(create_keystaff()?
+			.set_component_attribute(Position(0.2, 1.6 - 0.5, -0.2))?
+		)?
 		;
 	Ok(scene)
 }

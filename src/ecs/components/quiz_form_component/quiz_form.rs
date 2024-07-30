@@ -17,13 +17,13 @@ impl SchemaProperty for QuizForm {
 		SchemaPropertyType::Vec3
 	}
 	fn format(&self) -> String {
-		Vec3SchemaProperty::format(self.unsolved, self.solved, self.revealed)
+		Vec3SchemaProperty::format_usize(self.unsolved, self.solved, self.revealed)
 	}
 	fn create_js(&self) -> JsValue {
-		Vec3SchemaProperty::create_js(self.unsolved, self.solved, self.revealed)
+		Vec3SchemaProperty::create_js_usize(self.unsolved, self.solved, self.revealed)
 	}
 	fn parse_js(data: &JsValue) -> Self {
-		let (x, y, z) = Vec3SchemaProperty::parse_js(data);
+		let (x, y, z) = Vec3SchemaProperty::parse_js_usize(data);
 		Self { unsolved: x, solved: y, revealed: z }
 	}
 }

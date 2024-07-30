@@ -1,4 +1,5 @@
 use aframers::af_sys::components::{AComponent, register_component};
+use aframers::components::core::ComponentSetting;
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::convert::{FromWasmAbi, IntoWasmAbi, RefFromWasmAbi};
@@ -8,6 +9,14 @@ use web_sys::js_sys::{Array, Function, Object, Reflect};
 use crate::aframe_ex::js;
 use crate::aframe_ex::js::{aframers_bind_init_with_extra_state, aframers_bind_other_with_extra_state, aframers_bind_remove_with_extra_state, bind_this_to_component, bind_this_to_first};
 use crate::aframe_ex::schema::Schema;
+
+pub fn component_settings_as_string<T: ComponentSetting>(settings: impl AsRef<[T]>) -> String {
+	let clauses = settings.as_ref().iter()
+		.map(|setting| setting.as_setting_declaration())
+		.collect::<Vec<_>>()
+		;
+	clauses.join("; ")
+}
 
 pub mod properties {
 	use aframers::components::core::ToPropertyValue;
@@ -161,6 +170,14 @@ impl ComponentDefinition {
 		let bound = bind_this_to_first(unbound);
 		self.set_property("update", &bound)
 	}
+	pub fn set_tick<T>(self, value: impl Fn(T, usize, usize) + Sized + 'static) -> Self
+	where
+		T: AsRef<AComponent> + FromWasmAbi + 'static,
+	{
+		let unbound = function_from_component_tick_fn(value);
+		let bound = bind_this_to_first(unbound);
+		self.set_property("tick", &bound)
+	}
 	pub fn set_init(self, value: impl Fn(AComponent) + 'static) -> Self {
 		let closure = Closure::wrap(Box::new(value) as Box<dyn Fn(AComponent)>);
 		let new_self = self.set_property("init", &js::to_init(&closure));
@@ -187,3 +204,11 @@ where
 {
 	Closure::wrap(Box::new(f) as Box<dyn Fn(&T)>).into_js_value().unchecked_into::<Function>()
 }
+
+fn function_from_component_tick_fn<T>(f: impl Fn(T, usize, usize) + Sized + 'static) -> Function
+where
+	T: AsRef<AComponent> + FromWasmAbi + 'static,
+{
+	Closure::wrap(Box::new(f) as Box<dyn Fn(T, usize, usize)>).into_js_value().unchecked_into::<Function>()
+}
+

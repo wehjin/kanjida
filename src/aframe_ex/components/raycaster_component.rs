@@ -1,4 +1,9 @@
-use aframers::components::core::ComponentAttribute;
+use aframers::components::core::{ComponentAttribute, ComponentSetting};
+
+use crate::aframe_ex::components::core::component_settings_as_string;
+use crate::aframe_ex::schema::properties::Vec3SchemaProperty;
+
+pub const COMPONENT_NAME: &'static str = "raycaster";
 
 pub enum RaycasterEvent {
 	Intersected,
@@ -13,27 +18,50 @@ impl RaycasterEvent {
 	}
 }
 
-pub struct Raycaster {
-	objects: Option<String>,
+pub enum RaycasterSetting {
+	Direction(f32, f32, f32),
+	Enabled(bool),
+	Objects(String),
+	ShowLine(bool),
+	UseWorldCoordinates(bool),
 }
 
-impl Raycaster {
-	pub fn new() -> Self {
-		Self { objects: None }
+impl ComponentSetting for RaycasterSetting {
+	fn as_setting_name(&self) -> impl AsRef<str> {
+		match self {
+			Self::Direction(_, _, _) => "direction",
+			Self::Enabled(_) => "enabled",
+			Self::Objects(_) => "objects",
+			Self::ShowLine(_) => "showLine",
+			Self::UseWorldCoordinates(_) => "useWorldCoordinates",
+		}
 	}
-	pub fn set_objects(self, value: impl AsRef<str>) -> Self {
-		Self { objects: Some(value.as_ref().to_string()), ..self }
+	fn as_setting_str(&self) -> impl AsRef<str> {
+		match self {
+			Self::Direction(x, y, z) => Vec3SchemaProperty::format_float(*x, *y, *z),
+			Self::Enabled(value) => format!("{}", value),
+			Self::Objects(value) => value.to_string(),
+			Self::ShowLine(value) => format!("{}", value),
+			Self::UseWorldCoordinates(value) => format!("{}", value),
+		}
+	}
+}
+
+pub struct Raycaster(pub Vec<RaycasterSetting>);
+impl Raycaster {
+	pub fn objects(value: impl AsRef<str>) -> Self {
+		Self(vec![RaycasterSetting::Objects(value.as_ref().to_string())])
+	}
+	pub fn enabled(value: bool) -> Self {
+		Self(vec![RaycasterSetting::Enabled(value)])
 	}
 }
 
 impl ComponentAttribute for Raycaster {
-	fn as_attribute_name(&self) -> impl AsRef<str> { "raycaster" }
+	fn as_attribute_name(&self) -> impl AsRef<str> { COMPONENT_NAME }
 
 	fn as_attribute_str(&self) -> impl AsRef<str> {
-		let mut clauses = vec![];
-		if let Some(value) = &self.objects {
-			clauses.push(format!("objects: {}", value))
-		}
-		clauses.join("; ")
+		component_settings_as_string(&self.0)
 	}
 }
+

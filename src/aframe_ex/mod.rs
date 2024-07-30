@@ -2,6 +2,7 @@ pub mod scene_entity_bindgen;
 pub mod components;
 pub mod entities;
 pub mod events;
+pub mod geometries;
 pub mod js;
 pub mod objects;
 pub mod scenes;

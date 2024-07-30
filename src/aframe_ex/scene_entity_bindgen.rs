@@ -3,7 +3,7 @@ use aframers::af_sys::scenes::AScene;
 use aframers::browser::document;
 use aframers::components::core::ComponentAttribute;
 use aframers::components::Position;
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::three_sys::Object3D;
@@ -21,6 +21,9 @@ extern "C" {
 	pub fn set_object3d_kind(this: &AEntityEx, kind: &str, object: &Object3D);
 	#[wasm_bindgen(method, js_name = setAttribute)]
 	pub fn set_attribute_property(this: &AEntityEx, attribute: &str, property: &str, value: &str);
+
+	#[wasm_bindgen(method, js_name = getAttribute)]
+	pub fn get_component_attribute(this: &AEntityEx, attribute: &str) -> JsValue;
 }
 
 impl AEntityEx {
