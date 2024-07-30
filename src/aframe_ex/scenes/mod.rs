@@ -1,4 +1,5 @@
 use aframers::af_sys::scenes::AScene;
+use aframers::browser::document;
 use aframers::components::core::ComponentAttribute;
 use aframers::entities::Entity;
 use aframers::scene::create_scene;
@@ -16,6 +17,13 @@ impl Scene {
 }
 
 impl Scene {
+	pub fn get() -> Result<Self, JsValue> {
+		let a_scene = document().query_selector("a-scene").unwrap()
+			.unwrap()
+			.unchecked_into::<AScene>()
+			;
+		Ok(Self(a_scene))
+	}
 	pub fn new() -> Result<Self, JsValue> {
 		let a_scene = create_scene()?.unchecked_into::<AScene>();
 		Ok(Self(a_scene))

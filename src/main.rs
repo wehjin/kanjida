@@ -1,6 +1,10 @@
 use std::cell::RefCell;
 
+use wasm_bindgen::JsValue;
+
 use game::states::game_state::GameState;
+
+use crate::run::{init_scene, register_components};
 
 pub mod aframe_ex;
 pub mod js_sys_ex;
@@ -15,7 +19,9 @@ thread_local! {
 	pub static GAME: RefCell<GameState> = RefCell::new(GameState::init());
 }
 
-fn main() {
+fn main() -> Result<(), JsValue> {
 	console_error_panic_hook::set_once();
-	aframers::init(run::run).expect("Aframe init");
+	register_components();
+	init_scene()?;
+	Ok(())
 }

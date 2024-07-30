@@ -9,9 +9,9 @@ use hexgrid_entity::create_hexgrid;
 use hint_entity::create_hint_cursor;
 use yomigun_entity::create_yomigun;
 
-use crate::aframe_ex::components::baseline_component::Baseline;
 use crate::aframe_ex::components::align_component::Align;
 use crate::aframe_ex::components::anchor_component::Anchor;
+use crate::aframe_ex::components::baseline_component::Baseline;
 use crate::aframe_ex::components::stats_component::Stats;
 use crate::aframe_ex::components::text_component::Text;
 use crate::aframe_ex::components::visible_component::Visible;
@@ -31,14 +31,7 @@ use crate::ecs::entities::ring_entity::try_ring_entity;
 use crate::views::settings::{FOCUS_RING_ID, SELECT_RING_ID};
 use crate::views::yomi_data::YOMI_FONT;
 
-pub fn run() -> Result<(), JsValue> {
-	register_components();
-	let scene = create_scene()?;
-	document().body().expect("body").append_child(scene.a_scene())?;
-	Ok(())
-}
-
-fn register_components() {
+pub fn register_components() {
 	register_quiz_form_component();
 	register_laserfocus_component();
 	register_hexcell_component();
@@ -48,8 +41,8 @@ fn register_components() {
 	register_game_component();
 }
 
-fn create_scene() -> Result<Scene, JsValue> {
-	let scene = Scene::new()?
+pub fn init_scene() -> Result<Scene, JsValue> {
+	let scene = Scene::get()?
 		.add_assets(create_assets()?)
 		.add_entity(light_entity::make_over()?)?
 		.add_entity(origin_entity::make()?)?
