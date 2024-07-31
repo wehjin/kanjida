@@ -1,7 +1,9 @@
-use aframers::browser::document;
+use aframers::browser::{document, log};
 use aframers::components::{Color, Position};
 use aframers::entities::{create_entity, Entity};
 use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen::prelude::wasm_bindgen;
+use web_sys::js_sys::Object;
 
 use crate::aframe_ex::components::material_component::Material;
 use crate::aframe_ex::components::visible_component::Visible;
@@ -9,7 +11,7 @@ use crate::aframe_ex::geometries::cylinder_geometry::{CylinderGeometry, Cylinder
 use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::ecs::fonts::with_kana_font;
 use crate::three_sys;
-use crate::three_sys::{Mesh, MeshStandardMaterial};
+use crate::three_sys::{Mesh, MeshStandardMaterial, TextGeometry};
 
 const ROD_HEIGHT: f32 = 1.3;
 const ROD_RADIUS: f32 = 0.020;
@@ -19,10 +21,33 @@ const ROD_ABOVE_HAND: f32 = 0.070;
 const ROD_TOP: f32 = (0.5 * HAND_HEIGHT) + ROD_ABOVE_HAND;
 const CROWN_HEIGHT: f32 = 0.18;
 const CROWN_DEPTH: f32 = 0.010;
-const CROWN_GAP: f32 = CROWN_HEIGHT / 8.;
+const CROWN_GAP: f32 = CROWN_HEIGHT / 5.;
 const CROWN_CENTER_Y: f32 = ROD_TOP + CROWN_GAP + (CROWN_HEIGHT / 2.);
 
 pub const ENTITY_ID: &'static str = "keystaff";
+pub const CROWN_SELECTOR: &'static str = "#keystaff-crown";
+pub const CROWN_DEFAULT_GLYPH: &str = "〇";
+
+#[wasm_bindgen]
+pub fn set_keystaff_glyph(glyph: &str) -> Result<(), JsValue> {
+	let crown = document().query_selector(CROWN_SELECTOR)?.unwrap().unchecked_into::<AEntityEx>();
+	keystaff_set_crown_glyph(&crown, glyph);
+	Ok(())
+}
+
+pub fn keystaff_set_crown_glyph(crown: &AEntityEx, glyph: &str) {
+	let own_glyph = glyph.to_string();
+	let object3d = crown.object3d();
+	let mesh = object3d.children().get(0).unchecked_into::<Mesh>();
+	if mesh.name() != own_glyph {
+		with_kana_font(move |font| {
+			log(&format!("Updated keystaff crown glyph: {}", &own_glyph));
+			let geo = create_crown_geometry(own_glyph.as_str(), font);
+			mesh.set_geometry(&geo);
+			mesh.set_name(own_glyph.as_str());
+		});
+	}
+}
 
 pub fn create_keystaff() -> Result<Entity, JsValue> {
 	let rig = create_entity()?
@@ -36,30 +61,37 @@ pub fn create_keystaff() -> Result<Entity, JsValue> {
 
 fn create_crown() -> Result<Entity, JsValue> {
 	let entity = create_entity()?
+		.set_id("keystaff-crown")?
 		.set_component_attribute(Position(0.0, CROWN_CENTER_Y, 0.0))?
 		;
 	let a_entity = entity.a_entity().clone().unchecked_into::<AEntityEx>();
 	with_kana_font(move |font| {
-		let params = three_sys::TextGeometryParameters::new();
-		params.set_font(font);
-		params.set_size(CROWN_HEIGHT);
-		params.set_depth(CROWN_DEPTH);
-		params.set_bevel_thickness(CROWN_DEPTH / 4.);
-		params.set_bevel_size(CROWN_DEPTH / 5.);
-		params.set_bevel_enabled(true);
-
-		let geo = three_sys::TextGeometry::new("0", params.as_js());
-		geo.compute_bounding_box();
-		geo.center();
-
+		let glyph = CROWN_DEFAULT_GLYPH;
+		let geo = create_crown_geometry(glyph, font);
 		let mat = MeshStandardMaterial::new();
 		mat.set_color(&three_sys::Color::new_str("Gold"));
 		mat.set_emissive(&three_sys::Color::new_str("Crimson"));
 
 		let mesh = Mesh::new_with_geometry_and_material(&geo, &mat);
+		mesh.set_name(glyph);
 		a_entity.object3d().add(&mesh);
 	});
 	Ok(entity)
+}
+
+fn create_crown_geometry(glyph: &str, font: &Object) -> TextGeometry {
+	let params = three_sys::TextGeometryParameters::new();
+	params.set_font(font);
+	params.set_size(CROWN_HEIGHT);
+	params.set_depth(CROWN_DEPTH);
+	params.set_bevel_thickness(CROWN_DEPTH / 4.);
+	params.set_bevel_size(CROWN_DEPTH / 5.);
+	params.set_bevel_enabled(true);
+
+	let geo = three_sys::TextGeometry::new(glyph, params.as_js());
+	geo.compute_bounding_box();
+	geo.center();
+	geo
 }
 
 fn create_rod() -> Result<Entity, JsValue> {

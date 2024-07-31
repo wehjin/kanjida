@@ -12,6 +12,8 @@ pub struct TickTask {
 	pub(crate) row2_max: f32,
 	pub(crate) col2_min: f32,
 	pub(crate) col2_max: f32,
+	pub(crate) crown: AEntityEx,
+	pub(crate) current_index: usize,
 }
 
 #[wasm_bindgen]
