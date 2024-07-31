@@ -9,15 +9,15 @@ use web_sys::js_sys::Object;
 
 use quiz_form::QuizForm;
 
-use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::components::core::ComponentDefinition;
+use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::schema::SchemaProperty;
 use crate::aframe_ex::schema::single_property::SinglePropertySchema;
 use crate::ecs::entities::hint_entity::get_hint_cursor;
 use crate::three_sys::{Color, FontLoader, Mesh, MeshBasicMaterial, Object3D, TextGeometry, TextGeometryParameters};
 
 const COMPONENT_NAME: &'static str = "quiz-form";
-const FONT_URL: &'static str = "assets/Ubuntu Mono_Regular_Digits.json";
+const KATA_FONT_URL: &'static str = "assets/typeface/OsakaRegularMonoEnJaRestrictedReversed.json";
 
 pub fn register_quiz_form_component() {
 	let schema = SinglePropertySchema::from(QuizForm::default());
@@ -44,7 +44,7 @@ const Y_OFFSET: f32 = Y_FACTOR * OFFSET_INTENSITY * 0.5;
 
 thread_local! {
 	pub static FONT_LOADER: RefCell<FontLoader> = RefCell::new(FontLoader::new());
-	pub static FONT: RefCell<Option<Object>> = RefCell::new(None);
+	pub static KATA_FONT: RefCell<Option<Object>> = RefCell::new(None);
 }
 
 fn update_entity(entity: &AEntityEx, quiz_form: &QuizForm) {
@@ -53,12 +53,12 @@ fn update_entity(entity: &AEntityEx, quiz_form: &QuizForm) {
 }
 
 fn render_indicators(unsolved: usize, solved: usize, object3d: Object3D) {
-	let font = FONT.with_borrow(|font| font.clone());
+	let font = KATA_FONT.with_borrow(|font| font.clone());
 	match font {
 		None => {
 			FONT_LOADER.with_borrow(|loader| {
-				loader.load(FONT_URL, Closure::once_into_js(move |font: &Object| {
-					FONT.set(Some(font.clone()));
+				loader.load(KATA_FONT_URL, Closure::once_into_js(move |font: &Object| {
+					KATA_FONT.set(Some(font.clone()));
 					render_indicators_with_font(font, unsolved, solved, object3d);
 				}).unchecked_ref());
 			})
@@ -112,7 +112,7 @@ fn create_parameters(font: &Object) -> TextGeometryParameters {
 	let parameters = TextGeometryParameters::new();
 	parameters.set_font(font);
 	parameters.set_size(1.0);
-	parameters.set_depth(0.01);
+	parameters.set_depth(0.05);
 	parameters
 }
 
