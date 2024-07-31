@@ -3,21 +3,20 @@ use aframers::af_sys::components::AComponent;
 use aframers::components::Position;
 use aframers::entities::{create_entity, Entity};
 use kanji_data::KanjiData;
-use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::js_sys::{Array, Object};
 
 use hexgrid::Hexgrid;
 
-use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::events::StateEventKind;
+use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::schema::fields::Field;
 use crate::aframe_ex::schema::single_property::SinglePropertySchema;
 use crate::ecs::components::hexcell_component::attribute::Hexcell;
 use crate::ecs::components::hexgrid_component::bindgen::HexgridAComponent;
 use crate::ecs::components::hexgrid_component::other::SelectedEntity;
-use crate::ecs::components::quiz_form_component::FONT_LOADER;
+use crate::ecs::fonts::with_kanji_font;
 use crate::GAME;
 use crate::game::states::quiz_state::QuizState;
 use crate::three_sys::{BufferGeometry, Color, merge_geometries, Mesh, MeshBasicMaterial, TextGeometry, TextGeometryParameters};
@@ -73,16 +72,12 @@ pub fn init(component: AComponent) -> SelectedEntity {
 }
 
 fn load_font_create_mesh(coords: Vec<AxialCoord>, entity: AEntityEx) {
-	FONT_LOADER.with_borrow(|loader| {
-		loader.load("assets/mplus-1m-light_1m-light.json", Closure::once_into_js(
-			move |font: &Object| {
-				create_mesh_with_font(coords, entity, font);
-			}
-		).unchecked_ref());
-	})
+	with_kanji_font(move |font| {
+		create_mesh_with_font(&coords, &entity, font);
+	});
 }
 
-fn create_mesh_with_font(coords: Vec<AxialCoord>, entity: AEntityEx, font: &Object) {
+fn create_mesh_with_font(coords: &Vec<AxialCoord>, entity: &AEntityEx, font: &Object) {
 	let geometry = create_geometry(coords, font);
 	let material = create_material();
 	let mesh = Mesh::new_with_geometry_and_material(&geometry, &material);
@@ -90,7 +85,7 @@ fn create_mesh_with_font(coords: Vec<AxialCoord>, entity: AEntityEx, font: &Obje
 	entity.object3d().add(&mesh);
 }
 
-fn create_geometry(coords: Vec<AxialCoord>, font: &Object) -> BufferGeometry {
+fn create_geometry(coords: &Vec<AxialCoord>, font: &Object) -> BufferGeometry {
 	let params = create_text_geometry_params(font);
 	let array = Array::new_with_length(coords.len() as u32);
 	for i in 0..coords.len() {

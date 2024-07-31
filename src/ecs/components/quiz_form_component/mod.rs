@@ -1,9 +1,6 @@
-use std::cell::RefCell;
-
 use aframers::af_sys::components::AComponent;
 use aframers::browser::log;
 use aframers::components::Position;
-use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::js_sys::Object;
 
@@ -14,10 +11,10 @@ use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::schema::SchemaProperty;
 use crate::aframe_ex::schema::single_property::SinglePropertySchema;
 use crate::ecs::entities::hint_entity::get_hint_cursor;
-use crate::three_sys::{Color, FontLoader, Mesh, MeshBasicMaterial, Object3D, TextGeometry, TextGeometryParameters};
+use crate::ecs::fonts::with_kata_font;
+use crate::three_sys::{Color, Mesh, MeshBasicMaterial, Object3D, TextGeometry, TextGeometryParameters};
 
 const COMPONENT_NAME: &'static str = "quiz-form";
-const KATA_FONT_URL: &'static str = "assets/typeface/OsakaRegularMonoEnJaRestrictedReversed.json";
 
 pub fn register_quiz_form_component() {
 	let schema = SinglePropertySchema::from(QuizForm::default());
@@ -42,10 +39,6 @@ const Y_FACTOR: f32 = 1.732;
 const X_OFFSET: f32 = X_FACTOR * OFFSET_INTENSITY;
 const Y_OFFSET: f32 = Y_FACTOR * OFFSET_INTENSITY * 0.5;
 
-thread_local! {
-	pub static FONT_LOADER: RefCell<FontLoader> = RefCell::new(FontLoader::new());
-	pub static KATA_FONT: RefCell<Option<Object>> = RefCell::new(None);
-}
 
 fn update_entity(entity: &AEntityEx, quiz_form: &QuizForm) {
 	let QuizForm { unsolved, solved, .. } = *quiz_form;
@@ -53,23 +46,12 @@ fn update_entity(entity: &AEntityEx, quiz_form: &QuizForm) {
 }
 
 fn render_indicators(unsolved: usize, solved: usize, object3d: Object3D) {
-	let font = KATA_FONT.with_borrow(|font| font.clone());
-	match font {
-		None => {
-			FONT_LOADER.with_borrow(|loader| {
-				loader.load(KATA_FONT_URL, Closure::once_into_js(move |font: &Object| {
-					KATA_FONT.set(Some(font.clone()));
-					render_indicators_with_font(font, unsolved, solved, object3d);
-				}).unchecked_ref());
-			})
-		}
-		Some(font) => {
-			render_indicators_with_font(&font, unsolved, solved, object3d);
-		}
-	}
+	with_kata_font(move |font| {
+		render_indicators_with_font(font, unsolved, solved, &object3d);
+	});
 }
 
-fn render_indicators_with_font(font: &Object, unsolved: usize, solved: usize, object3d: Object3D) {
+fn render_indicators_with_font(font: &Object, unsolved: usize, solved: usize, object3d: &Object3D) {
 	match object3d.get_object_by_name("unsolved") {
 		None => add_indicator("unsolved", Position(-X_OFFSET, -Y_OFFSET, 0.), unsolved, "Yellow", font),
 		Some(mesh) => update_count(mesh.unchecked_into(), unsolved, font),
