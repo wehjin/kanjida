@@ -7,14 +7,62 @@ use crate::aframe_ex::components::material_component::Material;
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::geometries::cylinder_geometry::{CylinderGeometry, CylinderGeometrySetting};
 use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
+use crate::ecs::fonts::with_kana_font;
+use crate::three_sys;
+use crate::three_sys::{Mesh, MeshStandardMaterial};
 
-const ROD_HEIGHT: f32 = 0.4;
+const ROD_HEIGHT: f32 = 1.3;
 const ROD_RADIUS: f32 = 0.020;
 const HAND_HEIGHT: f32 = 0.09;
+
+const ROD_ABOVE_HAND: f32 = 0.070;
+const ROD_TOP: f32 = (0.5 * HAND_HEIGHT) + ROD_ABOVE_HAND;
+const CROWN_HEIGHT: f32 = 0.18;
+const CROWN_DEPTH: f32 = 0.010;
+const CROWN_GAP: f32 = CROWN_HEIGHT / 8.;
+const CROWN_CENTER_Y: f32 = ROD_TOP + CROWN_GAP + (CROWN_HEIGHT / 2.);
 
 pub const ENTITY_ID: &'static str = "keystaff";
 
 pub fn create_keystaff() -> Result<Entity, JsValue> {
+	let rig = create_entity()?
+		.set_id(ENTITY_ID)?
+		.append_child(create_rod()?)?
+		.append_child(create_crown()?)?
+		.set_component_attribute(Visible::False)?
+		;
+	Ok(rig)
+}
+
+fn create_crown() -> Result<Entity, JsValue> {
+	let entity = create_entity()?
+		.set_component_attribute(Position(0.0, CROWN_CENTER_Y, 0.0))?
+		;
+	let a_entity = entity.a_entity().clone().unchecked_into::<AEntityEx>();
+	with_kana_font(move |font| {
+		let params = three_sys::TextGeometryParameters::new();
+		params.set_font(font);
+		params.set_size(CROWN_HEIGHT);
+		params.set_depth(CROWN_DEPTH);
+		params.set_bevel_thickness(CROWN_DEPTH / 4.);
+		params.set_bevel_size(CROWN_DEPTH / 5.);
+		params.set_bevel_enabled(true);
+
+		let geo = three_sys::TextGeometry::new("0", params.as_js());
+		geo.compute_bounding_box();
+		geo.center();
+
+		let mat = MeshStandardMaterial::new();
+		mat.set_color(&three_sys::Color::new_str("Gold"));
+		mat.set_emissive(&three_sys::Color::new_str("Crimson"));
+
+		let mesh = Mesh::new_with_geometry_and_material(&geo, &mat);
+		a_entity.object3d().add(&mesh);
+	});
+	Ok(entity)
+}
+
+fn create_rod() -> Result<Entity, JsValue> {
 	let material = Material::new().set_color(get_default_color());
 	let geometry_settings = vec![
 		CylinderGeometrySetting::Primitive,
@@ -25,14 +73,9 @@ pub fn create_keystaff() -> Result<Entity, JsValue> {
 	let rod = create_entity()?
 		.set_component_attribute(CylinderGeometry(geometry_settings))?
 		.set_component_attribute(material)?
-		.set_component_attribute(Position(0.0, -(0.5 * ROD_HEIGHT) + (0.5 * HAND_HEIGHT) + 0.03, 0.0))?
+		.set_component_attribute(Position(0.0, -(0.5 * ROD_HEIGHT) + ROD_TOP, 0.0))?
 		;
-	let rig = create_entity()?
-		.set_id(ENTITY_ID)?
-		.append_child(rod)?
-		.set_component_attribute(Visible::False)?
-		;
-	Ok(rig)
+	Ok(rod)
 }
 
 fn get_default_color() -> Color {

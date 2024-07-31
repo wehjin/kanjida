@@ -29,4 +29,22 @@ extern "C" {
 	pub fn set_color(this: &MeshBasicMaterial, color: &Color);
 }
 
+#[wasm_bindgen(js_namespace = THREE)]
+extern "C" {
+	#[wasm_bindgen(extends = Material)]
+	pub type MeshStandardMaterial;
+	#[wasm_bindgen(constructor)]
+	pub fn new() -> MeshStandardMaterial;
+	#[wasm_bindgen(method, getter)]
+	pub fn color(this: &MeshStandardMaterial) -> Color;
+	#[wasm_bindgen(method, setter)]
+	pub fn set_color(this: &MeshStandardMaterial, color: &Color);
+	#[wasm_bindgen(method, getter)]
+	pub fn emissive(this: &MeshStandardMaterial) -> Color;
+	#[wasm_bindgen(method, setter)]
+	pub fn set_emissive(this: &MeshStandardMaterial, color: &Color);
+}
+
+
+
 

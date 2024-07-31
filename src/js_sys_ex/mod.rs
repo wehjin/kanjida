@@ -7,6 +7,18 @@ impl JsKey {
 	pub fn key(&self) -> &JsValue { &self.0 }
 }
 impl JsKey {
+	pub fn bool(&self, object: &JsValue) -> bool {
+		let value = Reflect::get(object, self.key()).unwrap()
+			.as_bool().unwrap()
+			;
+		value
+	}
+	pub fn set_bool(&self, object: &JsValue, value: bool) {
+		Reflect::set(object, self.key(), &value.into()).unwrap();
+	}
+}
+
+impl JsKey {
 	pub fn string(&self, object: &JsValue) -> String {
 		let value = Reflect::get(object, self.key()).unwrap()
 			.as_string().unwrap()

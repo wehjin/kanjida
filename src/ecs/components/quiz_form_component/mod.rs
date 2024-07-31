@@ -11,7 +11,7 @@ use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::schema::SchemaProperty;
 use crate::aframe_ex::schema::single_property::SinglePropertySchema;
 use crate::ecs::entities::hint_entity::get_hint_cursor;
-use crate::ecs::fonts::with_kata_font;
+use crate::ecs::fonts::with_kana_font;
 use crate::three_sys::{Color, Mesh, MeshBasicMaterial, Object3D, TextGeometry, TextGeometryParameters};
 
 const COMPONENT_NAME: &'static str = "quiz-form";
@@ -46,7 +46,7 @@ fn update_entity(entity: &AEntityEx, quiz_form: &QuizForm) {
 }
 
 fn render_indicators(unsolved: usize, solved: usize, object3d: Object3D) {
-	with_kata_font(move |font| {
+	with_kana_font(move |font| {
 		render_indicators_with_font(font, unsolved, solved, &object3d);
 	});
 }

@@ -13,6 +13,10 @@ extern "C" {
 	pub fn translate(this: &BufferGeometry, x: f32, y: f32, z: f32) -> BufferGeometry;
 	#[wasm_bindgen(method)]
 	pub fn scale(this: &BufferGeometry, x: f32, y: f32, z: f32) -> BufferGeometry;
+	#[wasm_bindgen(method, js_name = computeBoundingBox)]
+	pub fn compute_bounding_box(this: &BufferGeometry);
+	#[wasm_bindgen(method)]
+	pub fn center(this: &BufferGeometry);
 }
 
 #[wasm_bindgen(module = "three/addons/utils/BufferGeometryUtils.js")]
