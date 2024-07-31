@@ -1,4 +1,4 @@
-use aframers::components::Position;
+use aframers::components::{Color, Position};
 use wasm_bindgen::JsCast;
 use web_sys::CustomEvent;
 
@@ -9,7 +9,7 @@ use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::js::log_value;
 use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::ecs::components::keystaff_component::bindgen::{KeystaffAComponent, TickTask};
-use crate::ecs::entities::keystaff_entity::get_keystaff;
+use crate::ecs::entities::keystaff_entity::{get_keystaff, keystaff_reset_color, keystaff_set_color};
 use crate::three_sys::Vector3;
 
 pub const COMPONENT_NAME: &'static str = "keystaff";
@@ -31,15 +31,18 @@ pub fn register_keystaff_component() {
 
 fn on_tick(comp: KeystaffAComponent, _time: usize, _time_delta: usize) {
 	if let Some(tick_task) = comp.take_tick_task() {
-		perform_tick_task(&tick_task, comp.a_entity().unchecked_ref());
+		let controller = comp.a_entity().unchecked_into::<AEntityEx>();
+		// Get the controller's current world position into vec3.
+		let vec3 = &tick_task.vec3;
+		controller.object3d().get_world_position(&vec3);
+		let position = Position(vec3.x(), vec3.y(), vec3.z());
+		// Move the keystaff to the controller's current position.
+		tick_task.keystaff.set_component_attribute(position);
+		// Update the keystaff's color depending on where it is in relation to the start position.
+		let color = get_grid_color(&position, &tick_task);
+		keystaff_set_color(&tick_task.keystaff, color);
 		comp.set_tick_task(Some(tick_task));
 	}
-}
-
-fn perform_tick_task(tick_task: &TickTask, controller: &AEntityEx) {
-	let pos = &tick_task.pos;
-	controller.object3d().get_world_position(&pos);
-	tick_task.keystaff.set_component_attribute(Position(pos.x(), pos.y(), pos.z()));
 }
 
 fn on_grip_down(comp: KeystaffAComponent, event: CustomEvent) {
@@ -49,12 +52,23 @@ fn on_grip_down(comp: KeystaffAComponent, event: CustomEvent) {
 		RaycasterSetting::Enabled(false),
 		RaycasterSetting::ShowLine(false),
 	]));
+	let keystaff = get_keystaff();
+	let vec3 = Vector3::origin();
+	controller.object3d().get_world_position(&vec3);
+	let position = Position(vec3.x(), vec3.y(), vec3.z());
+	keystaff.set_component_attribute(position.clone());
+	keystaff.set_component_attribute(Visible::True);
+
+	const CELL_RADIUS: f32 = 0.05;
 	let tick_task = TickTask {
-		keystaff: get_keystaff(),
-		pos: Vector3::origin(),
+		keystaff,
+		vec3,
+		row2_min: position.2 - CELL_RADIUS,
+		row2_max: position.2 + CELL_RADIUS,
+		col2_min: position.0 - CELL_RADIUS,
+		col2_max: position.0 + CELL_RADIUS,
 	};
-	tick_task.keystaff.set_component_attribute(Visible::True);
-	perform_tick_task(&tick_task, &controller);
+	keystaff_set_color(&tick_task.keystaff, get_grid_color(&position, &tick_task));
 	comp.set_tick_task(Some(tick_task));
 }
 
@@ -67,5 +81,45 @@ fn on_grip_up(comp: KeystaffAComponent, event: CustomEvent) {
 	]));
 	let tick_task = comp.take_tick_task().unwrap();
 	tick_task.keystaff.set_component_attribute(Visible::False);
+	keystaff_reset_color(&tick_task.keystaff);
 	comp.set_tick_task(None);
+}
+
+fn get_grid_color(position: &Position, tick_task: &TickTask) -> Color {
+	let index = get_grid_index(&position, tick_task);
+	const GRID_COLORS: [Color; 9] = [
+		Color::WebStr("Silver"), Color::WebStr("Red"), Color::WebStr("Orange"),
+		Color::WebStr("Yellow"), Color::WebStr("Green"), Color::WebStr("Blue"),
+		Color::WebStr("Indigo"), Color::WebStr("Violet"), Color::WebStr("Cyan"),
+	];
+	GRID_COLORS[index].clone()
+}
+
+fn get_grid_index(position: &Position, tick_task: &TickTask) -> usize {
+	let index = if position.2 < tick_task.row2_min {
+		if position.0 < tick_task.col2_min {
+			7
+		} else if position.0 > tick_task.col2_max {
+			1
+		} else {
+			8
+		}
+	} else if position.2 > tick_task.row2_max {
+		if position.0 < tick_task.col2_min {
+			5
+		} else if position.0 > tick_task.col2_max {
+			3
+		} else {
+			4
+		}
+	} else {
+		if position.0 < tick_task.col2_min {
+			6
+		} else if position.0 > tick_task.col2_max {
+			2
+		} else {
+			0
+		}
+	};
+	index
 }

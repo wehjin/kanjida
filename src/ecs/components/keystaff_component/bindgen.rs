@@ -7,7 +7,11 @@ use crate::three_sys::Vector3;
 #[wasm_bindgen]
 pub struct TickTask {
 	pub(crate) keystaff: AEntityEx,
-	pub(crate) pos: Vector3,
+	pub(crate) vec3: Vector3,
+	pub(crate) row2_min: f32,
+	pub(crate) row2_max: f32,
+	pub(crate) col2_min: f32,
+	pub(crate) col2_max: f32,
 }
 
 #[wasm_bindgen]
