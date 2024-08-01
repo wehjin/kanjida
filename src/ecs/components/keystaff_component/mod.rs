@@ -38,10 +38,13 @@ pub fn register_keystaff_component() {
 
 fn on_init(comp: &KeystaffAComponent) {
 	let hand = Keystaff::get_hand(&comp.data());
+	let position = match hand {
+		Hand::Right => Position(0.2, 1.6 - 0.5, -0.2),
+		Hand::Left => Position(-0.2, 1.6 - 0.5, -0.2),
+	};
 	let keystaff = create_keystaff_entity(&hand).unwrap()
-		.set_component_attribute(Position(0.2, 1.6 - 0.5, -0.2)).unwrap()
-		.into_a_entity()
-		.unchecked_into::<AEntityEx>()
+		.set_component_attribute(position).unwrap()
+		.into_a_entity().unchecked_into::<AEntityEx>()
 		;
 	A_SCENE.with(|scene| {
 		scene.append_child(&keystaff).unwrap()
@@ -139,20 +142,25 @@ fn select_yomi(tick_task: &TickTask) {
 
 fn on_grip_up(comp: KeystaffAComponent, event: CustomEvent) {
 	log_value(&event);
-	let controller = comp.a_entity().unchecked_into::<AEntityEx>();
-	controller.set_component_attribute(Raycaster(vec![
-		RaycasterSetting::Enabled(true),
-		RaycasterSetting::ShowLine(true),
-	]));
 	let mut state = comp.take_keystaff_state();
-	state.keystaff.set_component_attribute(Visible::False);
-	keystaff_reset_color(&state.keystaff);
+	match state.hand {
+		Hand::Right => {
+			let controller = comp.a_entity().unchecked_into::<AEntityEx>();
+			controller.set_component_attribute(Raycaster(vec![
+				RaycasterSetting::Enabled(true),
+				RaycasterSetting::ShowLine(true),
+			]));
+			state.keystaff.set_component_attribute(Visible::False);
+			keystaff_reset_color(&state.keystaff);
 
-	let tick_task = state.tick_task.take().unwrap();
-	if tick_task.current_index != 0 {
-		A_SCENE.with(|scene| {
-			scene.emit_event(SubmitAnswer.as_ref());
-		});
+			let tick_task = state.tick_task.take().unwrap();
+			if tick_task.current_index != 0 {
+				A_SCENE.with(|scene| {
+					scene.emit_event(SubmitAnswer.as_ref());
+				});
+			}
+		}
+		Hand::Left => {}
 	}
 	comp.set_keystaff_state(state);
 }

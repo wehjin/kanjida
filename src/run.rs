@@ -29,6 +29,7 @@ use crate::ecs::components::yomigun_component::register_yomigun_component;
 use crate::ecs::components::yomikey_component::register_yomikey_component;
 use crate::ecs::entities::{camera_entity, controller_entity, ground_entity, hexgrid_entity, hint_entity, light_entity, origin_entity, sky_entity, yomigun_entity};
 use crate::ecs::entities::answers_entity::create_answers_panel;
+use crate::ecs::entities::controller_entity::create_left_controller;
 use crate::ecs::entities::ring_entity::try_ring_entity;
 use crate::views::settings::{FOCUS_RING_ID, SELECT_RING_ID};
 use crate::views::yomi_data::YOMI_FONT;
@@ -67,6 +68,7 @@ pub fn init_scene() -> Result<Scene, JsValue> {
 			.set_component_attribute(Position(0.0, 1.6, -12.0))?
 		)?
 		.add_entity(create_right_controller()?)?
+		.add_entity(create_left_controller()?)?
 		.add_entity(camera_entity::make()?)?
 		.set_component_attribute(Game)?
 		.set_component_attribute(Stats)?

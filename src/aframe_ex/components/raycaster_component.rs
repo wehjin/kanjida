@@ -18,6 +18,7 @@ impl RaycasterEvent {
 	}
 }
 
+#[derive(Debug)]
 pub enum RaycasterSetting {
 	Direction(f32, f32, f32),
 	Enabled(bool),
@@ -47,6 +48,7 @@ impl ComponentSetting for RaycasterSetting {
 	}
 }
 
+#[derive(Debug)]
 pub struct Raycaster(pub Vec<RaycasterSetting>);
 impl Raycaster {
 	pub fn objects(value: impl AsRef<str>) -> Self {
@@ -54,6 +56,10 @@ impl Raycaster {
 	}
 	pub fn enabled(value: bool) -> Self {
 		Self(vec![RaycasterSetting::Enabled(value)])
+	}
+	pub fn add_setting(mut self, setting: RaycasterSetting) -> Self {
+		self.0.push(setting);
+		self
 	}
 }
 
