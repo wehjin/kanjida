@@ -1,3 +1,6 @@
+use std::cell::LazyCell;
+use std::collections::HashMap;
+
 use aframers::components::{Color, Position};
 use wasm_bindgen::JsCast;
 use web_sys::CustomEvent;
@@ -16,8 +19,10 @@ use crate::ecs::components::game_component::GameEvent::{SelectYomi, SubmitAnswer
 use crate::ecs::components::keystaff_component::attribute::Keystaff;
 use crate::ecs::components::keystaff_component::bindgen::{KeystaffAComponent, KeystaffState, TickTask};
 use crate::ecs::entities::keystaff_entity::{create_keystaff_entity, CROWN_DEFAULT_GLYPH, get_keystaff_crown_selector, keystaff_reset_color, keystaff_set_color, keystaff_set_crown_glyph};
+use crate::ecs::systems::keystaff_system::ACTIVE_SHIELD;
+use crate::ecs::systems::keystaff_system::shield_point::ShieldPoint;
 use crate::three_sys::Vector3;
-use crate::views::yomi_data::{YOMI_BOOK, YomiChar};
+use crate::views::yomi_data::YOMI_BOOK;
 
 pub const COMPONENT_NAME: &'static str = "keystaff";
 
@@ -64,11 +69,12 @@ fn on_tick(comp: KeystaffAComponent, _time: usize, _time_delta: usize) {
 			if let Some(tick_task) = &mut state.tick_task {
 				let controller = comp.a_entity().unchecked_into::<AEntityEx>();
 				let position = controller.compute_world_position(&tick_task.vec3);
-				let index = get_grid_index(&position, &tick_task);
-				if index != tick_task.current_index {
-					tick_task.current_index = index;
-					keystaff_set_color(&state.keystaff, GRID_COLORS[index].clone());
-					select_crown(tick_task);
+				let shield_point = get_shield_point(&position, &tick_task);
+				if (shield_point != tick_task.current_shield_point()) || !tick_task.has_active_bank() {
+					tick_task.set_current_shield_point(shield_point);
+					tick_task.update_bank_to_active();
+					keystaff_set_color(&state.keystaff, get_rod_color(shield_point));
+					update_crown(tick_task);
 					select_yomi(tick_task);
 				}
 				state.keystaff.set_component_attribute(position);
@@ -79,28 +85,28 @@ fn on_tick(comp: KeystaffAComponent, _time: usize, _time_delta: usize) {
 	comp.set_keystaff_state(state);
 }
 
-fn select_crown(tick_task: &TickTask) {
-	let glyph = match try_yomi_char(tick_task.current_index) {
-		None => CROWN_DEFAULT_GLYPH,
-		Some(char) => char.as_glyph(),
-	};
-	keystaff_set_crown_glyph(&tick_task.crown, glyph);
+fn update_crown(tick_task: &TickTask) {
+	let crown_glyph = tick_task.try_glyph().unwrap_or_else(|| CROWN_DEFAULT_GLYPH);
+	keystaff_set_crown_glyph(&tick_task.crown, crown_glyph);
 }
 
-fn try_yomi_char(index: usize) -> Option<YomiChar> {
-	let glyph = GRID_GLYPHS[index];
-	YOMI_BOOK.with(|book| book.find_char(glyph).cloned())
+thread_local! {
+	static GRID_COLORS: LazyCell<HashMap<ShieldPoint, Color>> = LazyCell::new(map_points_to_colors)
 }
 
-const GRID_GLYPHS: [&str; 9] = [
-	CROWN_DEFAULT_GLYPH, "タ", "ア", "イ", "ウ", "エ", "オ", "カ", "サ",
-];
-
-const GRID_COLORS: [Color; 9] = [
-	Color::WebStr("Silver"), Color::WebStr("Red"), Color::WebStr("Orange"),
-	Color::WebStr("Yellow"), Color::WebStr("Green"), Color::WebStr("Blue"),
-	Color::WebStr("Indigo"), Color::WebStr("Violet"), Color::WebStr("Cyan"),
-];
+fn map_points_to_colors() -> HashMap<ShieldPoint, Color> {
+	const POINTS: [ShieldPoint; 9] = [
+		ShieldPoint::LeftBack, ShieldPoint::CenterBack, ShieldPoint::RightBack,
+		ShieldPoint::LeftMiddle, ShieldPoint::CenterMiddle, ShieldPoint::RightMiddle,
+		ShieldPoint::LeftFront, ShieldPoint::CenterFront, ShieldPoint::RightFront,
+	];
+	const COLORS: [Color; 9] = [
+		Color::WebStr("Red"), Color::WebStr("Orange"), Color::WebStr("Yellow"),
+		Color::WebStr("Cyan"), Color::WebStr("Silver"), Color::WebStr("Green"),
+		Color::WebStr("Violet"), Color::WebStr("Indigo"), Color::WebStr("Blue"),
+	];
+	POINTS.into_iter().zip(COLORS).collect()
+}
 
 
 fn on_grip_down(comp: KeystaffAComponent, event: CustomEvent) {
@@ -118,18 +124,19 @@ fn on_grip_down(comp: KeystaffAComponent, event: CustomEvent) {
 			state.keystaff.set_component_attribute(position.clone());
 			state.keystaff.set_component_attribute(Visible::True);
 			const CELL_RADIUS: f32 = 0.05;
-			let tick_task = TickTask {
+			let mut tick_task = TickTask {
 				vec3: register,
 				row2_min: position.2 - CELL_RADIUS,
 				row2_max: position.2 + CELL_RADIUS,
 				col2_min: position.0 - CELL_RADIUS,
 				col2_max: position.0 + CELL_RADIUS,
 				crown: state.keystaff.query_selector(&get_keystaff_crown_selector(&state.hand)).unwrap().unwrap().unchecked_into::<AEntityEx>(),
-				current_index: 0,
+				bank: ACTIVE_SHIELD.with_borrow(|shield| shield.active_bank()),
 			};
+			tick_task.set_current_shield_point(ShieldPoint::CenterMiddle);
 			select_yomi(&tick_task);
-			keystaff_set_color(&state.keystaff, GRID_COLORS[tick_task.current_index].clone());
-			select_crown(&tick_task);
+			keystaff_set_color(&state.keystaff, get_rod_color(tick_task.current_shield_point()));
+			update_crown(&tick_task);
 			state.tick_task = Some(tick_task);
 		}
 		Hand::Left => {}
@@ -137,9 +144,18 @@ fn on_grip_down(comp: KeystaffAComponent, event: CustomEvent) {
 	comp.set_keystaff_state(state);
 }
 
+fn get_rod_color(point: ShieldPoint) -> Color {
+	let color = GRID_COLORS.with(|colors| {
+		colors[&point].clone()
+	});
+	color
+}
+
 fn select_yomi(tick_task: &TickTask) {
-	if let Some(yomi_char) = try_yomi_char(tick_task.current_index) {
-		SelectYomi.emit_details(&yomi_char.to_code().into());
+	if let Some(glyph) = tick_task.try_glyph() {
+		if let Some(yomi_char) = YOMI_BOOK.with(|book| book.find_char(glyph).cloned()) {
+			SelectYomi.emit_details(&yomi_char.to_code().into());
+		}
 	}
 }
 
@@ -157,7 +173,7 @@ fn on_grip_up(comp: KeystaffAComponent, event: CustomEvent) {
 			keystaff_reset_color(&state.keystaff);
 
 			let tick_task = state.tick_task.take().unwrap();
-			if tick_task.current_index != 0 {
+			if tick_task.current_shield_point() != ShieldPoint::CenterMiddle {
 				let crown_position = tick_task.crown.compute_world_position(&tick_task.vec3);
 				SubmitAnswer.emit_details(&Vec3SchemaProperty::js_from_position(crown_position));
 			}
@@ -167,31 +183,33 @@ fn on_grip_up(comp: KeystaffAComponent, event: CustomEvent) {
 	comp.set_keystaff_state(state);
 }
 
-fn get_grid_index(position: &Position, tick_task: &TickTask) -> usize {
-	let index = if position.2 < tick_task.row2_min {
-		if position.0 < tick_task.col2_min {
-			7
-		} else if position.0 > tick_task.col2_max {
-			1
+fn get_shield_point(&Position(x, _y, z): &Position, tick_task: &TickTask) -> ShieldPoint {
+	if z < tick_task.row2_min {
+		// Back row
+		if x < tick_task.col2_min {
+			ShieldPoint::LeftBack
+		} else if x > tick_task.col2_max {
+			ShieldPoint::RightBack
 		} else {
-			8
+			ShieldPoint::CenterBack
 		}
-	} else if position.2 > tick_task.row2_max {
-		if position.0 < tick_task.col2_min {
-			5
-		} else if position.0 > tick_task.col2_max {
-			3
+	} else if z > tick_task.row2_max {
+		// Front row
+		if x < tick_task.col2_min {
+			ShieldPoint::LeftFront
+		} else if x > tick_task.col2_max {
+			ShieldPoint::RightFront
 		} else {
-			4
+			ShieldPoint::CenterFront
 		}
 	} else {
-		if position.0 < tick_task.col2_min {
-			6
-		} else if position.0 > tick_task.col2_max {
-			2
+		// Middle row
+		if x < tick_task.col2_min {
+			ShieldPoint::LeftMiddle
+		} else if x > tick_task.col2_max {
+			ShieldPoint::RightMiddle
 		} else {
-			0
+			ShieldPoint::CenterMiddle
 		}
-	};
-	index
+	}
 }
