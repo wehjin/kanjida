@@ -56,6 +56,7 @@ impl AEntityEx {
 
 #[wasm_bindgen]
 extern "C" {
+	#[derive(Clone)]
 	#[wasm_bindgen(extends = AScene, extends = AEntityEx)]
 	pub type ASceneEx;
 

@@ -14,10 +14,15 @@ pub mod ring_entity;
 pub mod sky_entity;
 pub mod yomigun_entity;
 
-pub fn create_sprite_entity(position: Position) -> Entity {
+pub fn create_sprite_entity(position: Position, scale: Option<f32>) -> Entity {
 	const SPRITE_SCALE: f32 = 0.6;
+	let scale = if let Some(scale) = scale {
+		scale
+	} else {
+		SPRITE_SCALE
+	};
 	create_box_entity().unwrap()
-		.set_component_attribute(Scale(SPRITE_SCALE, SPRITE_SCALE, SPRITE_SCALE)).unwrap()
+		.set_component_attribute(Scale(scale, scale, scale)).unwrap()
 		.set_component_attribute(position).unwrap()
 		.set_component_attribute(Color::Web("tomato".into())).unwrap()
 }

@@ -1,6 +1,5 @@
 use aframers::af_sys::components::AComponent;
 use aframers::af_sys::entities::AEntity;
-use aframers::af_sys::scenes::AScene;
 use aframers::browser::{document, log};
 use aframers::components::Position;
 use chrono::Utc;
@@ -19,8 +18,9 @@ use crate::aframe_ex::components::oculus_touch_controls_component::OculusTouchCo
 use crate::aframe_ex::events::core::AEvent;
 use crate::aframe_ex::js::log_value;
 use crate::aframe_ex::scene_entity_bindgen::{AEntityEx, ASceneEx};
+use crate::aframe_ex::scenes::A_SCENE;
 use crate::aframe_ex::scenes::core::scene_apply_effects;
-use crate::aframe_ex::scenes::Scene;
+use crate::aframe_ex::schema::properties::Vec3SchemaProperty;
 use crate::ecs::entities::create_sprite_entity;
 use crate::GAME;
 use crate::game::{AnswerPoint, YomiPoint};
@@ -73,12 +73,13 @@ fn on_grade_answer(_comp: AComponent, event: CustomEvent) {
 	render_scene();
 }
 
-fn on_submit_answer(comp: AComponent, event: CustomEvent) {
+fn on_submit_answer(_comp: AComponent, event: CustomEvent) {
+	let position = Vec3SchemaProperty::try_position(&event.detail());
 	let answer_point = update_game("SUBMIT_ANSWER", event, |state, _event| {
 		state.submit_answer()
 	});
 	if let Some(answer_point) = answer_point {
-		render_answer_sprite(answer_point, comp.a_entity().a_scene());
+		render_answer_sprite(answer_point, position);
 	}
 }
 
@@ -132,15 +133,16 @@ fn render_yomigun(selected_yomi: YomiPoint) {
 		.update_component_property("yomigun", "yomiCode", &selected_yomi.into());
 }
 
-fn render_answer_sprite(answer_point: AnswerPoint, a_scene: AScene) {
-	let scene = Scene::from(a_scene);
-	let yomigun_target_vector = scene.a_scene().unchecked_ref::<ASceneEx>().yomigun_target_position();
-	let yomigun = document().query_selector("#yomigun").unwrap().unwrap().unchecked_into::<AEntityEx>();
+fn render_answer_sprite(answer_point: AnswerPoint, position: Option<Position>) {
+	let yomigun_target_vector = A_SCENE.with(|scene| scene.yomigun_target_position());
 	if let Some(target) = yomigun_target_vector {
 		let end = Position(target.x(), target.y(), target.z());
-		let start = {
+		let (start, scale) = if let Some(position) = position {
+			(position, Some(0.2))
+		} else {
 			let relative_position = Position(0., 0., -1.);
-			yomigun.local_position_to_world(relative_position)
+			let yomigun = document().query_selector("#yomigun").unwrap().unwrap().unchecked_into::<AEntityEx>();
+			(yomigun.local_position_to_world(relative_position), None)
 		};
 		let animation = Animation::new()
 			.set_property("position")
@@ -150,21 +152,19 @@ fn render_answer_sprite(answer_point: AnswerPoint, a_scene: AScene) {
 			.set_easing(Easing::EaseOutQuad)
 			;
 		let id = element_id_from_answer_point(answer_point);
-		let sprite = create_sprite_entity(start)
+		let sprite = create_sprite_entity(start, scale)
 			.set_id(id).unwrap()
-			.set_component_attribute(animation).unwrap();
-		{
-			let a_scene = scene.a_scene().clone();
-			sprite.a_entity()
-				.add_event_listener_with_callback(
-					AnimationComplete.as_ref(),
-					&Closure::once_into_js(move |event: CustomEvent| {
-						log_value(&event);
-						a_scene.emit_event_with_details(GradeAnswer.as_ref(), &answer_point.into())
-					}).unchecked_into::<Function>(),
-				).unwrap();
-		}
-		scene.add_entity(sprite).unwrap();
+			.set_component_attribute(animation).unwrap()
+			.into_a_entity()
+			;
+		sprite.add_event_listener_with_callback(
+			AnimationComplete.as_ref(),
+			&Closure::once_into_js(move |event: CustomEvent| {
+				log_value(&event);
+				GradeAnswer.emit_details(&answer_point.into());
+			}).unchecked_into::<Function>(),
+		).unwrap();
+		A_SCENE.with(|scene| scene.append_child(&sprite).unwrap());
 	}
 }
 

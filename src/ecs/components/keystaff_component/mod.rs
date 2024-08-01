@@ -11,6 +11,7 @@ use crate::aframe_ex::events::core::AEvent;
 use crate::aframe_ex::js::log_value;
 use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::scenes::A_SCENE;
+use crate::aframe_ex::schema::properties::Vec3SchemaProperty;
 use crate::ecs::components::game_component::GameEvent::{SelectYomi, SubmitAnswer};
 use crate::ecs::components::keystaff_component::attribute::Keystaff;
 use crate::ecs::components::keystaff_component::bindgen::{KeystaffAComponent, KeystaffState, TickTask};
@@ -157,9 +158,8 @@ fn on_grip_up(comp: KeystaffAComponent, event: CustomEvent) {
 
 			let tick_task = state.tick_task.take().unwrap();
 			if tick_task.current_index != 0 {
-				A_SCENE.with(|scene| {
-					scene.emit_event(SubmitAnswer.as_ref());
-				});
+				let crown_position = tick_task.crown.compute_world_position(&tick_task.vec3);
+				SubmitAnswer.emit_details(&Vec3SchemaProperty::js_from_position(crown_position));
 			}
 		}
 		Hand::Left => {}

@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 
+use aframers::components::Position;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::js_sys::Object;
 
@@ -62,17 +63,36 @@ impl Vec3SchemaProperty {
 	pub fn format_float(x: f32, y: f32, z: f32) -> String {
 		format!("{} {} {}", x, y, z)
 	}
+	pub fn try_position(data: &JsValue) -> Option<Position> {
+		let x = X_KEY.with_borrow(|key| key.try_float(&data));
+		let y = Y_KEY.with_borrow(|key| key.try_float(&data));
+		let z = Z_KEY.with_borrow(|key| key.try_float(&data));
+		if let (Some(x), Some(y), Some(z)) = (x, y, z) {
+			Some(Position(x, y, z))
+		} else {
+			None
+		}
+	}
+	pub fn js_from_position(Position(x, y, z): Position) -> JsValue {
+		let object: JsValue = Object::new().unchecked_into();
+		X_KEY.with_borrow(|key| key.set_float(&object, x));
+		Y_KEY.with_borrow(|key| key.set_float(&object, y));
+		Z_KEY.with_borrow(|key| key.set_float(&object, z));
+		object
+	}
+}
+impl Vec3SchemaProperty {
 	pub fn format_usize(x: usize, y: usize, z: usize) -> String {
 		format!("{} {} {}", x, y, z)
 	}
-	pub fn create_js_usize(x: usize, y: usize, z: usize) -> JsValue {
+	pub fn js_from_usize(x: usize, y: usize, z: usize) -> JsValue {
 		let object: JsValue = Object::new().unchecked_into();
 		X_KEY.with_borrow(|key| key.set_usize(&object, x));
 		Y_KEY.with_borrow(|key| key.set_usize(&object, y));
 		Z_KEY.with_borrow(|key| key.set_usize(&object, z));
 		object
 	}
-	pub fn parse_js_usize(data: &JsValue) -> (usize, usize, usize) {
+	pub fn usize_from_js(data: &JsValue) -> (usize, usize, usize) {
 		let x = X_KEY.with_borrow(|key| key.usize(&data));
 		let y = Y_KEY.with_borrow(|key| key.usize(&data));
 		let z = Z_KEY.with_borrow(|key| key.usize(&data));

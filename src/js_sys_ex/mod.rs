@@ -6,7 +6,16 @@ pub struct JsKey(JsValue);
 impl JsKey {
 	pub fn key(&self) -> &JsValue { &self.0 }
 	pub fn to_value(&self, object: &JsValue) -> JsValue {
-		Reflect::get(object, self.key()).unwrap()
+		self.try_value(object).unwrap()
+	}
+	pub fn try_value(&self, object: &JsValue) -> Option<JsValue> {
+		match Reflect::get(object, self.key()) {
+			Ok(val) => match val.is_undefined() {
+				true => None,
+				false => Some(val)
+			},
+			Err(_) => None,
+		}
 	}
 }
 impl JsKey {
@@ -28,7 +37,13 @@ impl JsKey {
 }
 impl JsKey {
 	pub fn float(&self, object: &JsValue) -> f32 {
-		self.to_value(object).as_f64().unwrap() as f32
+		self.try_float(object).unwrap()
+	}
+	pub fn try_float(&self, object: &JsValue) -> Option<f32> {
+		self.try_value(object)
+			.map(|val| val.as_f64())
+			.flatten()
+			.map(|val| val as f32)
 	}
 	pub fn set_float(&self, object: &JsValue, value: f32) {
 		Reflect::set(object, self.key(), &value.into()).unwrap();

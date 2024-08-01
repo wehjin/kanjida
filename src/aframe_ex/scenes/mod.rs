@@ -8,18 +8,20 @@ use aframers::entities::Entity;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::Element;
 
+use crate::aframe_ex::scene_entity_bindgen::ASceneEx;
+
 pub mod core;
 
 thread_local! {
-	 pub static A_SCENE: LazyCell<AScene> = LazyCell::new(|| {
-		 document().query_selector("a-scene").unwrap().unwrap().unchecked_into::<AScene>()
+	 pub static A_SCENE: LazyCell<ASceneEx> = LazyCell::new(|| {
+		 document().query_selector("a-scene").unwrap().unwrap().unchecked_into::<ASceneEx>()
 	})
 }
 
-pub struct Scene(AScene);
+pub struct Scene(ASceneEx);
 
 impl Scene {
-	pub fn a_scene(&self) -> &AScene {
+	pub fn a_scene(&self) -> &ASceneEx {
 		&self.0
 	}
 }
@@ -47,8 +49,8 @@ impl Scene {
 	}
 }
 
-impl From<AScene> for Scene {
-	fn from(value: AScene) -> Self {
+impl From<ASceneEx> for Scene {
+	fn from(value: ASceneEx) -> Self {
 		Self(value)
 	}
 }
