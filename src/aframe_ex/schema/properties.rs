@@ -11,6 +11,19 @@ thread_local! {
 	pub static Z_KEY: RefCell<JsKey> = RefCell::new("z".into());
 }
 
+pub struct StringSchemaProperty;
+impl StringSchemaProperty {
+	pub fn format(value: impl AsRef<str>) -> String {
+		value.as_ref().to_string()
+	}
+	pub fn create_js(value: impl AsRef<str>) -> JsValue {
+		JsValue::from(value.as_ref())
+	}
+	pub fn parse_js(data: &JsValue) -> String {
+		data.as_string().unwrap()
+	}
+}
+
 pub struct UsizeSchemaProperty;
 impl UsizeSchemaProperty {
 	pub fn format(value: usize) -> String {

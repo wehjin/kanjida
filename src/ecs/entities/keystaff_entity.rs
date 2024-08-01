@@ -5,6 +5,7 @@ use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::js_sys::Object;
 
+use crate::aframe_ex::components::laser_controls_component::Hand;
 use crate::aframe_ex::components::material_component::Material;
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::geometries::cylinder_geometry::{CylinderGeometry, CylinderGeometrySetting};
@@ -24,15 +25,18 @@ const CROWN_DEPTH: f32 = 0.010;
 const CROWN_GAP: f32 = CROWN_HEIGHT / 5.;
 const CROWN_CENTER_Y: f32 = ROD_TOP + CROWN_GAP + (CROWN_HEIGHT / 2.);
 
-pub const ENTITY_ID: &'static str = "keystaff";
-pub const CROWN_SELECTOR: &'static str = "#keystaff-crown";
 pub const CROWN_DEFAULT_GLYPH: &str = "〇";
 
 #[wasm_bindgen]
 pub fn set_keystaff_glyph(glyph: &str) -> Result<(), JsValue> {
-	let crown = document().query_selector(CROWN_SELECTOR)?.unwrap().unchecked_into::<AEntityEx>();
+	let crown_selector = get_keystaff_crown_selector(&Hand::Right);
+	let crown = document().query_selector(&crown_selector)?.unwrap().unchecked_into::<AEntityEx>();
 	keystaff_set_crown_glyph(&crown, glyph);
 	Ok(())
+}
+
+pub fn get_keystaff_crown_selector(hand: &Hand) -> String {
+	format!("#{}", get_keystaff_crown_id(&hand))
 }
 
 pub fn keystaff_set_crown_glyph(crown: &AEntityEx, glyph: &str) {
@@ -49,19 +53,29 @@ pub fn keystaff_set_crown_glyph(crown: &AEntityEx, glyph: &str) {
 	}
 }
 
-pub fn create_keystaff() -> Result<Entity, JsValue> {
+pub fn create_keystaff_entity(hand: &Hand) -> Result<Entity, JsValue> {
 	let rig = create_entity()?
-		.set_id(ENTITY_ID)?
+		.set_id(get_keystaff_id(hand))?
 		.append_child(create_rod()?)?
-		.append_child(create_crown()?)?
+		.append_child(create_crown(hand)?)?
 		.set_component_attribute(Visible::False)?
 		;
 	Ok(rig)
 }
 
-fn create_crown() -> Result<Entity, JsValue> {
+fn get_keystaff_id(hand: &Hand) -> String {
+	let keystaff_id = format!("keystaff-{}", hand.as_str());
+	keystaff_id
+}
+
+fn get_keystaff_crown_id(hand: &Hand) -> String {
+	let string = format!("{}-crown", get_keystaff_id(hand));
+	string
+}
+
+fn create_crown(hand: &Hand) -> Result<Entity, JsValue> {
 	let entity = create_entity()?
-		.set_id("keystaff-crown")?
+		.set_id(get_keystaff_crown_id(hand))?
 		.set_component_attribute(Position(0.0, CROWN_CENTER_Y, 0.0))?
 		;
 	let a_entity = entity.a_entity().clone().unchecked_into::<AEntityEx>();
@@ -88,7 +102,7 @@ fn create_crown_geometry(glyph: &str, font: &Object) -> TextGeometry {
 	params.set_bevel_size(CROWN_DEPTH / 5.);
 	params.set_bevel_enabled(true);
 
-	let geo = three_sys::TextGeometry::new(glyph, params.as_js());
+	let geo = TextGeometry::new(glyph, params.as_js());
 	geo.compute_bounding_box();
 	geo.center();
 	geo
@@ -113,10 +127,6 @@ fn create_rod() -> Result<Entity, JsValue> {
 fn get_default_color() -> Color {
 	let color = Color::WebStr("Gold");
 	color
-}
-
-pub fn get_keystaff() -> AEntityEx {
-	document().get_element_by_id(ENTITY_ID).unwrap().unchecked_into::<AEntityEx>()
 }
 
 pub fn keystaff_reset_color(keystaff: &AEntityEx) {

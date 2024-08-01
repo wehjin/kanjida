@@ -47,6 +47,11 @@ impl AEntityEx {
 			attr.as_attribute_str().as_ref(),
 		).unwrap();
 	}
+	pub fn compute_world_position(&self, register: &Vector3) -> Position {
+		self.object3d().get_world_position(&register);
+		let position = Position(register.x(), register.y(), register.z());
+		position
+	}
 }
 
 #[wasm_bindgen]

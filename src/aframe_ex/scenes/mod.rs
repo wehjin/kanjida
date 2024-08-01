@@ -1,12 +1,20 @@
+use std::cell::LazyCell;
+use std::ops::Deref;
+
 use aframers::af_sys::scenes::AScene;
 use aframers::browser::document;
 use aframers::components::core::ComponentAttribute;
 use aframers::entities::Entity;
-use aframers::scene::create_scene;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::Element;
 
 pub mod core;
+
+thread_local! {
+	 pub static A_SCENE: LazyCell<AScene> = LazyCell::new(|| {
+		 document().query_selector("a-scene").unwrap().unwrap().unchecked_into::<AScene>()
+	})
+}
 
 pub struct Scene(AScene);
 
@@ -18,15 +26,8 @@ impl Scene {
 
 impl Scene {
 	pub fn get() -> Result<Self, JsValue> {
-		let a_scene = document().query_selector("a-scene").unwrap()
-			.unwrap()
-			.unchecked_into::<AScene>()
-			;
-		Ok(Self(a_scene))
-	}
-	pub fn new() -> Result<Self, JsValue> {
-		let a_scene = create_scene()?.unchecked_into::<AScene>();
-		Ok(Self(a_scene))
+		let scene_element = A_SCENE.with(|it| it.deref().clone());
+		Ok(Self(scene_element))
 	}
 	pub fn set_component_attribute(self, value: impl ComponentAttribute) -> Result<Self, JsValue> {
 		self.0.set_attribute(value.as_attribute_name().as_ref(), value.as_attribute_str().as_ref())?;

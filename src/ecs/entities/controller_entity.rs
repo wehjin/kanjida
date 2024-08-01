@@ -11,7 +11,7 @@ pub fn create_right_controller() -> Result<Entity, JsValue> {
 	let entity = create_entity()?
 		.set_component_attribute(LaserControls::new().set_hand(Hand::Right))?
 		.set_component_attribute(Raycaster::objects(TARGETS))?
-		.set_component_attribute(Keystaff)?
+		.set_component_attribute(Keystaff::from(Hand::Right))?
 		;
 	Ok(entity)
 }
