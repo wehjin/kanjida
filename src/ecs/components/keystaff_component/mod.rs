@@ -7,6 +7,7 @@ use crate::aframe_ex::components::laser_controls_component::Hand;
 use crate::aframe_ex::components::oculus_touch_controls_component::OculusTouchControlsEvent::{GripDown, GripUp};
 use crate::aframe_ex::components::raycaster_component::{Raycaster, RaycasterSetting};
 use crate::aframe_ex::components::visible_component::Visible;
+use crate::aframe_ex::events::core::AEvent;
 use crate::aframe_ex::js::log_value;
 use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::scenes::A_SCENE;
@@ -15,7 +16,7 @@ use crate::ecs::components::keystaff_component::attribute::Keystaff;
 use crate::ecs::components::keystaff_component::bindgen::{KeystaffAComponent, KeystaffState, TickTask};
 use crate::ecs::entities::keystaff_entity::{create_keystaff_entity, CROWN_DEFAULT_GLYPH, get_keystaff_crown_selector, keystaff_reset_color, keystaff_set_color, keystaff_set_crown_glyph};
 use crate::three_sys::Vector3;
-use crate::views::yomi_data::YomiChar;
+use crate::views::yomi_data::{YOMI_BOOK, YomiChar};
 
 pub const COMPONENT_NAME: &'static str = "keystaff";
 
@@ -62,7 +63,6 @@ fn on_tick(comp: KeystaffAComponent, _time: usize, _time_delta: usize) {
 			if let Some(tick_task) = &mut state.tick_task {
 				let controller = comp.a_entity().unchecked_into::<AEntityEx>();
 				let position = controller.compute_world_position(&tick_task.vec3);
-				state.keystaff.set_component_attribute(position);
 				let index = get_grid_index(&position, &tick_task);
 				if index != tick_task.current_index {
 					tick_task.current_index = index;
@@ -70,6 +70,7 @@ fn on_tick(comp: KeystaffAComponent, _time: usize, _time_delta: usize) {
 					select_crown(tick_task);
 					select_yomi(tick_task);
 				}
+				state.keystaff.set_component_attribute(position);
 			}
 		}
 		Hand::Left => {}
@@ -78,14 +79,16 @@ fn on_tick(comp: KeystaffAComponent, _time: usize, _time_delta: usize) {
 }
 
 fn select_crown(tick_task: &TickTask) {
-	let glyph = YomiChar(get_yomi_point(tick_task)).as_glyph();
+	let glyph = match try_yomi_char(tick_task.current_index) {
+		None => CROWN_DEFAULT_GLYPH,
+		Some(char) => char.as_glyph(),
+	};
 	keystaff_set_crown_glyph(&tick_task.crown, glyph);
 }
 
-fn get_yomi_point(tick_task: &TickTask) -> usize {
-	// Temporary until we get the correct mapping.
-	let yomi_point = tick_task.current_index; // Temporary until we get the correct mapping.
-	yomi_point
+fn try_yomi_char(index: usize) -> Option<YomiChar> {
+	let glyph = GRID_GLYPHS[index];
+	YOMI_BOOK.with(|book| book.find_char(glyph).cloned())
 }
 
 const GRID_GLYPHS: [&str; 9] = [
@@ -134,10 +137,9 @@ fn on_grip_down(comp: KeystaffAComponent, event: CustomEvent) {
 }
 
 fn select_yomi(tick_task: &TickTask) {
-	let yomi_point = get_yomi_point(tick_task);
-	A_SCENE.with(|scene| {
-		scene.emit_event_with_details(SelectYomi.as_ref(), &yomi_point.into());
-	})
+	if let Some(yomi_char) = try_yomi_char(tick_task.current_index) {
+		SelectYomi.emit_details(&yomi_char.to_code().into());
+	}
 }
 
 fn on_grip_up(comp: KeystaffAComponent, event: CustomEvent) {

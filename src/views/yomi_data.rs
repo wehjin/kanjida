@@ -1,3 +1,6 @@
+use std::cell::LazyCell;
+use std::collections::HashMap;
+
 //noinspection SpellCheckingInspection
 pub const YOMI_FONT: &'static str = "assets/NanumGothicCodingWithXmpls-msdf.json";
 pub const YOMI_GLYPHS: [&'static str; 61] = [
@@ -10,6 +13,25 @@ pub const YOMI_GLYPHS: [&'static str; 61] = [
 	"ミ", "ム", "メ", "モ", "ヤ", "ユ", "ヨ", "ラ",
 	"リ", "ル", "レ", "ロ", "ワ"
 ];
+
+thread_local! {
+	pub static YOMI_BOOK : LazyCell<YomiBook> = LazyCell::new(||YomiBook::new());
+}
+
+pub struct YomiBook(HashMap<String, YomiChar>);
+impl YomiBook {
+	pub fn new() -> Self {
+		let mut map = HashMap::new();
+		for (i, &glyph) in YOMI_GLYPHS.iter().enumerate() {
+			let char = YomiChar(i);
+			map.insert(glyph.to_string(), char);
+		}
+		Self(map)
+	}
+	pub fn find_char(&self, glyph: &str) -> Option<&YomiChar> {
+		self.0.get(glyph)
+	}
+}
 
 #[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
 pub struct YomiChar(pub usize);

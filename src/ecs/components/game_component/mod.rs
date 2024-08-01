@@ -16,6 +16,7 @@ use SelectedQuizState::{Selected, Unselected};
 use crate::aframe_ex::components::animation_component::{Animation, AnimationEvent, Easing};
 use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::components::oculus_touch_controls_component::OculusTouchControlsEvent::AButtonDown;
+use crate::aframe_ex::events::core::AEvent;
 use crate::aframe_ex::js::log_value;
 use crate::aframe_ex::scene_entity_bindgen::{AEntityEx, ASceneEx};
 use crate::aframe_ex::scenes::core::scene_apply_effects;
@@ -182,8 +183,8 @@ pub enum GameEvent {
 	ToggleSolution,
 }
 
-impl AsRef<str> for GameEvent {
-	fn as_ref(&self) -> &str {
+impl AEvent for GameEvent {
+	fn as_event_name(&self) -> &'static str {
 		match self {
 			SelectQuiz => "game-select-quiz",
 			SelectYomi => "game-select-yomi",
@@ -192,4 +193,8 @@ impl AsRef<str> for GameEvent {
 			ToggleSolution => "game-toggle-solution",
 		}
 	}
+}
+
+impl AsRef<str> for GameEvent {
+	fn as_ref(&self) -> &str { self.as_event_name() }
 }
