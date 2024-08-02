@@ -1,5 +1,5 @@
 use aframers::browser::document;
-use aframers::components::{Color, Position, Rotation, Scale, Width};
+use aframers::components::{Color, Position, Rotation, Width};
 use aframers::entities::{create_plane_entity, Entity};
 use Color::WebStr;
 use wasm_bindgen::JsValue;
@@ -26,9 +26,7 @@ use crate::ecs::components::keystaff_component::register_keystaff_component;
 use crate::ecs::components::laserfocus_component::register_laserfocus_component;
 use crate::ecs::components::quiz_form_component::register_quiz_form_component;
 use crate::ecs::components::yomigun_component::register_yomigun_component;
-use crate::ecs::components::yomikey_component::register_yomikey_component;
 use crate::ecs::entities::{camera_entity, controller_entity, ground_entity, hexgrid_entity, hint_entity, light_entity, origin_entity, sky_entity, yomigun_entity};
-use crate::ecs::entities::answers_entity::create_answers_panel;
 use crate::ecs::entities::controller_entity::create_left_controller;
 use crate::ecs::entities::ring_entity::try_ring_entity;
 use crate::views::settings::{FOCUS_RING_ID, SELECT_RING_ID};
@@ -39,7 +37,6 @@ pub fn register_components() {
 	register_laserfocus_component();
 	register_hexcell_component();
 	register_hexgrid_component();
-	register_yomikey_component();
 	register_yomigun_component();
 	register_game_component();
 	register_keystaff_component();
@@ -58,11 +55,6 @@ pub fn init_scene() -> Result<Scene, JsValue> {
 		.add_entity(create_yomigun()?
 			.set_component_attribute(Position(0., 0.3, -1.6))?
 			.set_component_attribute(Rotation(-50., 0., 0.))?
-		)?
-		.add_entity(create_answers_panel()?
-			.set_component_attribute(Rotation(-2., -45., 0.)).unwrap()
-			.set_component_attribute(Position(1.4, 1.35, -1.4)).unwrap()
-			.set_component_attribute(Scale(1.3, 1.3, 1.3)).unwrap()
 		)?
 		.add_entity(create_hexgrid()?
 			.set_component_attribute(Position(0.0, 1.6, -12.0))?
