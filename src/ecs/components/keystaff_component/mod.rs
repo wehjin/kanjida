@@ -18,8 +18,9 @@ use crate::aframe_ex::schema::properties::Vec3SchemaProperty;
 use crate::ecs::components::game_component::GameEvent::{SelectYomi, SubmitAnswer};
 use crate::ecs::components::keystaff_component::attribute::Keystaff;
 use crate::ecs::components::keystaff_component::bindgen::{KeystaffAComponent, KeystaffState, TickTask};
-use crate::ecs::entities::keystaff_entity::{create_keystaff_entity, CROWN_DEFAULT_GLYPH, get_keystaff_crown_selector, keystaff_reset_color, keystaff_set_color, keystaff_set_crown_glyph};
-use crate::ecs::systems::keystaff_system::ACTIVE_SHIELD;
+use crate::ecs::entities::keystaff_entity::{create_keystaff_entity, CROWN_DEFAULT_GLYPH, keystaff_crown_selector, keystaff_reset_color, keystaff_set_crown_glyph, update_staff_color};
+use crate::ecs::systems::keystaff_system::{hand_shield, RIGHT_SHIELD};
+use crate::ecs::systems::keystaff_system::shield_bank::ShieldBank;
 use crate::ecs::systems::keystaff_system::shield_point::ShieldPoint;
 use crate::three_sys::Vector3;
 use crate::views::yomi_data::YOMI_BOOK;
@@ -45,6 +46,7 @@ pub fn register_keystaff_component() {
 
 fn on_init(comp: &KeystaffAComponent) {
 	let hand = Keystaff::get_hand(&comp.data());
+	let vector3 = Vector3::origin();
 	let position = match hand {
 		Hand::Right => Position(0.2, 1.6 - 0.5, -0.2),
 		Hand::Left => Position(-0.2, 1.6 - 0.5, -0.2),
@@ -53,10 +55,8 @@ fn on_init(comp: &KeystaffAComponent) {
 		.set_component_attribute(position).unwrap()
 		.into_a_entity().unchecked_into::<AEntityEx>()
 		;
-	A_SCENE.with(|scene| {
-		scene.append_child(&keystaff).unwrap()
-	});
-	comp.set_keystaff_state(KeystaffState { hand, keystaff, tick_task: None });
+	A_SCENE.with(|scene| scene.append_child(&keystaff).unwrap());
+	comp.set_keystaff_state(KeystaffState { hand, keystaff, tick_task: None, vector3 });
 }
 fn on_remove(comp: &KeystaffAComponent) {
 	comp.take_keystaff_state();
@@ -64,30 +64,23 @@ fn on_remove(comp: &KeystaffAComponent) {
 
 fn on_tick(comp: KeystaffAComponent, _time: usize, _time_delta: usize) {
 	let mut state = comp.take_keystaff_state();
-	match state.hand {
-		Hand::Right => {
-			if let Some(tick_task) = &mut state.tick_task {
-				let controller = comp.a_entity().unchecked_into::<AEntityEx>();
-				let position = controller.compute_world_position(&tick_task.vec3);
-				let shield_point = get_shield_point(&position, &tick_task);
-				if (shield_point != tick_task.current_shield_point()) || !tick_task.has_active_bank() {
-					tick_task.set_current_shield_point(shield_point);
-					tick_task.update_bank_to_active();
-					keystaff_set_color(&state.keystaff, get_rod_color(shield_point));
-					update_crown(tick_task);
-					select_yomi(tick_task);
-				}
-				state.keystaff.set_component_attribute(position);
-			}
+	if let Some(tick_task) = &mut state.tick_task {
+		let position = comp.to_controller().compute_world_position(&state.vector3);
+		let shield_point = get_shield_point(&position, &tick_task);
+		if (shield_point != tick_task.current_shield_point()) || !tick_task.has_active_bank() {
+			tick_task.update_current_shield_point(shield_point);
+			tick_task.update_bank_to_active();
+			render_keystaff(&state.keystaff, &tick_task);
+			do_effects(&tick_task);
 		}
-		Hand::Left => {}
+		state.keystaff.set_component_attribute(position);
 	}
 	comp.set_keystaff_state(state);
 }
 
-fn update_crown(tick_task: &TickTask) {
-	let crown_glyph = tick_task.try_glyph().unwrap_or_else(|| CROWN_DEFAULT_GLYPH);
-	keystaff_set_crown_glyph(&tick_task.crown, crown_glyph);
+fn update_crown_glyph(crown: &AEntityEx, glyph: Option<&str>) {
+	let crown_glyph = glyph.unwrap_or_else(|| CROWN_DEFAULT_GLYPH);
+	keystaff_set_crown_glyph(crown, crown_glyph);
 }
 
 thread_local! {
@@ -108,79 +101,95 @@ fn map_points_to_colors() -> HashMap<ShieldPoint, Color> {
 	POINTS.into_iter().zip(COLORS).collect()
 }
 
-
 fn on_grip_down(comp: KeystaffAComponent, event: CustomEvent) {
 	log_value(&event);
+	let controller = comp.to_controller();
 	let mut state = comp.take_keystaff_state();
-	match state.hand {
-		Hand::Right => {
-			let controller = comp.a_entity().unchecked_into::<AEntityEx>();
-			controller.set_component_attribute(Raycaster(vec![
-				RaycasterSetting::Enabled(false),
-				RaycasterSetting::ShowLine(false),
-			]));
-			let register = Vector3::origin();
-			let position = controller.compute_world_position(&register);
-			state.keystaff.set_component_attribute(position.clone());
-			state.keystaff.set_component_attribute(Visible::True);
-			const CELL_RADIUS: f32 = 0.05;
-			let mut tick_task = TickTask {
-				vec3: register,
-				row2_min: position.2 - CELL_RADIUS,
-				row2_max: position.2 + CELL_RADIUS,
-				col2_min: position.0 - CELL_RADIUS,
-				col2_max: position.0 + CELL_RADIUS,
-				crown: state.keystaff.query_selector(&get_keystaff_crown_selector(&state.hand)).unwrap().unwrap().unchecked_into::<AEntityEx>(),
-				bank: ACTIVE_SHIELD.with_borrow(|shield| shield.active_bank()),
-			};
-			tick_task.set_current_shield_point(ShieldPoint::CenterMiddle);
-			select_yomi(&tick_task);
-			keystaff_set_color(&state.keystaff, get_rod_color(tick_task.current_shield_point()));
-			update_crown(&tick_task);
-			state.tick_task = Some(tick_task);
-		}
-		Hand::Left => {}
+	let position = controller.compute_world_position(&state.vector3);
+	{
+		const CELL_RADIUS: f32 = 0.05;
+		let mut tick_task = TickTask {
+			row2_min: position.2 - CELL_RADIUS,
+			row2_max: position.2 + CELL_RADIUS,
+			col2_min: position.0 - CELL_RADIUS,
+			col2_max: position.0 + CELL_RADIUS,
+			crown: state.keystaff.query_selector(&keystaff_crown_selector(&state.hand)).unwrap().unwrap().unchecked_into::<AEntityEx>(),
+			bank: hand_shield(state.hand).with_borrow(|shield| shield.active_bank()),
+			hand: state.hand,
+		};
+		tick_task.update_current_shield_point(ShieldPoint::CenterMiddle);
+		render_keystaff(&state.keystaff, &tick_task);
+		do_effects(&tick_task);
+		state.tick_task = Some(tick_task);
 	}
+	state.keystaff.set_component_attribute(position);
+	state.keystaff.set_component_attribute(Visible::True);
 	comp.set_keystaff_state(state);
-}
 
-fn get_rod_color(point: ShieldPoint) -> Color {
-	let color = GRID_COLORS.with(|colors| {
-		colors[&point].clone()
-	});
-	color
-}
-
-fn select_yomi(tick_task: &TickTask) {
-	if let Some(glyph) = tick_task.try_glyph() {
-		if let Some(yomi_char) = YOMI_BOOK.with(|book| book.find_char(glyph).cloned()) {
-			SelectYomi.emit_details(&yomi_char.to_code().into());
-		}
-	}
+	controller.set_component_attribute(Raycaster(vec![
+		RaycasterSetting::Enabled(false),
+		RaycasterSetting::ShowLine(false),
+	]));
 }
 
 fn on_grip_up(comp: KeystaffAComponent, event: CustomEvent) {
 	log_value(&event);
+	let controller = comp.to_controller();
 	let mut state = comp.take_keystaff_state();
-	match state.hand {
-		Hand::Right => {
-			let controller = comp.a_entity().unchecked_into::<AEntityEx>();
-			controller.set_component_attribute(Raycaster(vec![
-				RaycasterSetting::Enabled(true),
-				RaycasterSetting::ShowLine(true),
-			]));
-			state.keystaff.set_component_attribute(Visible::False);
-			keystaff_reset_color(&state.keystaff);
-
-			let tick_task = state.tick_task.take().unwrap();
-			if tick_task.current_shield_point() != ShieldPoint::CenterMiddle {
-				let crown_position = tick_task.crown.compute_world_position(&tick_task.vec3);
-				SubmitAnswer.emit_details(&Vec3SchemaProperty::js_from_position(crown_position));
-			}
+	let tick_task = state.tick_task.take().unwrap();
+	if state.hand == Hand::Right {
+		if tick_task.current_shield_point() != ShieldPoint::CenterMiddle {
+			let crown_position = tick_task.crown.compute_world_position(&state.vector3);
+			SubmitAnswer.emit_details(&Vec3SchemaProperty::js_from_position(crown_position));
 		}
-		Hand::Left => {}
 	}
+	keystaff_reset_color(&state.keystaff);
+	state.keystaff.set_component_attribute(Visible::False);
 	comp.set_keystaff_state(state);
+
+	controller.set_component_attribute(Raycaster(vec![
+		RaycasterSetting::Enabled(true),
+		RaycasterSetting::ShowLine(true),
+	]));
+}
+
+fn do_effects(tick_task: &TickTask) {
+	match tick_task.hand {
+		Hand::Right => {
+			select_yomi(tick_task.try_glyph());
+		}
+		Hand::Left => {
+			let new_bank = match tick_task.current_shield_point() {
+				ShieldPoint::LeftBack => ShieldBank::A,
+				ShieldPoint::CenterBack => ShieldBank::K,
+				ShieldPoint::RightBack => ShieldBank::S,
+				ShieldPoint::LeftMiddle => ShieldBank::T,
+				ShieldPoint::CenterMiddle => ShieldBank::N,
+				ShieldPoint::RightMiddle => ShieldBank::H,
+				ShieldPoint::LeftFront => ShieldBank::M,
+				ShieldPoint::CenterFront => ShieldBank::Y,
+				ShieldPoint::RightFront => ShieldBank::R,
+			};
+			RIGHT_SHIELD.with_borrow_mut(|shield| shield.set_active_bank(new_bank));
+		}
+	}
+}
+
+fn render_keystaff(keystaff: &AEntityEx, tick_task: &TickTask) {
+	update_crown_glyph(&tick_task.crown, tick_task.try_glyph());
+	update_staff_color(keystaff, get_rod_color(tick_task.current_shield_point()));
+}
+
+fn get_rod_color(point: ShieldPoint) -> Color {
+	GRID_COLORS.with(|colors| colors[&point].clone())
+}
+
+fn select_yomi(option: Option<&str>) {
+	if let Some(glyph) = option {
+		if let Some(yomi_char) = YOMI_BOOK.with(|book| book.find_char(glyph).cloned()) {
+			SelectYomi.emit_details(&yomi_char.to_code().into());
+		}
+	}
 }
 
 fn get_shield_point(&Position(x, _y, z): &Position, tick_task: &TickTask) -> ShieldPoint {

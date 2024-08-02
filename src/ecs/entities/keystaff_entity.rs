@@ -29,13 +29,13 @@ pub const CROWN_DEFAULT_GLYPH: &str = "〇";
 
 #[wasm_bindgen]
 pub fn set_keystaff_glyph(glyph: &str) -> Result<(), JsValue> {
-	let crown_selector = get_keystaff_crown_selector(&Hand::Right);
+	let crown_selector = keystaff_crown_selector(&Hand::Right);
 	let crown = document().query_selector(&crown_selector)?.unwrap().unchecked_into::<AEntityEx>();
 	keystaff_set_crown_glyph(&crown, glyph);
 	Ok(())
 }
 
-pub fn get_keystaff_crown_selector(hand: &Hand) -> String {
+pub fn keystaff_crown_selector(hand: &Hand) -> String {
 	format!("#{}", get_keystaff_crown_id(&hand))
 }
 
@@ -130,10 +130,10 @@ fn get_default_color() -> Color {
 }
 
 pub fn keystaff_reset_color(keystaff: &AEntityEx) {
-	keystaff_set_color(keystaff, get_default_color())
+	update_staff_color(keystaff, get_default_color())
 }
 
-pub fn keystaff_set_color(keystaff: &AEntityEx, color: Color) {
+pub fn update_staff_color(keystaff: &AEntityEx, color: Color) {
 	let child = keystaff.first_element_child().unwrap().unchecked_into::<AEntityEx>();
 	let material = Material::new().set_color(color);
 	child.set_component_attribute(material)

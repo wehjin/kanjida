@@ -1,8 +1,8 @@
 use std::cell::LazyCell;
 use std::collections::HashMap;
 use std::ops::Deref;
-use std::thread::LocalKey;
 
+use crate::aframe_ex::components::laser_controls_component::Hand;
 use crate::ecs::entities::keystaff_entity::CROWN_DEFAULT_GLYPH;
 use crate::ecs::systems::keystaff_system::shield_point::{shield_points_map_glyphs, ShieldPoint};
 
@@ -37,86 +37,94 @@ impl<T: AsRef<str>> From<T> for ShieldBank {
 }
 
 impl ShieldBank {
-	pub fn try_glyph(&self, point: ShieldPoint) -> Option<&'static str> {
-		self.as_glyph_map().with(|map| map.deref()[&point])
-	}
-	pub fn as_glyph_map(&self) -> &'static LocalKey<LazyCell<HashMap<ShieldPoint, Option<&'static str>>>> {
-		match self {
-			ShieldBank::A => &A_GLYPHS,
-			ShieldBank::K => &K_GLYPHS,
-			ShieldBank::S => &S_GLYPHS,
-			ShieldBank::T => &T_GLYPHS,
-			ShieldBank::N => &N_GLYPHS,
-			ShieldBank::H => &H_GLYPHS,
-			ShieldBank::M => &M_GLYPHS,
-			ShieldBank::Y => &Y_GLYPHS,
-			ShieldBank::R => &R_GLYPHS,
-		}
+	pub fn try_glyph(&self, point: ShieldPoint, hand: Hand) -> Option<&'static str> {
+		let glyph_map = match hand {
+			Hand::Right => match self {
+				ShieldBank::A => &A_GLYPHS,
+				ShieldBank::K => &K_GLYPHS,
+				ShieldBank::S => &S_GLYPHS,
+				ShieldBank::T => &T_GLYPHS,
+				ShieldBank::N => &N_GLYPHS,
+				ShieldBank::H => &H_GLYPHS,
+				ShieldBank::M => &M_GLYPHS,
+				ShieldBank::Y => &Y_GLYPHS,
+				ShieldBank::R => &R_GLYPHS,
+			},
+			Hand::Left => &BANK_GLYPHS,
+		};
+		glyph_map.with(|map| map.deref()[&point])
 	}
 }
 
 thread_local! {
+	static BANK_GLYPHS : LazyCell<HashMap<ShieldPoint, Option<&'static str>>> = LazyCell::new(||{
+		shield_points_map_glyphs([
+			Some("A"), Some("K"), Some("S"),
+			Some("T"), Some("N"), Some("H"),
+			Some("M"), Some("Y"), Some( "R"),
+		])
+	});
 	static A_GLYPHS : LazyCell<HashMap<ShieldPoint, Option<&'static str>>> = LazyCell::new(||{
 		shield_points_map_glyphs([
+			Some( "イ"), Some("ウ"), Some("エ"),
+			Some("ア"), Some(CROWN_DEFAULT_GLYPH), Some("オ"),
 			None, None, None,
-			Some("オ"), Some(CROWN_DEFAULT_GLYPH), Some("ア"),
-			Some("エ"), Some("ウ"), Some( "イ"),
 		])
 	});
 	static K_GLYPHS : LazyCell<HashMap<ShieldPoint, Option<&'static str>>> = LazyCell::new(||{
 		shield_points_map_glyphs([
-			None,None,None,
-			Some("コ"),Some(CROWN_DEFAULT_GLYPH),Some("カ"),
-			Some("ケ"),Some("ク"),Some( "キ"),
+			Some( "キ"), Some("ク"), Some("ケ"),
+			Some("カ"), Some(CROWN_DEFAULT_GLYPH), Some("コ"),
+			None, None, None,
 		])
 	});
 	static S_GLYPHS : LazyCell<HashMap<ShieldPoint, Option<&'static str>>> = LazyCell::new(||{
 		shield_points_map_glyphs([
-			None,None,None,
-			Some("ソ"),Some(CROWN_DEFAULT_GLYPH),Some("サ"),
-			Some("セ"),Some("ス"),Some( "シ"),
+			Some( "シ"), Some("ス"), Some("セ"),
+			Some("サ"), Some(CROWN_DEFAULT_GLYPH), Some("ソ"),
+			None, None, None,
 		])
 	});
 	static T_GLYPHS : LazyCell<HashMap<ShieldPoint, Option<&'static str>>> = LazyCell::new(||{
 		shield_points_map_glyphs([
-			None,None,None,
-			Some("ト"),Some(CROWN_DEFAULT_GLYPH),Some("タ"),
-			Some("テ"),Some("ツ"),Some( "チ"),
+			Some( "チ"), Some("ツ"), Some("テ"),
+			Some("タ"), Some(CROWN_DEFAULT_GLYPH), Some("ト"),
+			None, None, None,
 		])
 	});
 	static N_GLYPHS : LazyCell<HashMap<ShieldPoint, Option<&'static str>>> = LazyCell::new(||{
 		shield_points_map_glyphs([
-			None,None,None,
-			Some("ノ"),Some(CROWN_DEFAULT_GLYPH),Some("ナ"),
-			Some("ネ"),Some("ヌ"),Some( "ニ"),
+			Some( "ニ"), Some("ヌ"), Some("ネ"),
+			Some("ナ"), Some(CROWN_DEFAULT_GLYPH), Some("ノ"),
+			None, None, None,
 		])
 	});
 	static H_GLYPHS : LazyCell<HashMap<ShieldPoint, Option<&'static str>>> = LazyCell::new(||{
 		shield_points_map_glyphs([
-			None,None,None,
-			Some("ホ"),Some(CROWN_DEFAULT_GLYPH),Some("ハ"),
-			Some("ヘ"),Some("フ"),Some( "ヒ"),
+			Some( "ヒ"), Some("フ"), Some("ヘ"),
+			Some("ハ"), Some(CROWN_DEFAULT_GLYPH), Some("ホ"),
+			None, None, None,
 		])
 	});
 	static M_GLYPHS : LazyCell<HashMap<ShieldPoint, Option<&'static str>>> = LazyCell::new(||{
 		shield_points_map_glyphs([
-			None,None,None,
-			Some("モ"),Some(CROWN_DEFAULT_GLYPH),Some("マ"),
-			Some("メ"),Some("ム"),Some( "ミ"),
+			Some( "ミ"), Some("ム"), Some("メ"),
+			Some("マ"), Some(CROWN_DEFAULT_GLYPH), Some("モ"),
+			None, None, None,
 		])
 	});
 	static Y_GLYPHS : LazyCell<HashMap<ShieldPoint, Option<&'static str>>> = LazyCell::new(||{
 		shield_points_map_glyphs([
-			None,Some("ン"),None,
-			Some("ヨ"),Some(CROWN_DEFAULT_GLYPH),Some("ヤ"),
-			Some("ヲ"),Some("ユ"),Some( "ワ"),
+			Some( "ワ"), Some("ユ"), Some("ヲ"),
+			Some("ヤ"), Some(CROWN_DEFAULT_GLYPH), Some("ヨ"),
+			None, Some("ン"), None,
 		])
 	});
 	static R_GLYPHS : LazyCell<HashMap<ShieldPoint, Option<&'static str>>> = LazyCell::new(||{
 		shield_points_map_glyphs([
-			None, None, None,
-			Some("ロ"), Some(CROWN_DEFAULT_GLYPH), Some("ラ"),
-			Some("レ"), Some("ル"), Some( "リ"),
+			Some( "リ"), Some("ル"), Some("レ"),
+			Some("ラ"), Some(CROWN_DEFAULT_GLYPH), Some("ロ"),
+			None,  None,  None,
 		])
 	});
 }
