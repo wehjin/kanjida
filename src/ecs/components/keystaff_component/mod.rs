@@ -114,7 +114,8 @@ fn on_grip_down(comp: KeystaffAComponent, event: CustomEvent) {
 			row2_max: z + CELL_RADIUS,
 			col2_min: x - CELL_RADIUS,
 			col2_max: x + CELL_RADIUS,
-			floor2_max: y + CELL_RADIUS * 1.5,
+			floor2_min: y - CELL_RADIUS,
+			floor2_max: y + CELL_RADIUS,
 			crown: state.keystaff.query_selector(&keystaff_crown_selector(&state.hand)).unwrap().unwrap().unchecked_into::<AEntityEx>(),
 			bank: hand_shield(state.hand).with_borrow(|shield| shield.active_bank()),
 			hand: state.hand,
@@ -224,6 +225,12 @@ fn get_shield_point(&Position(x, y, z): &Position, tick_task: &TickTask) -> Shie
 			RowCol::CenterMiddle
 		}
 	};
-	let floor = if y > tick_task.floor2_max { Floor::Over } else { Floor::Ground };
+	let floor = if y > tick_task.floor2_max {
+		Floor::Over
+	} else if y < tick_task.floor2_min {
+		Floor::Under
+	} else {
+		Floor::Ground
+	};
 	row_col.to_point_on_floor(floor)
 }

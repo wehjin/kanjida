@@ -4,7 +4,7 @@ use std::ops::Deref;
 
 use crate::aframe_ex::components::laser_controls_component::Hand;
 use crate::ecs::entities::keystaff_entity::CROWN_DEFAULT_GLYPH;
-use crate::ecs::systems::keystaff_system::shield_point::{shield_points_map_glyphs, shield_points_map_glyphs_ignore_floor, ShieldPoint};
+use crate::ecs::systems::keystaff_system::shield_point::{shield_points_map_glyphs, shield_points_map_glyphs_clamp_under, shield_points_map_glyphs_ignore_floor, ShieldPoint};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum ShieldBank {
@@ -72,7 +72,7 @@ thread_local! {
 		])
 	});
 	static K_GLYPHS : LazyCell<HashMap<ShieldPoint, Option<&'static str>>> = LazyCell::new(||{
-		shield_points_map_glyphs([
+		shield_points_map_glyphs_clamp_under([
 			Some( "ギ"), Some("グ"), Some("ゲ"),
 			Some("ガ"), Some(CROWN_DEFAULT_GLYPH), Some("ゴ"),
 			None, None, None,
@@ -82,7 +82,7 @@ thread_local! {
 		])
 	});
 	static S_GLYPHS : LazyCell<HashMap<ShieldPoint, Option<&'static str>>> = LazyCell::new(||{
-		shield_points_map_glyphs([
+		shield_points_map_glyphs_clamp_under([
 			Some( "ジ"), Some("ズ"), Some("ゼ"),
 			Some("ザ"), Some(CROWN_DEFAULT_GLYPH), Some("ゾ"),
 			None, None, None,
@@ -92,7 +92,7 @@ thread_local! {
 		])
 	});
 	static T_GLYPHS : LazyCell<HashMap<ShieldPoint, Option<&'static str>>> = LazyCell::new(||{
-		shield_points_map_glyphs([
+		shield_points_map_glyphs_clamp_under([
 			Some( "ヂ"), Some("ヅ"), Some("デ"),
 			Some("ダ"), Some(CROWN_DEFAULT_GLYPH), Some("ド"),
 			None, None, None,
@@ -116,6 +116,9 @@ thread_local! {
 			Some( "ヒ"), Some("フ"), Some("ヘ"),
 			Some("ハ"), Some(CROWN_DEFAULT_GLYPH), Some("ホ"),
 			None, None, None,
+			Some( "ピ"), Some("プ"), Some("ペ"),
+			Some("パ"), Some(CROWN_DEFAULT_GLYPH), Some("ポ"),
+			Some("パ"), None, Some("ポ"),
 		])
 	});
 	static M_GLYPHS : LazyCell<HashMap<ShieldPoint, Option<&'static str>>> = LazyCell::new(||{
@@ -126,7 +129,7 @@ thread_local! {
 		])
 	});
 	static Y_GLYPHS : LazyCell<HashMap<ShieldPoint, Option<&'static str>>> = LazyCell::new(||{
-		shield_points_map_glyphs([
+		shield_points_map_glyphs_clamp_under([
 			Some( "ヷ"), Some("ュ"), Some("ヺ"),
 			Some("ャ"), Some(CROWN_DEFAULT_GLYPH), Some("ョ"),
 			None, Some("ン"), None,
