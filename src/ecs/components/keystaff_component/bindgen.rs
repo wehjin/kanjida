@@ -15,6 +15,7 @@ pub struct TickTask {
 	pub(crate) row2_max: f32,
 	pub(crate) col2_min: f32,
 	pub(crate) col2_max: f32,
+	pub(crate) floor2_max: f32,
 	pub(crate) crown: AEntityEx,
 	pub(crate) bank: ShieldBank,
 	pub(crate) hand: Hand,

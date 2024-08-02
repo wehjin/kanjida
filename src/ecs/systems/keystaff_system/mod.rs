@@ -37,7 +37,7 @@ pub struct Shield {
 
 impl Shield {
 	pub fn new(hand: Hand) -> Self {
-		Self { active_bank: ShieldBank::N, active_point: ShieldPoint::CenterMiddle, hand }
+		Self { active_bank: ShieldBank::N, active_point: ShieldPoint::GroundCenterMiddle, hand }
 	}
 	pub fn try_glyph(&self) -> Option<&'static str> {
 		self.active_bank.try_glyph(self.active_point, self.hand)

@@ -21,7 +21,7 @@ use crate::ecs::components::keystaff_component::bindgen::{KeystaffAComponent, Ke
 use crate::ecs::entities::keystaff_entity::{create_keystaff_entity, CROWN_DEFAULT_GLYPH, keystaff_crown_selector, keystaff_reset_color, keystaff_set_crown_glyph, update_staff_color};
 use crate::ecs::systems::keystaff_system::{hand_shield, RIGHT_SHIELD};
 use crate::ecs::systems::keystaff_system::shield_bank::ShieldBank;
-use crate::ecs::systems::keystaff_system::shield_point::ShieldPoint;
+use crate::ecs::systems::keystaff_system::shield_point::{Floor, RowCol, ShieldPoint};
 use crate::three_sys::Vector3;
 use crate::views::yomi_data::YOMI_BOOK;
 
@@ -84,21 +84,21 @@ fn update_crown_glyph(crown: &AEntityEx, glyph: Option<&str>) {
 }
 
 thread_local! {
-	static GRID_COLORS: LazyCell<HashMap<ShieldPoint, Color>> = LazyCell::new(map_points_to_colors)
+	static GRID_COLORS: LazyCell<HashMap<RowCol, Color>> = LazyCell::new(map_points_to_colors)
 }
 
-fn map_points_to_colors() -> HashMap<ShieldPoint, Color> {
-	const POINTS: [ShieldPoint; 9] = [
-		ShieldPoint::LeftBack, ShieldPoint::CenterBack, ShieldPoint::RightBack,
-		ShieldPoint::LeftMiddle, ShieldPoint::CenterMiddle, ShieldPoint::RightMiddle,
-		ShieldPoint::LeftFront, ShieldPoint::CenterFront, ShieldPoint::RightFront,
+fn map_points_to_colors() -> HashMap<RowCol, Color> {
+	const ROW_COLS: [RowCol; 9] = [
+		RowCol::LeftBack, RowCol::CenterBack, RowCol::RightBack,
+		RowCol::LeftMiddle, RowCol::CenterMiddle, RowCol::RightMiddle,
+		RowCol::LeftFront, RowCol::CenterFront, RowCol::RightFront,
 	];
 	const COLORS: [Color; 9] = [
 		Color::WebStr("Red"), Color::WebStr("Orange"), Color::WebStr("Yellow"),
 		Color::WebStr("Cyan"), Color::WebStr("Silver"), Color::WebStr("Green"),
 		Color::WebStr("Violet"), Color::WebStr("Indigo"), Color::WebStr("Blue"),
 	];
-	POINTS.into_iter().zip(COLORS).collect()
+	ROW_COLS.into_iter().zip(COLORS).collect()
 }
 
 fn on_grip_down(comp: KeystaffAComponent, event: CustomEvent) {
@@ -107,17 +107,19 @@ fn on_grip_down(comp: KeystaffAComponent, event: CustomEvent) {
 	let mut state = comp.take_keystaff_state();
 	let position = controller.compute_world_position(&state.vector3);
 	{
+		let Position(x, y, z) = position;
 		const CELL_RADIUS: f32 = 0.05;
 		let mut tick_task = TickTask {
-			row2_min: position.2 - CELL_RADIUS,
-			row2_max: position.2 + CELL_RADIUS,
-			col2_min: position.0 - CELL_RADIUS,
-			col2_max: position.0 + CELL_RADIUS,
+			row2_min: z - CELL_RADIUS,
+			row2_max: z + CELL_RADIUS,
+			col2_min: x - CELL_RADIUS,
+			col2_max: x + CELL_RADIUS,
+			floor2_max: y + CELL_RADIUS * 1.5,
 			crown: state.keystaff.query_selector(&keystaff_crown_selector(&state.hand)).unwrap().unwrap().unchecked_into::<AEntityEx>(),
 			bank: hand_shield(state.hand).with_borrow(|shield| shield.active_bank()),
 			hand: state.hand,
 		};
-		tick_task.update_current_shield_point(ShieldPoint::CenterMiddle);
+		tick_task.update_current_shield_point(ShieldPoint::GroundCenterMiddle);
 		render_keystaff(&state.keystaff, &tick_task);
 		do_effects(&tick_task);
 		state.tick_task = Some(tick_task);
@@ -138,7 +140,7 @@ fn on_grip_up(comp: KeystaffAComponent, event: CustomEvent) {
 	let mut state = comp.take_keystaff_state();
 	let tick_task = state.tick_task.take().unwrap();
 	if state.hand == Hand::Right {
-		if tick_task.current_shield_point() != ShieldPoint::CenterMiddle {
+		if tick_task.current_shield_point() != ShieldPoint::GroundCenterMiddle {
 			let crown_position = tick_task.crown.compute_world_position(&state.vector3);
 			SubmitAnswer.emit_details(&Vec3SchemaProperty::js_from_position(crown_position));
 		}
@@ -159,16 +161,16 @@ fn do_effects(tick_task: &TickTask) {
 			select_yomi(tick_task.try_glyph());
 		}
 		Hand::Left => {
-			let new_bank = match tick_task.current_shield_point() {
-				ShieldPoint::LeftBack => ShieldBank::A,
-				ShieldPoint::CenterBack => ShieldBank::K,
-				ShieldPoint::RightBack => ShieldBank::S,
-				ShieldPoint::LeftMiddle => ShieldBank::T,
-				ShieldPoint::CenterMiddle => ShieldBank::N,
-				ShieldPoint::RightMiddle => ShieldBank::H,
-				ShieldPoint::LeftFront => ShieldBank::M,
-				ShieldPoint::CenterFront => ShieldBank::Y,
-				ShieldPoint::RightFront => ShieldBank::R,
+			let new_bank = match tick_task.current_shield_point().to_row_col() {
+				RowCol::LeftBack => ShieldBank::A,
+				RowCol::CenterBack => ShieldBank::K,
+				RowCol::RightBack => ShieldBank::S,
+				RowCol::LeftMiddle => ShieldBank::T,
+				RowCol::CenterMiddle => ShieldBank::N,
+				RowCol::RightMiddle => ShieldBank::H,
+				RowCol::LeftFront => ShieldBank::M,
+				RowCol::CenterFront => ShieldBank::Y,
+				RowCol::RightFront => ShieldBank::R,
 			};
 			RIGHT_SHIELD.with_borrow_mut(|shield| shield.set_active_bank(new_bank));
 		}
@@ -181,7 +183,8 @@ fn render_keystaff(keystaff: &AEntityEx, tick_task: &TickTask) {
 }
 
 fn get_rod_color(point: ShieldPoint) -> Color {
-	GRID_COLORS.with(|colors| colors[&point].clone())
+	let row_col = point.to_row_col();
+	GRID_COLORS.with(|colors| colors[&row_col].clone())
 }
 
 fn select_yomi(option: Option<&str>) {
@@ -192,33 +195,35 @@ fn select_yomi(option: Option<&str>) {
 	}
 }
 
-fn get_shield_point(&Position(x, _y, z): &Position, tick_task: &TickTask) -> ShieldPoint {
-	if z < tick_task.row2_min {
+fn get_shield_point(&Position(x, y, z): &Position, tick_task: &TickTask) -> ShieldPoint {
+	let row_col = if z < tick_task.row2_min {
 		// Back row
 		if x < tick_task.col2_min {
-			ShieldPoint::LeftBack
+			RowCol::LeftBack
 		} else if x > tick_task.col2_max {
-			ShieldPoint::RightBack
+			RowCol::RightBack
 		} else {
-			ShieldPoint::CenterBack
+			RowCol::CenterBack
 		}
 	} else if z > tick_task.row2_max {
 		// Front row
 		if x < tick_task.col2_min {
-			ShieldPoint::LeftFront
+			RowCol::LeftFront
 		} else if x > tick_task.col2_max {
-			ShieldPoint::RightFront
+			RowCol::RightFront
 		} else {
-			ShieldPoint::CenterFront
+			RowCol::CenterFront
 		}
 	} else {
 		// Middle row
 		if x < tick_task.col2_min {
-			ShieldPoint::LeftMiddle
+			RowCol::LeftMiddle
 		} else if x > tick_task.col2_max {
-			ShieldPoint::RightMiddle
+			RowCol::RightMiddle
 		} else {
-			ShieldPoint::CenterMiddle
+			RowCol::CenterMiddle
 		}
-	}
+	};
+	let floor = if y > tick_task.floor2_max { Floor::Over } else { Floor::Ground };
+	row_col.to_point_on_floor(floor)
 }
