@@ -1,3 +1,6 @@
+use std::cell::LazyCell;
+use std::ops::Deref;
+
 use aframers::af_sys::entities::AEntity;
 use aframers::browser::document;
 use aframers::entities::Entity;
@@ -49,6 +52,21 @@ pub fn register_hexcell_component() {
 	;
 }
 
+thread_local! {
+	static RING_GEOMETRY: LazyCell<BufferGeometry> = LazyCell::new(create_ring_geometry);
+}
+fn create_ring_geometry() -> BufferGeometry {
+	let ring_geometry = RingGeometry::new_with_radius_and_segments(
+		0.75,
+		0.95,
+		6,
+	).translate(0., 0., STATUS_RING_Z_OFFSET);
+	ring_geometry
+}
+fn get_ring_geometry() -> BufferGeometry {
+	RING_GEOMETRY.with(|lazy| lazy.deref().clone())
+}
+
 fn init(this: &HexcellAComponent) {
 	// Install the geometry first via the component attribute
 	// in the entity so that the entity will be recognized as a
@@ -61,30 +79,14 @@ fn init(this: &HexcellAComponent) {
 	// with a second status-indicator geometry.
 	{
 		let mesh = get_entity_mesh(this.a_entity());
-		let circle_geometry = mesh.geometry();
-		let ring_geometry = create_ring_geometry();
 		let array = Array::new_with_length(2);
-		array.set(0, circle_geometry.unchecked_into());
-		array.set(1, ring_geometry.unchecked_into());
-		let geometry = merge_geometries(&array, false);
-		for i in 0..array.length() {
-			let geo = array.get(i).unchecked_into::<BufferGeometry>();
-			geo.dispose();
-		}
-		mesh.set_geometry(&geometry);
+		array.set(0, mesh.geometry().unchecked_into());
+		array.set(1, get_ring_geometry().unchecked_into());
+		mesh.set_geometry(&merge_geometries(&array, false));
 
 		mesh.material().dispose();
 		mesh.set_material(&get_current_material(this));
 	}
-}
-
-fn create_ring_geometry() -> BufferGeometry {
-	let ring_geometry = RingGeometry::new_with_radius_and_segments(
-		0.75,
-		0.95,
-		6,
-	).translate(0., 0., STATUS_RING_Z_OFFSET);
-	ring_geometry
 }
 
 fn update(this: &HexcellAComponent) {
