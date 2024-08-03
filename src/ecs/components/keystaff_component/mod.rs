@@ -1,6 +1,7 @@
 use std::cell::LazyCell;
 use std::collections::HashMap;
 
+use aframers::browser::log;
 use aframers::components::{Color, Position};
 use wasm_bindgen::JsCast;
 use web_sys::CustomEvent;
@@ -46,6 +47,8 @@ pub fn register_keystaff_component() {
 
 fn on_init(comp: &KeystaffAComponent) {
 	let hand = Keystaff::get_hand(&comp.data());
+	log(&format!("INIT KEYSTAFF: {:?}", hand));
+
 	let vector3 = Vector3::origin();
 	let position = match hand {
 		Hand::Right => Position(0.2, 1.6 - 0.5, -0.2),
@@ -59,7 +62,8 @@ fn on_init(comp: &KeystaffAComponent) {
 	comp.set_keystaff_state(KeystaffState { hand, keystaff, tick_task: None, vector3 });
 }
 fn on_remove(comp: &KeystaffAComponent) {
-	comp.take_keystaff_state();
+	let state = comp.take_keystaff_state();
+	state.keystaff.destroy();
 }
 
 fn on_tick(comp: KeystaffAComponent, _time: usize, _time_delta: usize) {

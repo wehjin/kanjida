@@ -17,6 +17,8 @@ extern "C" {
 	pub fn compute_bounding_box(this: &BufferGeometry);
 	#[wasm_bindgen(method)]
 	pub fn center(this: &BufferGeometry);
+	#[wasm_bindgen(method)]
+	pub fn dispose(this: &BufferGeometry);
 }
 
 #[wasm_bindgen(module = "three/addons/utils/BufferGeometryUtils.js")]

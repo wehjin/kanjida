@@ -69,15 +69,14 @@ fn create_material(color: &str) -> MeshBasicMaterial {
 }
 
 fn update_count(mesh: Mesh, count: usize, font: &Object) {
-	let geometry = create_geometry(count, font);
-	mesh.set_geometry(&geometry);
+	mesh.geometry().dispose();
+	mesh.set_geometry(&create_geometry(count, font));
 }
 
 fn add_indicator(name: &str, position: Position, count: usize, color: &str, font: &Object) {
-	let mesh = Mesh::new_with_geometry_and_material(
-		&create_geometry(count, font),
-		&create_material(color),
-	);
+	let geometry = create_geometry(count, font);
+	let material = create_material(color);
+	let mesh = Mesh::new_with_geometry_and_material(&geometry, &material);
 	mesh.set_name(name);
 	mesh.position().set(position.0, position.1, position.2);
 	mesh.scale().set(INDICATOR_SCALE, INDICATOR_SCALE, INDICATOR_SCALE);

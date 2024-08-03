@@ -15,6 +15,8 @@ extern "C" {
 	pub fn needs_update(this: &Material) -> bool;
 	#[wasm_bindgen(method, setter, js_name = needsUpdate)]
 	pub fn set_needs_update(this: &Material, value: bool);
+	#[wasm_bindgen(method)]
+	pub fn dispose(this: &Material);
 }
 
 #[wasm_bindgen(js_namespace = THREE)]

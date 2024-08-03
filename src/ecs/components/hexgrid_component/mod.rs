@@ -94,7 +94,11 @@ fn create_geometry(coords: &Vec<AxialCoord>, font: &Object) -> BufferGeometry {
 		let geometry = create_text_geometry(glyph, coord.to_pixel(), &params);
 		array.set(i as u32, geometry.unchecked_into());
 	}
-	merge_geometries(&array, false)
+	let merged = merge_geometries(&array, false);
+	for i in 0..array.length() {
+		array.get(i).unchecked_into::<BufferGeometry>().dispose();
+	}
+	merged
 }
 
 fn create_text_geometry_params(font: &Object) -> TextGeometryParameters {

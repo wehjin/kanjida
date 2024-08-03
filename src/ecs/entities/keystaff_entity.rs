@@ -41,13 +41,12 @@ pub fn keystaff_crown_selector(hand: &Hand) -> String {
 
 pub fn keystaff_set_crown_glyph(crown: &AEntityEx, glyph: &str) {
 	let own_glyph = glyph.to_string();
-	let object3d = crown.object3d();
-	let mesh = object3d.children().get(0).unchecked_into::<Mesh>();
+	let mesh = crown.object3d().children().get(0).unchecked_into::<Mesh>();
 	if mesh.name() != own_glyph {
 		with_kana_font(move |font| {
 			log(&format!("Updated keystaff crown glyph: {}", &own_glyph));
-			let geo = create_crown_geometry(own_glyph.as_str(), font);
-			mesh.set_geometry(&geo);
+			mesh.geometry().dispose();
+			mesh.set_geometry(&create_crown_geometry(own_glyph.as_str(), font));
 			mesh.set_name(own_glyph.as_str());
 		});
 	}
@@ -85,8 +84,9 @@ fn create_crown(hand: &Hand) -> Result<Entity, JsValue> {
 		let mat = MeshStandardMaterial::new();
 		mat.set_color(&three_sys::Color::new_str("Gold"));
 		mat.set_emissive(&three_sys::Color::new_str("Crimson"));
-
 		let mesh = Mesh::new_with_geometry_and_material(&geo, &mat);
+		geo.dispose();
+		mat.dispose();
 		mesh.set_name(glyph);
 		a_entity.object3d().add(&mesh);
 	});

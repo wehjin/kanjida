@@ -90,16 +90,16 @@ fn create_details_screen() -> Entity {
 pub const DETAILS_SCREEN_SELECTOR: &'static str = "#details";
 
 fn create_select_ring() -> Result<Entity, JsValue> {
-	let select_ring = try_ring_entity(HexColor::Selected.as_ref())
-		.unwrap().set_id(SELECT_RING_ID)?
+	let select_ring = try_ring_entity(HexColor::Selected.as_ref()).unwrap()
+		.set_id(SELECT_RING_ID)?
 		.set_component_attribute(Visible::False)?
 		;
 	Ok(select_ring)
 }
 
 fn create_focus_ring() -> Result<Entity, JsValue> {
-	let focus_ring = try_ring_entity(HexColor::Focused.as_ref())
-		.unwrap().set_id(FOCUS_RING_ID)?
+	let focus_ring = try_ring_entity(HexColor::Focused.as_ref()).unwrap()
+		.set_id(FOCUS_RING_ID)?
 		.set_component_attribute(Visible::False)?
 		;
 	Ok(focus_ring)

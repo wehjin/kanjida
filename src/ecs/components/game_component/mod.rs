@@ -75,9 +75,11 @@ fn on_grade_answer(_comp: AComponent, event: CustomEvent) {
 
 fn on_submit_answer(_comp: AComponent, event: CustomEvent) {
 	let position = Vec3SchemaProperty::try_position(&event.detail());
-	let answer_point = update_game("SUBMIT_ANSWER", event, |state, _event| {
-		state.submit_answer()
-	});
+	let answer_point = update_game(
+		"SUBMIT_ANSWER",
+		event,
+		|state, _event| state.submit_answer(),
+	);
 	if let Some(answer_point) = answer_point {
 		render_answer_sprite(answer_point, position);
 	}
@@ -124,6 +126,7 @@ fn erase_answer_sprite(answer_point: AnswerPoint) {
 	let selector = answer_point_element_selector(answer_point);
 	if let Ok(Some(sprite)) = document().query_selector(&selector) {
 		sprite.remove();
+		sprite.unchecked_ref::<AEntity>().destroy();
 	}
 }
 

@@ -6,10 +6,10 @@ use web_sys::js_sys::{Array, Reflect};
 
 use three_sys::RingGeometry;
 
-use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::components::core::{ComponentDefinition, Dependencies, Events};
 use crate::aframe_ex::components::geometry_component::{Circle, Geometry};
 use crate::aframe_ex::events::StateEventKind::{StateAdded, StateRemoved};
+use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::schema::fields::Field;
 use crate::aframe_ex::schema::multi_property::MultiPropertySchema;
 use crate::ecs::components::hexcell_component::bindgen::HexcellAComponent;
@@ -67,7 +67,13 @@ fn init(this: &HexcellAComponent) {
 		array.set(0, circle_geometry.unchecked_into());
 		array.set(1, ring_geometry.unchecked_into());
 		let geometry = merge_geometries(&array, false);
+		for i in 0..array.length() {
+			let geo = array.get(i).unchecked_into::<BufferGeometry>();
+			geo.dispose();
+		}
 		mesh.set_geometry(&geometry);
+
+		mesh.material().dispose();
 		mesh.set_material(&get_current_material(this));
 	}
 }
