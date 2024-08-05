@@ -10,8 +10,6 @@ pub mod keystaff_entity;
 pub mod light_entity;
 pub mod origin_entity;
 pub mod ring_entity;
-pub mod sky_entity;
-pub mod yomigun_entity;
 
 pub fn create_sprite_entity(position: Position, scale: Option<f32>) -> Entity {
 	const SPRITE_SCALE: f32 = 0.6;

@@ -7,7 +7,7 @@ use crate::aframe_ex::js::log_value;
 use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::ecs::components::keystaff_component::attribute::Keystaff;
 
-const RIGHT_HAND_TARGETS: &'static str = "[hexcell],[yomigun],[yomikey],#answers";
+const RIGHT_HAND_TARGETS: &'static str = "[hexcell]";
 
 pub fn create_right_controller() -> Result<Entity, JsValue> {
 	let entity = create_entity()?

@@ -1,23 +1,18 @@
-use aframers::browser::document;
 use aframers::components::{Color, Position, Rotation, Width};
 use aframers::entities::{create_plane_entity, Entity};
 use Color::WebStr;
 use wasm_bindgen::JsValue;
-use web_sys::Element;
 
 use controller_entity::create_right_controller;
 use hexgrid_entity::create_hexgrid;
 use hint_entity::create_hint_cursor;
-use yomigun_entity::create_yomigun;
 
 use crate::aframe_ex::components::align_component::Align;
 use crate::aframe_ex::components::anchor_component::Anchor;
 use crate::aframe_ex::components::baseline_component::Baseline;
-use crate::aframe_ex::components::stats_component::Stats;
 use crate::aframe_ex::components::text_component::Text;
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::scenes::Scene;
-use crate::ecs::components::game_component::game::Game;
 use crate::ecs::components::game_component::register_game_component;
 use crate::ecs::components::hex_color_component::HexColor;
 use crate::ecs::components::hexcell_component::register_hexcell_component;
@@ -25,8 +20,7 @@ use crate::ecs::components::hexgrid_component::register_hexgrid_component;
 use crate::ecs::components::keystaff_component::register_keystaff_component;
 use crate::ecs::components::laserfocus_component::register_laserfocus_component;
 use crate::ecs::components::quiz_form_component::register_quiz_form_component;
-use crate::ecs::components::yomigun_component::register_yomigun_component;
-use crate::ecs::entities::{camera_entity, controller_entity, ground_entity, hexgrid_entity, hint_entity, light_entity, origin_entity, sky_entity, yomigun_entity};
+use crate::ecs::entities::{camera_entity, controller_entity, ground_entity, hexgrid_entity, hint_entity, light_entity, origin_entity};
 use crate::ecs::entities::controller_entity::create_left_controller;
 use crate::ecs::entities::ring_entity::try_ring_entity;
 use crate::views::settings::{FOCUS_RING_ID, SELECT_RING_ID};
@@ -37,33 +31,24 @@ pub fn register_components() {
 	register_laserfocus_component();
 	register_hexcell_component();
 	register_hexgrid_component();
-	register_yomigun_component();
 	register_game_component();
 	register_keystaff_component();
 }
 
 pub fn init_scene() -> Result<Scene, JsValue> {
 	let scene = Scene::get()?
-		.add_assets(create_assets()?)
-		.add_entity(light_entity::make_over()?)?
-		.add_entity(origin_entity::make()?)?
-		.add_entity(ground_entity::make()?)?
-		.add_entity(sky_entity::make()?)?
-		.add_entity(create_hint_cursor()?)?
-		.add_entity(create_focus_ring()?)?
-		.add_entity(create_select_ring()?)?
-		.add_entity(create_yomigun()?
-			.set_component_attribute(Position(0., 0.3, -1.6))?
-			.set_component_attribute(Rotation(-50., 0., 0.))?
-		)?
 		.add_entity(create_hexgrid()?
 			.set_component_attribute(Position(0.0, 1.6, -12.0))?
 		)?
+		.add_entity(create_hint_cursor()?)?
+		.add_entity(create_focus_ring()?)?
+		.add_entity(create_select_ring()?)?
+		.add_entity(light_entity::make_over()?)?
+		.add_entity(origin_entity::make()?)?
+		.add_entity(ground_entity::make()?)?
 		.add_entity(create_right_controller()?)?
 		.add_entity(create_left_controller()?)?
 		.add_entity(camera_entity::make()?)?
-		.set_component_attribute(Game)?
-		.set_component_attribute(Stats)?
 		.add_entity(create_details_screen())?
 		;
 	Ok(scene)
@@ -105,7 +90,3 @@ fn create_focus_ring() -> Result<Entity, JsValue> {
 	Ok(focus_ring)
 }
 
-fn create_assets() -> Result<Element, JsValue> {
-	let assets = document().create_element("a-assets")?;
-	Ok(assets)
-}

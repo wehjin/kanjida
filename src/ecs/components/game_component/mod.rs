@@ -17,13 +17,13 @@ use crate::aframe_ex::components::core::{ComponentDefinition, Events};
 use crate::aframe_ex::components::oculus_touch_controls_component::OculusTouchControlsEvent::AButtonDown;
 use crate::aframe_ex::events::core::AEvent;
 use crate::aframe_ex::js::log_value;
-use crate::aframe_ex::scene_entity_bindgen::{AEntityEx, ASceneEx};
+use crate::aframe_ex::scene_entity_bindgen::ASceneEx;
 use crate::aframe_ex::scenes::A_SCENE;
 use crate::aframe_ex::scenes::core::scene_apply_effects;
 use crate::aframe_ex::schema::properties::Vec3SchemaProperty;
 use crate::ecs::entities::create_sprite_entity;
 use crate::GAME;
-use crate::game::{AnswerPoint, YomiPoint};
+use crate::game::AnswerPoint;
 use crate::game::game_material::GameMaterial;
 use crate::game::game_view::game_derive_effects;
 use crate::game::states::game_state::GameState;
@@ -74,7 +74,7 @@ fn on_grade_answer(_comp: AComponent, event: CustomEvent) {
 }
 
 fn on_submit_answer(_comp: AComponent, event: CustomEvent) {
-	let position = Vec3SchemaProperty::try_position(&event.detail());
+	let position = Vec3SchemaProperty::try_position(&event.detail()).expect("start position");
 	let answer_point = update_game(
 		"SUBMIT_ANSWER",
 		event,
@@ -91,8 +91,7 @@ fn on_select_yomi(_comp: AComponent, event: CustomEvent) {
 		let game_state = state.select_yomi(yomi_point);
 		(game_state, ())
 	});
-	let selected_yomi = GAME.with_borrow(|game_state| game_state.selected_yomi);
-	render_yomigun(selected_yomi);
+	GAME.with_borrow(|game_state| game_state.selected_yomi);
 }
 
 fn on_select_quiz(_comp: AComponent, event: CustomEvent) {
@@ -130,23 +129,11 @@ fn erase_answer_sprite(answer_point: AnswerPoint) {
 	}
 }
 
-fn render_yomigun(selected_yomi: YomiPoint) {
-	let yomigun = document().query_selector("#yomigun").unwrap().unwrap();
-	yomigun.unchecked_ref::<AEntity>()
-		.update_component_property("yomigun", "yomiCode", &selected_yomi.into());
-}
-
-fn render_answer_sprite(answer_point: AnswerPoint, position: Option<Position>) {
-	let yomigun_target_vector = A_SCENE.with(|scene| scene.yomigun_target_position());
-	if let Some(target) = yomigun_target_vector {
+fn render_answer_sprite(answer_point: AnswerPoint, start_position: Position) {
+	let yomisprite_target_vector = A_SCENE.with(|scene| scene.yomisprite_target_position());
+	if let Some(target) = yomisprite_target_vector {
 		let end = Position(target.x(), target.y(), target.z());
-		let (start, scale) = if let Some(position) = position {
-			(position, Some(0.2))
-		} else {
-			let relative_position = Position(0., 0., -1.);
-			let yomigun = document().query_selector("#yomigun").unwrap().unwrap().unchecked_into::<AEntityEx>();
-			(yomigun.local_position_to_world(relative_position), None)
-		};
+		let (start, scale) = (start_position, Some(0.2));
 		let animation = Animation::new()
 			.set_property("position")
 			.set_from(start)

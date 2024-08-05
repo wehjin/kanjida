@@ -61,9 +61,9 @@ extern "C" {
 	pub type ASceneEx;
 
 	#[wasm_bindgen(method, getter)]
-	pub fn yomigun_target_position(this: &ASceneEx) -> Option<Vector3>;
+	pub fn yomisprite_target_position(this: &ASceneEx) -> Option<Vector3>;
 	#[wasm_bindgen(method, setter, structural)]
-	pub fn set_yomigun_target_position(this: &ASceneEx, value: Option<Vector3>);
+	pub fn set_yomisprite_target_position(this: &ASceneEx, value: Option<Vector3>);
 }
 
 impl ASceneEx {

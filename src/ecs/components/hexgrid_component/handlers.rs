@@ -23,7 +23,7 @@ pub fn handle_state_added(component: AComponent, event: Event) {
 				update_hint_entity(&cell_world_position);
 				update_component_with_selected_entity_notifying_old(&component, &cell);
 				let scene = component.a_entity().a_scene().unchecked_into::<ASceneEx>();
-				scene.set_yomigun_target_position(Some(cell_world_position));
+				scene.set_yomisprite_target_position(Some(cell_world_position));
 			}
 			_ => ()
 		}
@@ -47,7 +47,7 @@ pub fn handle_state_removed(component: AComponent, event: Event) {
 				let was_selected = update_component_with_unselected_entity(&component, &target);
 				if was_selected {
 					let scene = component.a_entity().a_scene().unchecked_into::<ASceneEx>();
-					scene.set_yomigun_target_position(None);
+					scene.set_yomisprite_target_position(None);
 				}
 			}
 			_ => ()
