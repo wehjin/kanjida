@@ -43,8 +43,8 @@ pub fn platform_system_animate_to_view_selected_hexcell() {
 		platform.set_component_attribute(Animation::new()
 			.set_property("position")
 			.set_to(end_position)
-			.set_dur_millis(750)
-			.set_delay_millis(5) // No delay causes a fault in Quest Browser.
+			.set_dur_millis(800)
+			.set_delay_millis(20) // No or too short of a delay seems to cause a fault in Quest Browser.
 			.set_easing(Easing::EaseInOutQuad)
 		);
 	}
