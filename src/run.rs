@@ -1,5 +1,5 @@
 use aframers::components::{Color, Position, Rotation, Width};
-use aframers::entities::{create_plane_entity, Entity};
+use aframers::entities::{create_entity, create_plane_entity, Entity};
 use Color::WebStr;
 use wasm_bindgen::JsValue;
 
@@ -26,6 +26,8 @@ use crate::ecs::entities::ring_entity::try_ring_entity;
 use crate::views::settings::{FOCUS_RING_ID, SELECT_RING_ID};
 use crate::views::yomi_data::YOMI_FONT;
 
+pub const PLATFORM_ENTITY_ID: &'static str = "platform";
+
 pub fn register_components() {
 	register_quiz_form_component();
 	register_laserfocus_component();
@@ -37,21 +39,28 @@ pub fn register_components() {
 
 pub fn init_scene() -> Result<Scene, JsValue> {
 	let scene = Scene::get()?
-		.add_entity(create_hexgrid()?
-			.set_component_attribute(Position(0.0, 1.6, -12.0))?
-		)?
+		.add_entity(create_hexgrid()?.set_component_attribute(Position(0.0, 1.6, -12.0))?)?
 		.add_entity(create_hint_cursor()?)?
 		.add_entity(create_focus_ring()?)?
 		.add_entity(create_select_ring()?)?
-		.add_entity(light_entity::make_over()?)?
-		.add_entity(origin_entity::make()?)?
-		.add_entity(ground_entity::make()?)?
-		.add_entity(create_right_controller()?)?
-		.add_entity(create_left_controller()?)?
-		.add_entity(camera_entity::make()?)?
-		.add_entity(create_details_screen())?
+		.add_entity(create_platform_entity()?)?
 		;
 	Ok(scene)
+}
+
+fn create_platform_entity() -> Result<Entity, JsValue> {
+	let vehicle = create_entity()?
+		.set_id(PLATFORM_ENTITY_ID)?
+		.append_child(light_entity::make_over()?)?
+		.append_child(origin_entity::make()?)?
+		.append_child(ground_entity::make()?)?
+		.append_child(create_right_controller()?)?
+		.append_child(create_left_controller()?)?
+		.append_child(camera_entity::make()?)?
+		.append_child(create_details_screen())?
+		.set_component_attribute(Position(0., 0., 0.))?
+		;
+	Ok(vehicle)
 }
 
 fn create_details_screen() -> Entity {

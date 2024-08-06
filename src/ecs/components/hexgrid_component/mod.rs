@@ -50,9 +50,7 @@ pub fn init(component: AComponent) -> SelectedEntity {
 		.set_id("hexgrid-1").unwrap()
 		;
 	let cells = GAME.with_borrow(|game| {
-		game.as_quiz_states()
-			.into_iter()
-			.enumerate()
+		game.as_quiz_states().into_iter().enumerate()
 			.map(|(quiz_point, quiz_state)| {
 				let element_id = element_id_from_quiz_point(quiz_point);
 				hexcell_entity(quiz_state).set_id(element_id).unwrap()

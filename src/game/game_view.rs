@@ -7,17 +7,18 @@ use crate::game::game_material::GameMaterial;
 use crate::run::DETAILS_SCREEN_SELECTOR;
 use crate::views::quiz_point_element_selector;
 
-pub fn game_derive_effects(material: &GameMaterial) -> Vec<SceneEffect> {
+pub fn derive_scene_effects(material: &GameMaterial) -> Vec<SceneEffect> {
 	let mut out = vec![
 		SceneEffect::set_component_property(DETAILS_SCREEN_SELECTOR, "text", "value", &material.details),
 		SceneEffect::set_component(HINT_ENTITY_SELECTOR, "value", &material.hint),
 	];
 	if let Some(add_state) = &material.quiz_add_selected {
-		let select_hexcell = SceneEffect::add_state(&add_state.entity_selector, &add_state.state_name);
-		out.push(select_hexcell);
+		out.push(
+			SceneEffect::add_state(&add_state.entity_selector, &add_state.state_name)
+		);
 	}
 	if let Some(quiz_form) = material.quiz_form {
-		let effects = vec![
+		out.extend(vec![
 			SceneEffect::set_component(
 				HINT_ENTITY_SELECTOR,
 				quiz_form.as_attribute_name(),
@@ -29,8 +30,7 @@ pub fn game_derive_effects(material: &GameMaterial) -> Vec<SceneEffect> {
 				hexcell_component::STATUS_SETTING,
 				if quiz_form.unsolved == 0 { "1" } else { "0" },
 			),
-		];
-		out.extend(effects);
+		]);
 	}
 	out
 }

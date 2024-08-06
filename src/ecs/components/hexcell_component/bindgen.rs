@@ -5,10 +5,9 @@ use aframers::entities::Entity;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::components::material_component::Material;
 use crate::aframe_ex::components::visible_component::Visible;
-use crate::aframe_ex::js::log_value;
+use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::ecs::components::hex_color_component::HexColor;
 use crate::views::settings::{FOCUS_RING_SELECTOR, FOCUS_RING_Z_OFFSET, SELECT_RING_SELECTOR, SELECT_RING_Z_OFFSET};
 
@@ -50,7 +49,6 @@ impl HexcellAComponent {
 	}
 
 	pub fn set_ring_color_from_entity_state(&self) {
-		log_value(&self.a_entity().id().into());
 		let focus_ring = self.focus_ring_entity();
 		let cell_is_focus_ring_target = match focus_ring.get_attribute("target") {
 			Some(target) if target == self.a_entity().id() => true,

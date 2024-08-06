@@ -22,10 +22,11 @@ use crate::aframe_ex::scenes::A_SCENE;
 use crate::aframe_ex::scenes::core::scene_apply_effects;
 use crate::aframe_ex::schema::properties::Vec3SchemaProperty;
 use crate::ecs::entities::create_sprite_entity;
+use crate::ecs::systems::platform_system::platform_system_animate_to_view_selected_hexcell;
 use crate::GAME;
 use crate::game::AnswerPoint;
 use crate::game::game_material::GameMaterial;
-use crate::game::game_view::game_derive_effects;
+use crate::game::game_view::derive_scene_effects;
 use crate::game::states::game_state::GameState;
 use crate::game::states::selected_quiz_state::SelectedQuizState;
 use crate::views::{answer_point_element_selector, element_id_from_answer_point};
@@ -91,7 +92,7 @@ fn on_select_yomi(_comp: AComponent, event: CustomEvent) {
 		let game_state = state.select_yomi(yomi_point);
 		(game_state, ())
 	});
-	GAME.with_borrow(|game_state| game_state.selected_yomi);
+	render_scene();
 }
 
 fn on_select_quiz(_comp: AComponent, event: CustomEvent) {
@@ -102,11 +103,12 @@ fn on_select_quiz(_comp: AComponent, event: CustomEvent) {
 		(game, ())
 	});
 	render_scene();
+	platform_system_animate_to_view_selected_hexcell();
 }
 
 fn render_scene() {
 	let game_material = GAME.with_borrow(GameMaterial::derive);
-	let scene_effects = game_derive_effects(&game_material);
+	let scene_effects = derive_scene_effects(&game_material);
 	scene_apply_effects(&ASceneEx::get(), scene_effects);
 }
 
