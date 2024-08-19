@@ -34,9 +34,12 @@ impl GameState {
 	pub fn as_quiz_states(&self) -> &Vec<QuizState> {
 		&self.all_quizzes.0
 	}
-	pub fn as_selected_quiz(&self) -> Option<&QuizState> {
+	pub fn with_selected_quiz<T>(&self, f: impl FnOnce(&QuizState, bool) -> T) -> Option<T> {
 		match self.selected_quiz {
-			SelectedQuizState::Selected { quiz_point, .. } => Some(&self.all_quizzes[quiz_point]),
+			SelectedQuizState::Selected { quiz_point, revealed } => {
+				let quiz = &self.all_quizzes[quiz_point];
+				Some(f(quiz, revealed))
+			}
 			SelectedQuizState::Unselected => None
 		}
 	}

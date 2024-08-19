@@ -1,5 +1,6 @@
 use crate::ecs::components::quiz_form_component::quiz_form::QuizForm;
 use crate::game::states::game_state::GameState;
+use crate::game::states::quiz_state::QuizState;
 use crate::game::states::selected_quiz_state::SelectedQuizState;
 use crate::game::QuizPoint;
 use crate::queries::query_details_at_kanji_point;
@@ -60,44 +61,38 @@ fn derive_quiz_add_selected(game: &GameState) -> Option<EntityStateAddition> {
 }
 
 fn derive_hint(game: &GameState) -> String {
-	if let Some(quiz) = game.as_selected_quiz() {
+	game.with_selected_quiz(|quiz, revealed| {
 		let data = KanjiData(quiz.kanji_point);
 		let meaning = data.as_meaning();
-		let progress = derive_progress(game).unwrap_or_else(|| String::new());
+		let progress = derive_progress(quiz, revealed);
 		format!("{}\n\n\n\n{}", meaning, &progress).to_uppercase()
-	} else {
-		String::new()
-	}
+	}).unwrap_or_else(|| String::new())
 }
 
-fn derive_progress(game: &GameState) -> Option<String> {
-	if let Some(quiz) = game.as_selected_quiz() {
-		let data = KanjiData(quiz.kanji_point);
-		let mut parts = Vec::new();
-		for &onyomi in data.as_onyomi() {
-			let chars = onyomi.chars();
-			if chars.count() == 0 {
-				break;
-			}
-			let c = first_char_in_str(onyomi);
-			let solved = if let Some(solution) = quiz.solutions.get(&c) {
-				solution.is_solved()
-			} else {
-				false
-			};
-			let part = match solved {
-				false => {
-					let (_, rest) = split_string_first_char(onyomi);
-					format!("〓{}", &rest)
-				}
-				true => onyomi.to_string(),
-			};
-			parts.push(part);
+fn derive_progress(quiz: &QuizState, revealed: bool) -> String {
+	let data = KanjiData(quiz.kanji_point);
+	let mut parts = Vec::new();
+	for &onyomi in data.as_onyomi() {
+		let chars = onyomi.chars();
+		if chars.count() == 0 {
+			break;
 		}
-		Some(parts.join(", "))
-	} else {
-		None
+		let c = first_char_in_str(onyomi);
+		let solved = revealed || if let Some(solution) = quiz.solutions.get(&c) {
+			solution.is_solved()
+		} else {
+			false
+		};
+		let part = match solved {
+			false => {
+				let (_, rest) = split_string_first_char(onyomi);
+				format!("〓{}", &rest)
+			}
+			true => onyomi.to_string(),
+		};
+		parts.push(part);
 	}
+	parts.join(", ")
 }
 
 fn derive_details(game: &GameState) -> String {
