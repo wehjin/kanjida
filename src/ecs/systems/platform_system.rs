@@ -13,11 +13,6 @@ use crate::run::PLATFORM_ENTITY_ID;
 struct SystemState {
 	anim_end_position: Position,
 }
-impl SystemState {
-	pub fn new() -> Self {
-		Self { anim_end_position: Position(0., 0., 0.) }
-	}
-}
 
 thread_local! {
 	static SYSTEM_STATE: RefCell<SystemState> = RefCell::new(SystemState::default());

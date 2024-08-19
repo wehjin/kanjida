@@ -2,7 +2,7 @@ use std::cell::LazyCell;
 use std::collections::HashMap;
 
 //noinspection SpellCheckingInspection
-pub const YOMI_FONT: &'static str = "assets/NanumGothicCodingWithXmpls-msdf.json";
+pub const YOMI_FONT: &'static str = "assets/MPLUSRounded1cBoldKana-msdf.json";
 pub const YOMI_GLYPHS: [&'static str; 61] = [
 	"ア", "イ", "ウ", "エ", "オ", "カ", "ガ", "キ",
 	"ギ", "ク", "グ", "ケ", "ゲ", "コ", "ゴ", "サ",
@@ -40,14 +40,8 @@ impl YomiChar {
 	pub fn to_code(&self) -> usize {
 		self.0
 	}
-	pub fn is_glyph(&self) -> bool {
-		self.0 < YOMI_GLYPHS.len()
-	}
 	pub fn as_glyph(&self) -> &'static str {
 		YOMI_GLYPHS.get(self.0).cloned().unwrap_or("　")
-	}
-	pub fn as_font(&self) -> &'static str {
-		YOMI_FONT
 	}
 	pub fn to_char(&self) -> char {
 		let glyph = self.as_glyph();

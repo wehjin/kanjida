@@ -4,12 +4,12 @@ use aframers::components::{Color, Position, Scale};
 use aframers::entities::Entity;
 use wasm_bindgen::{JsCast, JsValue};
 
-use crate::aframe_ex::components::baseline_component::Baseline;
-use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::components::align_component::Align;
 use crate::aframe_ex::components::anchor_component::Anchor;
+use crate::aframe_ex::components::baseline_component::Baseline;
 use crate::aframe_ex::components::font_component::{CustomFont, Negate};
 use crate::aframe_ex::components::visible_component::Visible;
+use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::ecs::components::quiz_form_component::quiz_form::QuizForm;
 use crate::views::yomi_data::YOMI_FONT;
 

@@ -5,10 +5,10 @@ use std::ops::{Index, IndexMut};
 use chrono::{DateTime, Utc};
 use kanji_data::KanjiData;
 
-use crate::game::{AnswerPoint, QuizPoint, YomiPoint};
 use crate::game::states::answer_state::AnswerState;
 use crate::game::states::quiz_state::QuizState;
 use crate::game::states::selected_quiz_state::SelectedQuizState;
+use crate::game::{AnswerPoint, QuizPoint, YomiPoint};
 
 /// Holds game state.
 #[derive(Debug, Clone, Default)]
@@ -33,6 +33,12 @@ impl GameState {
 	}
 	pub fn as_quiz_states(&self) -> &Vec<QuizState> {
 		&self.all_quizzes.0
+	}
+	pub fn as_selected_quiz(&self) -> Option<&QuizState> {
+		match self.selected_quiz {
+			SelectedQuizState::Selected { quiz_point, .. } => Some(&self.all_quizzes[quiz_point]),
+			SelectedQuizState::Unselected => None
+		}
 	}
 }
 
