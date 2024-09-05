@@ -8,7 +8,7 @@ use kanji_data::KanjiData;
 use crate::game::states::answer_state::AnswerState;
 use crate::game::states::quiz_state::QuizState;
 use crate::game::states::selected_quiz_state::SelectedQuizState;
-use crate::game::{AnswerPoint, QuizPoint, YomiPoint};
+use crate::game::{records, AnswerPoint, QuizPoint, YomiPoint};
 
 /// Holds game state.
 #[derive(Debug, Clone, Default)]
@@ -49,6 +49,13 @@ impl GameState {
 #[derive(Clone, Default)]
 pub struct QuizStates(pub Vec<QuizState>);
 impl QuizStates {
+	pub fn new() -> Self {
+		let quizzes = (0..KanjiData::len()).into_iter()
+			.map(|kanji_point| QuizState::init(kanji_point))
+			.collect()
+			;
+		QuizStates(quizzes)
+	}
 	pub fn swap(mut self, index: usize, f: impl Fn(QuizState) -> QuizState) -> Self {
 		let state = self.0.remove(index);
 		let new_state = f(state);
@@ -92,13 +99,7 @@ impl Index<QuizPoint> for QuizStates {
 impl GameState {
 	/// Initialize the game.
 	pub fn init() -> Self {
-		let quizzes = (0..KanjiData::len())
-			.into_iter()
-			.map(|kanji_point| QuizState::init(kanji_point))
-			.collect()
-			;
-		let quiz_states = QuizStates(quizzes);
-		GameState { all_quizzes: quiz_states, ..GameState::default() }
+		GameState { all_quizzes: records::read(), ..GameState::default() }
 	}
 
 	/// Select the yomi to use in the next answer.
@@ -140,6 +141,7 @@ impl GameState {
 		let new_quiz = quiz.attempt_solution(yomi_point, now);
 		self.all_quizzes.0.insert(quiz_point, new_quiz);
 		self.age = self.age + 1;
+		records::write(&self.all_quizzes);
 		self
 	}
 }
