@@ -27,8 +27,8 @@ pub fn derive_scene_effects(material: &GameMaterial) -> Vec<SceneEffect> {
 			SceneEffect::set_component_property(
 				quiz_point_element_selector(material.selected_quiz_point.unwrap()),
 				hexcell_component::COMPONENT_NAME,
-				hexcell_component::STATUS_SETTING,
-				if quiz_form.unsolved == 0 { "1" } else { "0" },
+				"solved",
+				(quiz_form.unsolved == 0).to_string(),
 			),
 		]);
 	}

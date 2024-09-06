@@ -1,7 +1,7 @@
-use ::hexgrid::coordinates::{AxialCoord, PixelCoord};
 use aframers::af_sys::components::AComponent;
 use aframers::components::Position;
 use aframers::entities::{create_entity, Entity};
+use ::hexgrid::coordinates::{AxialCoord, PixelCoord};
 use kanji_data::KanjiData;
 use wasm_bindgen::JsCast;
 use web_sys::js_sys::{Array, Object};
@@ -17,11 +17,11 @@ use crate::ecs::components::hexcell_component::attribute::Hexcell;
 use crate::ecs::components::hexgrid_component::bindgen::HexgridAComponent;
 use crate::ecs::components::hexgrid_component::other::SelectedEntity;
 use crate::ecs::fonts::with_kanji_font;
-use crate::GAME;
 use crate::game::states::quiz_state::QuizState;
-use crate::three_sys::{BufferGeometry, Color, merge_geometries, Mesh, MeshBasicMaterial, TextGeometry, TextGeometryParameters};
+use crate::three_sys::{merge_geometries, BufferGeometry, Color, Mesh, MeshBasicMaterial, TextGeometry, TextGeometryParameters};
 use crate::views::element_id_from_quiz_point;
 use crate::views::settings::PLAIN_RING_Z_OFFSET;
+use crate::GAME;
 
 pub mod bindgen;
 pub mod handlers;
@@ -49,14 +49,14 @@ pub fn init(component: AComponent) -> SelectedEntity {
 	let mut grid = Entity::from(component.a_entity())
 		.set_id("hexgrid-1").unwrap()
 		;
-	let cells = GAME.with_borrow(|game| {
-		game.as_quiz_states().into_iter().enumerate()
-			.map(|(quiz_point, quiz_state)| {
-				let element_id = element_id_from_quiz_point(quiz_point);
-				hexcell_entity(quiz_state).set_id(element_id).unwrap()
-			})
-			.collect::<Vec<_>>()
-	});
+	let cells = GAME.with_borrow(|game| game.as_quiz_states().into_iter()
+		.enumerate()
+		.map(|(quiz_point, quiz_state)| {
+			let element_id = element_id_from_quiz_point(quiz_point);
+			hexcell_entity(quiz_state).set_id(element_id).unwrap()
+		})
+		.collect::<Vec<_>>()
+	);
 	let spiral_coords = AxialCoord::ORIGIN.iter_spiral().take(cells.len()).collect::<Vec<_>>();
 	for (i, cell) in cells.into_iter().enumerate() {
 		let pixel = spiral_coords[i].to_pixel();
@@ -124,10 +124,11 @@ fn create_material() -> MeshBasicMaterial {
 }
 
 fn hexcell_entity(quiz_state: &QuizState) -> Entity {
-	let glyph = quiz_state.as_question();
-	let entity = create_entity().unwrap()
-		.set_component_attribute(Hexcell::new().set_glyph(glyph)).unwrap()
+	let hexcell = Hexcell::new()
+		.set_glyph(quiz_state.as_question())
+		.set_solved(quiz_state.is_solved())
 		;
+	let entity = create_entity().unwrap().set_component_attribute(hexcell).unwrap();
 	entity
 }
 

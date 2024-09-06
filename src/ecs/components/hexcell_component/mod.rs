@@ -16,12 +16,11 @@ use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::aframe_ex::schema::fields::Field;
 use crate::aframe_ex::schema::multi_property::MultiPropertySchema;
 use crate::ecs::components::hexcell_component::bindgen::HexcellAComponent;
-use crate::ecs::components::hexcell_component::data::HexcellData;
 use crate::ecs::components::hexcell_component::handlers::{handle_state_added, handle_state_removed};
 use crate::ecs::components::laserfocus_component;
 use crate::three_sys;
-use crate::three_sys::{BufferGeometry, Material, merge_geometries, Mesh};
 use crate::three_sys::MeshBasicMaterial;
+use crate::three_sys::{merge_geometries, BufferGeometry, Material, Mesh};
 use crate::views::settings::STATUS_RING_Z_OFFSET;
 
 pub mod attribute;
@@ -30,7 +29,6 @@ pub mod data;
 pub mod handlers;
 
 pub const COMPONENT_NAME: &'static str = "hexcell";
-pub const STATUS_SETTING: &'static str = "status";
 
 pub fn register_hexcell_component() {
 	let dependencies = Dependencies::new(laserfocus_component::NAME);
@@ -40,7 +38,7 @@ pub fn register_hexcell_component() {
 		;
 	let schema = MultiPropertySchema::new()
 		.push("glyph", Field::string("美"))
-		.push(STATUS_SETTING, Field::usize(0))
+		.push("solved", Field::boolean(false))
 		;
 	ComponentDefinition::new()
 		.set_dependencies(dependencies)
@@ -85,22 +83,19 @@ fn init(this: &HexcellAComponent) {
 		mesh.set_geometry(&merge_geometries(&array, false));
 
 		mesh.material().dispose();
-		mesh.set_material(&get_current_material(this));
+		mesh.set_material(&ring_material(this));
 	}
 }
 
 fn update(this: &HexcellAComponent) {
-	let data = this.data().unchecked_into::<HexcellData>();
-	let status = data.status();
-	let material = get_or_create_material(status);
 	let mesh = get_entity_mesh(this.a_entity());
-	mesh.set_material(&material);
+	mesh.set_material(&ring_material(this));
 }
 
-fn get_current_material(this: &HexcellAComponent) -> Material {
-	let data = this.data().unchecked_into::<HexcellData>();
-	let status = data.status();
-	let material = get_or_create_material(status);
+fn ring_material(this: &HexcellAComponent) -> Material {
+	let solved = this.settings().solved();
+	let ring_color = if solved { 1 } else { 0 };
+	let material = get_or_create_material(ring_color);
 	material
 }
 

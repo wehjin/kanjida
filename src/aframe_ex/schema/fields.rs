@@ -1,5 +1,5 @@
-use aframers::components::Color;
 use aframers::components::core::ComponentSetting;
+use aframers::components::Color;
 use wasm_bindgen::JsValue;
 use web_sys::js_sys::{Object, Reflect};
 
@@ -7,6 +7,7 @@ pub enum FieldType {
 	Color,
 	String,
 	USize,
+	Boolean,
 }
 
 impl FieldType {
@@ -15,6 +16,7 @@ impl FieldType {
 			FieldType::Color => "color",
 			FieldType::String => "string",
 			FieldType::USize => "int",
+			FieldType::Boolean => "boolean",
 		}
 	}
 }
@@ -30,6 +32,9 @@ impl Field {
 	}
 	pub fn usize(value: usize) -> Self {
 		Self(JsValue::from(value), FieldType::USize)
+	}
+	pub fn boolean(value: bool) -> Self {
+		Self(JsValue::from(value), FieldType::Boolean)
 	}
 	pub fn to_object(self) -> Object {
 		let object = Object::new();

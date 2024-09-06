@@ -2,13 +2,14 @@ use aframers::af_sys::components::AComponent;
 use aframers::af_sys::entities::AEntity;
 use aframers::components::Position;
 use aframers::entities::Entity;
-use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::JsCast;
 
 use crate::aframe_ex::components::material_component::Material;
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::scene_entity_bindgen::AEntityEx;
 use crate::ecs::components::hex_color_component::HexColor;
+use crate::ecs::components::hexcell_component::data::HexcellSettings;
 use crate::views::settings::{FOCUS_RING_SELECTOR, FOCUS_RING_Z_OFFSET, SELECT_RING_SELECTOR, SELECT_RING_Z_OFFSET};
 
 #[wasm_bindgen]
@@ -19,6 +20,9 @@ extern "C" {
 }
 
 impl HexcellAComponent {
+	pub fn settings(&self) -> HexcellSettings {
+		self.data().unchecked_into::<HexcellSettings>()
+	}
 	pub fn select_ring_entity(&self) -> AEntity {
 		let element = self.a_entity().a_scene().query_selector(SELECT_RING_SELECTOR).unwrap().unwrap();
 		element.unchecked_into()

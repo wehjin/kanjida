@@ -3,8 +3,8 @@ use std::collections::{HashMap, HashSet};
 use chrono::{DateTime, Utc};
 use kanji_data::KanjiData;
 
-use crate::game::{KanjiPoint, YomiPoint};
 use crate::game::states::solution_state::SolutionState;
+use crate::game::{KanjiPoint, YomiPoint};
 use crate::views::yomi_data::{first_char_in_str, YomiChar};
 
 /// Holds the state of a quiz.
@@ -33,6 +33,10 @@ impl QuizState {
 			},
 		);
 		score
+	}
+	pub fn is_solved(&self) -> bool {
+		let (unsolved, _solved) = self.unsolved_solved();
+		unsolved == 0
 	}
 }
 
