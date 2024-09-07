@@ -1,7 +1,7 @@
 use aframers::components::{Color, Position, Rotation, Width};
-use aframers::entities::{create_entity, create_plane_entity, Entity};
-use Color::WebStr;
+use aframers::entities::{create_entity, create_plane_entity, create_sky_entity, Entity};
 use wasm_bindgen::JsValue;
+use Color::WebStr;
 
 use controller_entity::create_right_controller;
 use hexgrid_entity::create_hexgrid;
@@ -10,9 +10,11 @@ use hint_entity::create_hint_cursor;
 use crate::aframe_ex::components::align_component::Align;
 use crate::aframe_ex::components::anchor_component::Anchor;
 use crate::aframe_ex::components::baseline_component::Baseline;
+use crate::aframe_ex::components::stats_component::Stats;
 use crate::aframe_ex::components::text_component::Text;
 use crate::aframe_ex::components::visible_component::Visible;
 use crate::aframe_ex::scenes::Scene;
+use crate::ecs::components::game_component::game::Game;
 use crate::ecs::components::game_component::register_game_component;
 use crate::ecs::components::hex_color_component::HexColor;
 use crate::ecs::components::hexcell_component::register_hexcell_component;
@@ -20,9 +22,9 @@ use crate::ecs::components::hexgrid_component::register_hexgrid_component;
 use crate::ecs::components::keystaff_component::register_keystaff_component;
 use crate::ecs::components::laserfocus_component::register_laserfocus_component;
 use crate::ecs::components::quiz_form_component::register_quiz_form_component;
-use crate::ecs::entities::{camera_entity, controller_entity, ground_entity, hexgrid_entity, hint_entity, light_entity, origin_entity};
 use crate::ecs::entities::controller_entity::create_left_controller;
 use crate::ecs::entities::ring_entity::try_ring_entity;
+use crate::ecs::entities::{camera_entity, controller_entity, ground_entity, hexgrid_entity, hint_entity, light_entity, origin_entity};
 use crate::views::settings::{FOCUS_RING_ID, SELECT_RING_ID};
 use crate::views::yomi_data::YOMI_FONT;
 
@@ -39,6 +41,9 @@ pub fn register_components() {
 
 pub fn init_scene() -> Result<Scene, JsValue> {
 	let scene = Scene::get()?
+		.set_component_attribute(Game)?
+		.set_component_attribute(Stats)?
+		.add_entity(create_sky_entity()?.set_component_attribute(WebStr("#5C5C5C"))?)?
 		.add_entity(create_hexgrid()?.set_component_attribute(Position(0.0, 1.6, -12.0))?)?
 		.add_entity(create_hint_cursor()?)?
 		.add_entity(create_focus_ring()?)?

@@ -5,6 +5,7 @@ use aframers::af_sys::scenes::AScene;
 use aframers::browser::document;
 use aframers::components::core::ComponentAttribute;
 use aframers::entities::Entity;
+use aframers::scene::create_scene;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::Element;
 
@@ -14,7 +15,9 @@ pub mod core;
 
 thread_local! {
 	 pub static A_SCENE: LazyCell<ASceneEx> = LazyCell::new(|| {
-		 document().query_selector("a-scene").unwrap().unwrap().unchecked_into::<ASceneEx>()
+		let scene = create_scene().unwrap();
+		document().body().unwrap().append_child(&scene).unwrap();
+		document().query_selector("a-scene").unwrap().unwrap().unchecked_into::<ASceneEx>()
 	})
 }
 
