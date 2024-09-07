@@ -16,6 +16,7 @@ pub mod core;
 thread_local! {
 	 pub static A_SCENE: LazyCell<ASceneEx> = LazyCell::new(|| {
 		let scene = create_scene().unwrap();
+
 		document().body().unwrap().append_child(&scene).unwrap();
 		document().query_selector("a-scene").unwrap().unwrap().unchecked_into::<ASceneEx>()
 	})

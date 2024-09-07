@@ -1,11 +1,11 @@
 use aframers::components::{Color, Position, Rotation, Width};
 use aframers::entities::{create_entity, create_plane_entity, create_sky_entity, Entity};
-use wasm_bindgen::JsValue;
-use Color::WebStr;
-
 use controller_entity::create_right_controller;
 use hexgrid_entity::create_hexgrid;
 use hint_entity::create_hint_cursor;
+use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::JsValue;
+use Color::WebStr;
 
 use crate::aframe_ex::components::align_component::Align;
 use crate::aframe_ex::components::anchor_component::Anchor;
@@ -39,8 +39,9 @@ pub fn register_components() {
 	register_keystaff_component();
 }
 
-pub fn init_scene() -> Result<Scene, JsValue> {
-	let scene = Scene::get()?
+#[wasm_bindgen]
+pub fn init_scene() -> Result<(), JsValue> {
+	Scene::get()?
 		.set_component_attribute(Game)?
 		.set_component_attribute(Stats)?
 		.add_entity(create_sky_entity()?.set_component_attribute(WebStr("#5C5C5C"))?)?
@@ -49,8 +50,8 @@ pub fn init_scene() -> Result<Scene, JsValue> {
 		.add_entity(create_focus_ring()?)?
 		.add_entity(create_select_ring()?)?
 		.add_entity(create_platform_entity()?)?
-		;
-	Ok(scene)
+	;
+	Ok(())
 }
 
 fn create_platform_entity() -> Result<Entity, JsValue> {

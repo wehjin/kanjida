@@ -17,7 +17,11 @@
     <link data-trunk rel="copy-dir" href="assets"/>
     <link data-trunk rel="copy-file" href="cloudflare/_headers"/>
     <link data-trunk rel="rust" href="Cargo.toml" data-integrity="none"/>
+    <script type="module">
+        addEventListener("TrunkApplicationStarted", (event) => {
+            console.log("application started - bindings:", window.wasmBindings, "WASM:", event.detail.wasm);
+            window.wasmBindings.init_scene();
+        });
+    </script>
 </head>
-<body>
-</body>
 </html>
